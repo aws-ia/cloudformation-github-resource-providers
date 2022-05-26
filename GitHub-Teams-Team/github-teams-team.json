@@ -1,0 +1,99 @@
+{
+  "typeName": "GitHub::Teams::Team",
+  "description": "Manage a team in Github",
+  "sourceUrl": "https://github.com/aws-cloudformation/aws-cloudformation-rpdk.git",
+  "definitions": {
+    "GitHubAccess": {
+      "type": "object",
+      "properties": {
+        "AccessToken": {
+          "description": "Personal Access Token",
+          "type": "string"
+        }
+      },
+      "required": [
+        "AccessToken"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "typeConfiguration": {
+    "properties": {
+      "GitHubAccess": {
+        "$ref": "#/definitions/GitHubAccess"
+      }
+    },
+    "additionalProperties": false,
+    "required": [
+      "GitHubAccess"
+    ]
+  },
+  "properties": {
+    "Name": {
+      "description": "Team name",
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9_-]{1,512}$"
+    },
+    "Organisation": {
+      "description": "The organisation that the team will belong to",
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9_-]{1-39}$"
+    },
+    "Description": {
+      "description": "Describe the team",
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9_-]{1,512}$"
+    },
+    "Privacy": {
+      "description": "The privacy for the team - must be either secret or closed",
+      "type": "string"
+    },
+    "Slug": {
+      "description": "The organisation unique identifier for the team",
+      "type": "string"
+    },
+    "GitHubAccess": {
+      "description": "Personal access token",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "Name",
+    "Organisation",
+    "GitHubAccess"
+  ],
+  "createOnlyProperties": [
+    "/properties/Name",
+    "/properties/Organisation"
+  ],
+  "readOnlyProperties": [
+    "/properties/Slug"
+  ],
+  "primaryIdentifier": [
+    "/properties/Organisation",
+    "/properties/Slug"
+  ],
+  "handlers": {
+    "create": {
+      "permissions": [
+      ]
+    },
+    "read": {
+      "permissions": [
+      ]
+    },
+    "update": {
+      "permissions": [
+      ]
+    },
+    "delete": {
+      "permissions": [
+      ]
+    },
+    "list": {
+      "permissions": [
+      ]
+    }
+  }
+}
