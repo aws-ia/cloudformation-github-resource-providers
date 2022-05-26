@@ -38,6 +38,9 @@ type RepoData = CreateOrgRepoResponseData
     & ListUserRepoResponseData;
 
 class Resource extends BaseResource<ResourceModel> {
+    constructor(typeName: string, modelTypeReference: Constructor<ResourceModel>, workerPool?: AwsTaskWorkerPool, handlers?: HandlerSignatures<ResourceModel>) {
+        super(typeName, modelTypeReference, workerPool, handlers);
+    }
 
     private setModelFromApiResponse(baseModel: ResourceModel, data: RepoData): ResourceModel {
         baseModel.owner = data.owner.login;
@@ -229,10 +232,22 @@ class Resource extends BaseResource<ResourceModel> {
         logger: LoggerProxy
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
-        const progress = ProgressEvent.progress<ProgressEvent<ResourceModel, CallbackContext>>();
-        // TODO: put code here
-        progress.status = OperationStatus.Success;
-        return progress;
+        const octokit = new Octokit({auth: model.gitHubAccess})
+
+        try {
+            // TODO: Convert the model to a dictionary corresponding the type for the request
+            const response = await octokit.request('DELETE /repos/{owner}/{repo}', {
+                owner: model.org,
+                repo: model.name
+            });
+            return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(this.setModelFromApiResponse(model, response));
+        } catch (err) {
+            logger.log(err);
+            // exceptions module lets CloudFormation know the type of failure that occurred
+            throw new exceptions.InternalFailure(err.message);
+            // this can also be done by returning a failed progress event
+            // return ProgressEvent.failed(HandlerErrorCode.InternalFailure, err.message);
+        }
     }
 
     /**
