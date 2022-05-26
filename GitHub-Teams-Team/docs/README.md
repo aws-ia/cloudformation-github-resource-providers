@@ -16,7 +16,7 @@ To declare this entity in your AWS CloudFormation template, use the following sy
         "<a href="#organisation" title="Organisation">Organisation</a>" : <i>String</i>,
         "<a href="#description" title="Description">Description</a>" : <i>String</i>,
         "<a href="#privacy" title="Privacy">Privacy</a>" : <i>String</i>,
-        "<a href="#githubaccess" title="GitHubAccess">GitHubAccess</a>" : <i><a href="githubaccess.md">GitHubAccess</a></i>
+        "<a href="#githubaccess" title="GitHubAccess">GitHubAccess</a>" : <i>String</i>
     }
 }
 </pre>
@@ -30,7 +30,7 @@ Properties:
     <a href="#organisation" title="Organisation">Organisation</a>: <i>String</i>
     <a href="#description" title="Description">Description</a>: <i>String</i>
     <a href="#privacy" title="Privacy">Privacy</a>: <i>String</i>
-    <a href="#githubaccess" title="GitHubAccess">GitHubAccess</a>: <i><a href="githubaccess.md">GitHubAccess</a></i>
+    <a href="#githubaccess" title="GitHubAccess">GitHubAccess</a>: <i>String</i>
 </pre>
 
 ## Properties
@@ -83,9 +83,11 @@ _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormati
 
 #### GitHubAccess
 
+Personal access token
+
 _Required_: Yes
 
-_Type_: <a href="githubaccess.md">GitHubAccess</a>
+_Type_: String
 
 _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
 

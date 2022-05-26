@@ -53,7 +53,8 @@
       "type": "string"
     },
     "GitHubAccess": {
-      "$ref": "#/definitions/GitHubAccess"
+      "description": "Personal access token",
+      "type": "string"
     }
   },
   "additionalProperties": false,

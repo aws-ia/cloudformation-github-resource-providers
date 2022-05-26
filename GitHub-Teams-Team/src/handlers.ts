@@ -1,7 +1,6 @@
 import {
     Action,
     BaseResource, exceptions,
-    HandlerErrorCode,
     handlerEvent,
     LoggerProxy,
     OperationStatus,
@@ -13,7 +12,6 @@ import {
 import {ResourceModel} from './models';
 import {Octokit} from "@octokit/rest";
 import {OctokitResponse} from "@octokit/types"
-import {foo} from "../../Common/util"
 
 interface CallbackContext extends Record<string, any> {}
 
@@ -38,9 +36,7 @@ class Resource extends BaseResource<ResourceModel> {
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
         const progress = ProgressEvent.progress<ProgressEvent<ResourceModel, CallbackContext>>(model);
-        const octokit = new Octokit({auth: model.gitHubAccess.accessToken});
-
-        foo();
+        const octokit = new Octokit({auth: model.gitHubAccess});
 
         let response: OctokitResponse<any>;
         try {
@@ -80,16 +76,17 @@ class Resource extends BaseResource<ResourceModel> {
         const model = new ResourceModel(request.desiredResourceState);
         const progress = ProgressEvent.progress<ProgressEvent<ResourceModel, CallbackContext>>(model);
 
-        const octokit = new Octokit({auth: model.gitHubAccess.accessToken});
+        const octokit = new Octokit({auth: model.gitHubAccess});
 
         let response: OctokitResponse<any>;
         try {
+            const privacy = model.privacy as "closed" | "secret";
             response = await octokit.request('PATCH /orgs/{org}/teams/{team_slug}', {
                 org: model.organisation,
                 team_slug: request.previousResourceState.slug,
                 name: model.name,
                 description: model.description,
-                privacy: 'closed' // TODO how to set this from input?
+                privacy: privacy // TODO how to set this from input?
             });
         }catch (e) {
             throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
@@ -120,7 +117,7 @@ class Resource extends BaseResource<ResourceModel> {
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
         const progress = ProgressEvent.progress<ProgressEvent<ResourceModel, CallbackContext>>();
-        const octokit = new Octokit({auth: model.gitHubAccess.accessToken});
+        const octokit = new Octokit({auth: model.gitHubAccess});
 
         let response: OctokitResponse<any>;
         try {
@@ -139,11 +136,6 @@ class Resource extends BaseResource<ResourceModel> {
         logger.log("Data " + response.data);
         logger.log("Headers " + response.headers);
         logger.log("Url " + response.url);
-
-        // if (response.==200){
-        //    progress.errorCode = HandlerErrorCode.NotFound;
-        //    return progress;
-        // }
 
         progress.status = OperationStatus.Success;
         return progress;
@@ -167,7 +159,7 @@ class Resource extends BaseResource<ResourceModel> {
         logger: LoggerProxy
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
-        const octokit = new Octokit({auth: model.gitHubAccess.accessToken});
+        const octokit = new Octokit({auth: model.gitHubAccess});
 
         try {
             await octokit.request('GET /orgs/{org}/teams/{team_slug}', {
@@ -204,7 +196,7 @@ class Resource extends BaseResource<ResourceModel> {
             .status(OperationStatus.Success)
             .resourceModels([model]);
 
-        const octokit = new Octokit({auth: model.gitHubAccess.accessToken});
+        const octokit = new Octokit({auth: model.gitHubAccess});
         try{
             await octokit.request('GET /orgs/{org}/teams', {
                 org: model.organisation
