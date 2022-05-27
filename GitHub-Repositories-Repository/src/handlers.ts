@@ -15,7 +15,8 @@ import {
 } from '@amazon-web-services-cloudformation/cloudformation-cli-typescript-lib';
 import {ResourceModel} from './models';
 import {Octokit} from '@octokit/core';
-import {OctokitResponse} from "@octokit/types";
+import {OctokitResponse, RequestError} from "@octokit/types";
+import {NotFound} from "@amazon-web-services-cloudformation/cloudformation-cli-typescript-lib/dist/exceptions";
 
 interface CallbackContext extends Record<string, any> {
 }
@@ -29,9 +30,6 @@ interface CallbackContext extends Record<string, any> {
 // }
 
 class Resource extends BaseResource<ResourceModel> {
-    constructor(typeName: string, modelTypeReference: Constructor<ResourceModel>, workerPool: AwsTaskWorkerPool, handlers: HandlerSignatures<ResourceModel>) {
-        super(typeName, modelTypeReference, workerPool, handlers);
-    }
 
     private setModelFromApiResponse(baseModel: ResourceModel, response: OctokitResponse<any>): ResourceModel {
         baseModel.gitUrl = response.data.git_url;
@@ -43,6 +41,40 @@ class Resource extends BaseResource<ResourceModel> {
         baseModel.watchersCount = response.data.forks_count;
         baseModel.issuesCount = response.data.forks_count;
         return baseModel;
+    }
+
+    private isRequestError(ex: object) {
+        return ex.hasOwnProperty('status') && ex.hasOwnProperty('name') && ex.hasOwnProperty('errors');
+    }
+
+    private async getRepo(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>): Promise<OctokitResponse<any>> {
+        const octokit = new Octokit({
+            auth: model.gitHubAccess
+        });
+
+        try {
+            return await octokit.request('GET /repos/{owner}/{repo}', {
+                owner: model.org,
+                repo: model.name
+            });
+        } catch (e) {
+            if (this.isRequestError(e) && (e as RequestError).status === 404) {
+               throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
+            }
+            if (this.isRequestError(e) && (e as RequestError).status === 403) {
+               throw new exceptions.AccessDenied((e as RequestError).errors.map(e => e.message).join('\n'));
+            }
+            throw new exceptions.InternalFailure(e);
+        }
+    }
+
+    private async assertRepoExist(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>) {
+        try {
+            await this.getRepo(model, request);
+        } catch (e) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -64,13 +96,18 @@ class Resource extends BaseResource<ResourceModel> {
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
 
+        if (await this.assertRepoExist(model, request)) {
+            throw new exceptions.AlreadyExists(this.typeName, request.logicalResourceIdentifier);
+        }
+
         const octokit = new Octokit({
             auth: model.gitHubAccess
         });
 
         try {
             // TODO: Convert the model to a dictionary corresponding the type for the request
-            const response = await octokit.request('POST /orgs/{org}/repos', {
+            // TODO: This does not support organization repositories yet.
+            const response = await octokit.request('POST /user/repos', {
                 org: model.org,
                 name: model.name,
                 private: model.private_,
@@ -94,12 +131,10 @@ class Resource extends BaseResource<ResourceModel> {
 
             // Setting Status to success will signal to CloudFormation that the operation is complete
             return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(this.setModelFromApiResponse(model, response));
-        } catch (err) {
-            logger.log(err);
-            // exceptions module lets CloudFormation know the type of failure that occurred
-            throw new exceptions.InternalFailure(err.message);
-            // this can also be done by returning a failed progress event
-            // return ProgressEvent.failed(HandlerErrorCode.InternalFailure, err.message);
+        } catch (e) {
+            logger.log(e);
+            // TODO: Should have utility to get the right exception
+            throw new exceptions.InternalFailure(e.message);
         }
     }
 
@@ -121,6 +156,10 @@ class Resource extends BaseResource<ResourceModel> {
         logger: LoggerProxy
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
+
+        if (!(await this.assertRepoExist(model, request))) {
+            throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
+        }
 
         const octokit = new Octokit({
             auth: model.gitHubAccess
@@ -156,12 +195,10 @@ class Resource extends BaseResource<ResourceModel> {
             });
 
             return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(this.setModelFromApiResponse(model, response));
-        } catch (err) {
-            logger.log(err);
-            // exceptions module lets CloudFormation know the type of failure that occurred
-            throw new exceptions.InternalFailure(err.message);
-            // this can also be done by returning a failed progress event
-            // return ProgressEvent.failed(HandlerErrorCode.InternalFailure, err.message);
+        } catch (e) {
+            logger.log(e);
+            // TODO: Should have utility to get the right exception
+            throw new exceptions.InternalFailure(e);
         }
     }
 
@@ -209,24 +246,9 @@ class Resource extends BaseResource<ResourceModel> {
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
 
-        const octokit = new Octokit({
-            auth: model.gitHubAccess
-        })
+        const response = await this.getRepo(model, request);
 
-        try {
-            // TODO: Convert the model to a dictionary corresponding the type for the request
-            const response = await octokit.request('GET /repos/{owner}/{repo}', {
-                owner: model.org,
-                repo: model.name
-            });
-            return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(this.setModelFromApiResponse(model, response));
-        } catch (err) {
-            logger.log(err);
-            // exceptions module lets CloudFormation know the type of failure that occurred
-            throw new exceptions.InternalFailure(err.message);
-            // this can also be done by returning a failed progress event
-            // return ProgressEvent.failed(HandlerErrorCode.InternalFailure, err.message);
-        }
+        return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(this.setModelFromApiResponse(model, response));
     }
 
     /**

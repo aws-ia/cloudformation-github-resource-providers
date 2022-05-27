@@ -1,6 +1,6 @@
 # GitHub::Repositories::Repository
 
-CloudFormation resource to manage GitHub repositories.
+Manage a repository in GitHub.
 
 ## Syntax
 
