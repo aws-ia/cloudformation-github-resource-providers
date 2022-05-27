@@ -243,10 +243,11 @@ class Resource extends BaseResource<ResourceModel> {
             return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(this.setModelFromApiResponse(model, response));
         } catch (err) {
             logger.log(err);
-            // exceptions module lets CloudFormation know the type of failure that occurred
-            throw new exceptions.InternalFailure(err.message);
-            // this can also be done by returning a failed progress event
-            // return ProgressEvent.failed(HandlerErrorCode.InternalFailure, err.message);
+            if (err instanceof exceptions.BaseHandlerException) {
+                throw err;
+            }
+            // TODO: handle not authorized error
+            throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
         }
     }
 
