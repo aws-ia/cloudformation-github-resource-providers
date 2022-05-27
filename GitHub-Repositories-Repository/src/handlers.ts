@@ -12,31 +12,43 @@ import {
 } from '@amazon-web-services-cloudformation/cloudformation-cli-typescript-lib';
 import {ResourceModel} from './models';
 import {Octokit} from '@octokit/core';
-import {OctokitResponse, RequestError} from "@octokit/types";
+import {Endpoints, OctokitResponse, RequestError} from "@octokit/types";
 
 interface CallbackContext extends Record<string, any> {
 }
 
-// type GitHubModel<T> = Omit<T, 'constructor' | 'toJSON' | 'private_' | 'getAdditionalIdentifiers' | 'getPrimaryIdentifier' | 'getTypeName' | 'serialize'>
-//
-// type CreateResourceModel = GitHubModel<ResourceModel>;
-// type UpdateResourceModel = GitHubModel<Omit<ResourceModel, 'org' | 'name' | 'teamId' | 'autoInit' | 'gitIgnoreTemplate' | 'licenseTemplate'>> & {
-//     owner: string
-//     repo: string
-// }
+type CreateOrgRepoEndpoint = 'POST /orgs/{org}/repos';
+type CreateUserRepoEndpoint = 'POST /user/repos';
+type UpdateRepoEndpoint = 'PATCH /repos/{owner}/{repo}';
+type GetRepoEndpoint = 'GET /repos/{owner}/{repo}';
+type ListOrgRepoEndpoint = 'GET /orgs/{org}/repos';
+type ListUserRepoEndpoint = 'GET /users/{username}/repos';
+
+type CreateOrgRepoResponseData = Endpoints[CreateOrgRepoEndpoint]['response']['data'];
+type CreateUserRepoResponseData = Endpoints[CreateUserRepoEndpoint]['response']['data'];
+type UpdateRepoResponseData = Endpoints[UpdateRepoEndpoint]['response']['data'];
+type GetRepoResponseData = Endpoints[GetRepoEndpoint]['response']['data'];
+type ListOrgRepoResponseData = Endpoints[ListOrgRepoEndpoint]['response']['data'];
+type ListUserRepoResponseData = Endpoints[ListUserRepoEndpoint]['response']['data'];
+type RepoData = CreateOrgRepoResponseData
+    & CreateUserRepoResponseData
+    & UpdateRepoResponseData
+    & GetRepoResponseData
+    & ListOrgRepoResponseData
+    & ListUserRepoResponseData;
 
 class Resource extends BaseResource<ResourceModel> {
 
-    private setModelFromApiResponse(baseModel: ResourceModel, response: OctokitResponse<any>): ResourceModel {
-        baseModel.owner = response.data.owner.login;
-        baseModel.gitUrl = response.data.git_url;
-        baseModel.htmlUrl = response.data.html_url;
-        baseModel.defaultBranch = response.data.default_branch;
-        baseModel.language = response.data.language;
-        baseModel.forksCount = response.data.forks_count;
-        baseModel.starsCount = response.data.forks_count;
-        baseModel.watchersCount = response.data.forks_count;
-        baseModel.issuesCount = response.data.forks_count;
+    private setModelFromApiResponse(baseModel: ResourceModel, data: RepoData): ResourceModel {
+        baseModel.owner = data.owner.login;
+        baseModel.gitUrl = data.git_url;
+        baseModel.htmlUrl = data.html_url;
+        baseModel.defaultBranch = data.default_branch;
+        baseModel.language = data.language;
+        baseModel.forksCount = data.forks_count;
+        baseModel.starsCount = data.forks_count;
+        baseModel.watchersCount = data.forks_count;
+        baseModel.issuesCount = data.forks_count;
         return baseModel;
     }
 
@@ -44,7 +56,7 @@ class Resource extends BaseResource<ResourceModel> {
         return ex.hasOwnProperty('status') && ex.hasOwnProperty('name') && ex.hasOwnProperty('errors');
     }
 
-    private async getRepo(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>): Promise<OctokitResponse<any>> {
+    private async getRepo(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>): Promise<OctokitResponse<GetRepoResponseData>> {
         const octokit = new Octokit({
             auth: model.gitHubAccess
         });
@@ -104,7 +116,7 @@ class Resource extends BaseResource<ResourceModel> {
         try {
             // TODO: Convert the model to a dictionary corresponding the type for the request
             // TODO: This does not support organization repositories yet.
-            const response = await octokit.request(model.org ? 'POST /orgs/{org}/repos' : 'POST /user/repos', {
+            const response = await octokit.request<CreateOrgRepoEndpoint | CreateUserRepoEndpoint>(model.org ? 'POST /orgs/{org}/repos' : 'POST /user/repos', {
                 ...{org: model.org ? model.org : undefined},
                 name: model.name,
                 private: model.private_,
@@ -126,7 +138,7 @@ class Resource extends BaseResource<ResourceModel> {
                 license_template: model.licenseTemplate
             });
 
-            return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(this.setModelFromApiResponse(model, response));
+            return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(this.setModelFromApiResponse(model, response.data as RepoData));
         } catch (e) {
             logger.log(e);
             // TODO: Should have utility to get the right exception
@@ -163,7 +175,7 @@ class Resource extends BaseResource<ResourceModel> {
 
         try {
             // TODO: Convert the model to a dictionary corresponding the type for the request
-            const response = await octokit.request('PATCH /repos/{owner}/{repo}', {
+            const response = await octokit.request<UpdateRepoEndpoint>('PATCH /repos/{owner}/{repo}', {
                 owner: model.owner,
                 repo: model.name,
                 name: model.name,
@@ -190,7 +202,7 @@ class Resource extends BaseResource<ResourceModel> {
                     } : {}
             });
 
-            return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(this.setModelFromApiResponse(model, response));
+            return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(this.setModelFromApiResponse(model, response.data as RepoData));
         } catch (e) {
             logger.log(e);
             // TODO: Should have utility to get the right exception
@@ -244,7 +256,7 @@ class Resource extends BaseResource<ResourceModel> {
 
         const response = await this.getRepo(model, request);
 
-        return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(this.setModelFromApiResponse(model, response));
+        return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(this.setModelFromApiResponse(model, response.data as RepoData));
     }
 
     /**

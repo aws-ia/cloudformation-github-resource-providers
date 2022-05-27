@@ -85,7 +85,7 @@ _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormati
 
 #### Org
 
-The organization name. The name is not case sensitive. If not specified, then the managed repository will be within the currently logged-in user
+The organization name. The name is not case sensitive. If not specified, then the managed repository will be within the currently logged-in user account.
 
 _Required_: No
 

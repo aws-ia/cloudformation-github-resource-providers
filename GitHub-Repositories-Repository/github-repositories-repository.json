@@ -92,7 +92,7 @@
       "type": "string"
     },
     "Org": {
-      "description": "The organization name. The name is not case sensitive. If not specified, then the managed repository will be within the currently logged-in user account",
+      "description": "The organization name. The name is not case sensitive. If not specified, then the managed repository will be within the currently logged-in user account.",
       "type": "string"
     },
     "Name": {
