@@ -92,7 +92,7 @@
       "type": "string"
     },
     "Org": {
-      "description": "The organization name. The name is not case sensitive.",
+      "description": "The organization name. The name is not case sensitive. If not specified, then the managed repository will be within the currently logged-in user account",
       "type": "string"
     },
     "Name": {
@@ -190,12 +190,16 @@
     "SecurityAndAnalysis": {
       "$ref": "#/definitions/SecurityAndAnalysis"
     },
+    "Owner": {
+      "description": "ID of the repository owner.",
+      "type": "string"
+    },
     "HtmlUrl": {
-      "description": "URL of the git repository on Github",
+      "description": "URL of the git repository on Github.",
       "type": "string"
     },
     "GitUrl": {
-      "description": "Git URL of the repository on Github",
+      "description": "Git URL of the repository on Github.",
       "type": "string"
     },
     "DefaultBranch": {
@@ -226,10 +230,10 @@
   "additionalProperties": false,
   "required": [
     "GitHubAccess",
-    "Org",
     "Name"
   ],
   "readOnlyProperties": [
+    "/properties/Owner",
     "/properties/HtmlUrl",
     "/properties/GitUrl",
     "/properties/DefaultBranch",
@@ -248,7 +252,7 @@
     "/properties/LicenseTemplate"
   ],
   "primaryIdentifier": [
-    "/properties/Org",
+    "/properties/Owner",
     "/properties/Name"
   ],
   "handlers": {

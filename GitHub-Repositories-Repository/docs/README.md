@@ -85,9 +85,9 @@ _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormati
 
 #### Org
 
-The organization name. The name is not case sensitive.
+The organization name. The name is not case sensitive. If not specified, then the managed repository will be within the currently logged-in user
 
-_Required_: Yes
+_Required_: No
 
 _Type_: String
 
@@ -323,13 +323,17 @@ The `Fn::GetAtt` intrinsic function returns a value for a specified attribute of
 
 For more information about using the `Fn::GetAtt` intrinsic function, see [Fn::GetAtt](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-getatt.html).
 
+#### Owner
+
+ID of the repository owner.
+
 #### HtmlUrl
 
-URL of the git repository on Github
+URL of the git repository on Github.
 
 #### GitUrl
 
-Git URL of the repository on Github
+Git URL of the repository on Github.
 
 #### DefaultBranch
 

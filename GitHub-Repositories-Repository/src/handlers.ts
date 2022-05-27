@@ -1,11 +1,8 @@
 import {
     Action,
-    AwsTaskWorkerPool,
     BaseResource,
-    Constructor,
     exceptions,
     handlerEvent,
-    HandlerSignatures,
     LoggerProxy,
     OperationStatus,
     Optional,
@@ -16,7 +13,6 @@ import {
 import {ResourceModel} from './models';
 import {Octokit} from '@octokit/core';
 import {OctokitResponse, RequestError} from "@octokit/types";
-import {NotFound} from "@amazon-web-services-cloudformation/cloudformation-cli-typescript-lib/dist/exceptions";
 
 interface CallbackContext extends Record<string, any> {
 }
@@ -32,6 +28,7 @@ interface CallbackContext extends Record<string, any> {
 class Resource extends BaseResource<ResourceModel> {
 
     private setModelFromApiResponse(baseModel: ResourceModel, response: OctokitResponse<any>): ResourceModel {
+        baseModel.owner = response.data.owner.login;
         baseModel.gitUrl = response.data.git_url;
         baseModel.htmlUrl = response.data.html_url;
         baseModel.defaultBranch = response.data.default_branch;
@@ -54,15 +51,15 @@ class Resource extends BaseResource<ResourceModel> {
 
         try {
             return await octokit.request('GET /repos/{owner}/{repo}', {
-                owner: model.org,
+                owner: model.owner,
                 repo: model.name
             });
         } catch (e) {
             if (this.isRequestError(e) && (e as RequestError).status === 404) {
-               throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
+                throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
             }
             if (this.isRequestError(e) && (e as RequestError).status === 403) {
-               throw new exceptions.AccessDenied((e as RequestError).errors.map(e => e.message).join('\n'));
+                throw new exceptions.AccessDenied((e as RequestError).errors.map(e => e.message).join('\n'));
             }
             throw new exceptions.InternalFailure(e);
         }
@@ -107,8 +104,8 @@ class Resource extends BaseResource<ResourceModel> {
         try {
             // TODO: Convert the model to a dictionary corresponding the type for the request
             // TODO: This does not support organization repositories yet.
-            const response = await octokit.request('POST /user/repos', {
-                org: model.org,
+            const response = await octokit.request(model.org ? 'POST /orgs/{org}/repos' : 'POST /user/repos', {
+                ...{org: model.org ? model.org : undefined},
                 name: model.name,
                 private: model.private_,
                 description: model.description,
@@ -129,7 +126,6 @@ class Resource extends BaseResource<ResourceModel> {
                 license_template: model.licenseTemplate
             });
 
-            // Setting Status to success will signal to CloudFormation that the operation is complete
             return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(this.setModelFromApiResponse(model, response));
         } catch (e) {
             logger.log(e);
@@ -168,7 +164,7 @@ class Resource extends BaseResource<ResourceModel> {
         try {
             // TODO: Convert the model to a dictionary corresponding the type for the request
             const response = await octokit.request('PATCH /repos/{owner}/{repo}', {
-                owner: model.org,
+                owner: model.owner,
                 repo: model.name,
                 name: model.name,
                 private: model.private_,

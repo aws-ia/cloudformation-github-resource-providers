@@ -9,7 +9,7 @@ export class ResourceModel extends BaseModel {
     public static readonly TYPE_NAME: string = 'GitHub::Repositories::Repository';
 
     @Exclude()
-    protected readonly IDENTIFIER_KEY_ORG: string = '/properties/Org';
+    protected readonly IDENTIFIER_KEY_OWNER: string = '/properties/Owner';
     @Exclude()
     protected readonly IDENTIFIER_KEY_NAME: string = '/properties/Name';
 
@@ -214,6 +214,15 @@ export class ResourceModel extends BaseModel {
     @Expose({ name: 'SecurityAndAnalysis' })
     @Type(() => SecurityAndAnalysis)
     securityAndAnalysis?: Optional<SecurityAndAnalysis>;
+    @Expose({ name: 'Owner' })
+    @Transform(
+        (value: any, obj: any) =>
+            transformValue(String, 'owner', value, obj, []),
+        {
+            toClassOnly: true,
+        }
+    )
+    owner?: Optional<string>;
     @Expose({ name: 'HtmlUrl' })
     @Transform(
         (value: any, obj: any) =>
@@ -290,8 +299,8 @@ export class ResourceModel extends BaseModel {
     @Exclude()
     public getPrimaryIdentifier(): Dict {
         const identifier: Dict = {};
-        if (this.org != null) {
-            identifier[this.IDENTIFIER_KEY_ORG] = this.org;
+        if (this.owner != null) {
+            identifier[this.IDENTIFIER_KEY_OWNER] = this.owner;
         }
 
         if (this.name != null) {
