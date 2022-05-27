@@ -1,6 +1,7 @@
 import {
     Action,
-    BaseResource, exceptions,
+    BaseResource,
+    exceptions,
     handlerEvent,
     LoggerProxy,
     OperationStatus,
@@ -40,15 +41,17 @@ class Resource extends BaseResource<ResourceModel> {
 
         let response: OctokitResponse<any>;
         try {
+            const privacy = model.privacy as "closed" | "secret";
             response = await octokit.request('POST /orgs/{org}/teams', {
                 org: model.organisation,
                 name: model.name,
                 description: model.description,
-                privacy: 'closed' // TODO how to set this from input?
+                privacy: privacy
             });
         }catch (e) {
             throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
         }
+
 
         model.slug = response.data.slug;
         progress.status = OperationStatus.Success;
@@ -86,7 +89,7 @@ class Resource extends BaseResource<ResourceModel> {
                 team_slug: request.previousResourceState.slug,
                 name: model.name,
                 description: model.description,
-                privacy: privacy // TODO how to set this from input?
+                privacy: privacy
             });
         }catch (e) {
             throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
@@ -161,14 +164,27 @@ class Resource extends BaseResource<ResourceModel> {
         const model = new ResourceModel(request.desiredResourceState);
         const octokit = new Octokit({auth: model.gitHubAccess});
 
+        let response: OctokitResponse<any>;
         try {
-            await octokit.request('GET /orgs/{org}/teams/{team_slug}', {
+            response = await octokit.request('GET /orgs/{org}/teams/{team_slug}', {
                 org: model.organisation,
                 team_slug: model.slug
-            })
+            });
         }catch (e) {
             throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
         }
+
+        logger.log("djg-logger");
+        logger.log("Status " + response.status);
+        logger.log("Data " + response.data);
+        logger.log("Data privacy " + response.data.privacy);
+        logger.log("Headers " + response.headers);
+        logger.log("Url " + response.url);
+
+
+        model.description = response.data.description;
+        model.name = response.data.name;
+        model.privacy = response.data.privacy;
 
         const progress = ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(model);
         return progress;
@@ -192,21 +208,44 @@ class Resource extends BaseResource<ResourceModel> {
         logger: LoggerProxy
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
-        let resourceModels = ProgressEvent.builder<ProgressEvent<ResourceModel, CallbackContext>>()
-            .status(OperationStatus.Success)
-            .resourceModels([model]);
 
         const octokit = new Octokit({auth: model.gitHubAccess});
+        let response: any;
+        logger.log("List teams");
+        logger.log("Request model " + JSON.stringify(model));
+
         try{
-            await octokit.request('GET /orgs/{org}/teams', {
-                org: model.organisation
-            })
+            response = await octokit.paginate('GET /orgs/{org}/teams', {
+                    org: model.organisation,
+                    per_page: 100
+                },
+                response1 => {
+                logger.log("paginate handler " + JSON.stringify(response1.data));
+                    return response1.data
+            });
         } catch (e) {
             logger.log("djg-logger-error");
             logger.log("Status " + e.status);
             throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
         }
-        return resourceModels.build();
+
+        logger.log("response " + JSON.stringify(response));
+        let models = [];
+        for(const m of response) {
+            logger.log("loop thourgh response " + JSON.stringify(m));
+            let resourceModel = new ResourceModel();
+            resourceModel.name = m.name;
+            resourceModel.description = m.description;
+            resourceModel.privacy =  m.privacy;
+            resourceModel.slug = m.slug;
+            resourceModel.organisation = model.organisation;
+            models.push(resourceModel);
+        }
+
+        logger.log("Status: return success " + JSON.stringify(models));
+        return ProgressEvent.builder<ProgressEvent<ResourceModel, CallbackContext>>()
+            .status(OperationStatus.Success)
+            .resourceModels(models).build();
     }
 }
 
