@@ -1,6 +1,6 @@
 {
   "CREATE": {
-    "/Organisation": "cloudsoft",
-    "/GitHubAccess": {"AccessToken": "<TOKEN HERE>"}
+    "/Organisation": "Cloudsoft-CloudFormation",
+    "/GitHubAccess": "<TOKEN HERE>"
   }
 }

@@ -46,7 +46,11 @@
     },
     "Privacy": {
       "description": "The privacy for the team - must be either secret or closed",
-      "type": "string"
+      "type": "string",
+      "enum": [
+        "secret",
+        "closed"
+      ]
     },
     "Slug": {
       "description": "The organisation unique identifier for the team",
