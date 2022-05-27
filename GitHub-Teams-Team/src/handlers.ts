@@ -129,16 +129,8 @@ class Resource extends BaseResource<ResourceModel> {
                 team_slug: model.slug
             });
         } catch (e) {
-            logger.log("djg-logger-error");
-            logger.log("Status " + e.status);
             throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
         }
-
-        logger.log("djg-logger");
-        logger.log("Status " + response.status);
-        logger.log("Data " + response.data);
-        logger.log("Headers " + response.headers);
-        logger.log("Url " + response.url);
 
         progress.status = OperationStatus.Success;
         return progress;
@@ -174,14 +166,6 @@ class Resource extends BaseResource<ResourceModel> {
             throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
         }
 
-        logger.log("djg-logger");
-        logger.log("Status " + response.status);
-        logger.log("Data " + response.data);
-        logger.log("Data privacy " + response.data.privacy);
-        logger.log("Headers " + response.headers);
-        logger.log("Url " + response.url);
-
-
         model.description = response.data.description;
         model.name = response.data.name;
         model.privacy = response.data.privacy;
@@ -211,8 +195,6 @@ class Resource extends BaseResource<ResourceModel> {
 
         const octokit = new Octokit({auth: model.gitHubAccess});
         let response: any;
-        logger.log("List teams");
-        logger.log("Request model " + JSON.stringify(model));
 
         try{
             response = await octokit.paginate('GET /orgs/{org}/teams', {
@@ -220,19 +202,14 @@ class Resource extends BaseResource<ResourceModel> {
                     per_page: 100
                 },
                 response1 => {
-                logger.log("paginate handler " + JSON.stringify(response1.data));
                     return response1.data
             });
         } catch (e) {
-            logger.log("djg-logger-error");
-            logger.log("Status " + e.status);
             throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
         }
 
-        logger.log("response " + JSON.stringify(response));
         let models = [];
         for(const m of response) {
-            logger.log("loop thourgh response " + JSON.stringify(m));
             let resourceModel = new ResourceModel();
             resourceModel.name = m.name;
             resourceModel.description = m.description;
@@ -242,7 +219,6 @@ class Resource extends BaseResource<ResourceModel> {
             models.push(resourceModel);
         }
 
-        logger.log("Status: return success " + JSON.stringify(models));
         return ProgressEvent.builder<ProgressEvent<ResourceModel, CallbackContext>>()
             .status(OperationStatus.Success)
             .resourceModels(models).build();
