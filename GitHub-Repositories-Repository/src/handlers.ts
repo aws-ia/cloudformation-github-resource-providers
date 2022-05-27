@@ -11,7 +11,8 @@ import {
     SessionProxy,
 } from '@amazon-web-services-cloudformation/cloudformation-cli-typescript-lib';
 import {ResourceModel} from './models';
-import {Octokit} from '@octokit/core';
+import {Octokit} from "@octokit/rest";
+import {OctokitResponse, RequestError} from "@octokit/types";
 import {Endpoints, OctokitResponse, RequestError} from "@octokit/types";
 
 interface CallbackContext extends Record<string, any> {
@@ -293,12 +294,51 @@ class Resource extends BaseResource<ResourceModel> {
         logger: LoggerProxy
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
-        // TODO: put code here
-        const progress = ProgressEvent.builder<ProgressEvent<ResourceModel, CallbackContext>>()
+        const octokit = new Octokit({auth: model.gitHubAccess});
+        let response: any;
+
+        try{
+            response = await octokit.paginate(model.org ? 'GET /orgs/{org}/repos' : 'GET /user/repos', {
+                    org: model.org ? model.org : undefined,
+                    per_page: 100
+                },
+                response1 => {
+                    return response1.data
+                });
+        } catch (e) {
+            // TODO: handle unauthorized
+            logger.log(`Error response: {}`, e)
+            throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
+        }
+
+        const models :ResourceModel[] = [];
+        for(const repoItem of response) {
+            let resourceModel = new ResourceModel();
+            resourceModel.org = repoItem.org ?  repoItem.org : undefined,
+            resourceModel.name = repoItem.name,
+            resourceModel.private_ = repoItem.private_,
+            resourceModel.description = repoItem.description,
+            resourceModel.homepage = repoItem.homepage,
+            resourceModel.visibility = repoItem.visibility,
+            resourceModel.allowAutoMerge = repoItem.allowAutoMerge,
+            resourceModel.allowMergeCommit = repoItem.allowMergeCommit,
+            resourceModel.allowRebaseMerge = repoItem.allowRebaseMerge,
+            resourceModel.allowSquashMerge = repoItem.allowSquashMerge,
+            resourceModel.autoInit = repoItem.autoInit,
+            resourceModel.teamId = repoItem.teamId,
+            resourceModel.deleteBranchOnMerge = repoItem.deleteBranchOnMerge,
+            resourceModel.hasIssues = repoItem.hasIssues,
+            resourceModel.hasProjects = repoItem.hasProjects,
+            resourceModel.hasWiki = repoItem.hasWiki,
+            resourceModel.isTemplate = repoItem.isTemplate,
+            resourceModel.gitIgnoreTemplate = repoItem.gitIgnoreTemplate,
+            resourceModel.licenseTemplate = repoItem.licenseTemplate
+            models.push(resourceModel)
+        }
+
+        return ProgressEvent.builder<ProgressEvent<ResourceModel, CallbackContext>>()
             .status(OperationStatus.Success)
-            .resourceModels([model])
-            .build();
-        return progress;
+            .resourceModels(models).build();
     }
 }
 
