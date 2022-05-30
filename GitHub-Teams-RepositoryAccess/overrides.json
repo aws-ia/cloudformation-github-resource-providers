@@ -1,0 +1,13 @@
+{
+  "CREATE": {
+    "/GitHubAccess": "<GITHUB_TOKEN>",
+    "/Org": "Cloudsoft-CloudFormation",
+    "/Team": "github-repository-handler-test-team",
+    "/Owner": "Cloudsoft-CloudFormation",
+    "/Repository": "CloudFormation-GitHub-Test",
+    "/Permission": "pull"
+  },
+  "UPDATE": {
+    "/Permission": "push"
+  }
+}
