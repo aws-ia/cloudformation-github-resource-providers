@@ -14,7 +14,7 @@ export class ResourceModel extends BaseModel {
     public static readonly TYPE_NAME: string = 'GitHub::Teams::Team';
 
     @Exclude()
-    protected readonly IDENTIFIER_KEY_ORGANISATION: string = '/properties/Organisation';
+    protected readonly IDENTIFIER_KEY_ORGANIZATION: string = '/properties/organization';
     @Exclude()
     protected readonly IDENTIFIER_KEY_NAME: string = '/properties/Name';
     @Exclude()
@@ -29,15 +29,15 @@ export class ResourceModel extends BaseModel {
         }
     )
     name?: Optional<string>;
-    @Expose({ name: 'Organisation' })
+    @Expose({ name: 'organization' })
     @Transform(
         (value: any, obj: any) =>
-            transformValue(String, 'organisation', value, obj, []),
+            transformValue(String, 'organization', value, obj, []),
         {
             toClassOnly: true,
         }
     )
-    organisation?: Optional<string>;
+    organization?: Optional<string>;
     @Expose({ name: 'Description' })
     @Transform(
         (value: any, obj: any) =>
@@ -78,8 +78,8 @@ export class ResourceModel extends BaseModel {
     @Exclude()
     public getPrimaryIdentifier(): Dict {
         const identifier: Dict = {};
-        if (this.organisation != null) {
-            identifier[this.IDENTIFIER_KEY_ORGANISATION] = this.organisation;
+        if (this.organization != null) {
+            identifier[this.IDENTIFIER_KEY_ORGANIZATION] = this.organization;
         }
 
         if (this.name != null) {
