@@ -1,8 +1,11 @@
 import {
     Action,
+    AwsTaskWorkerPool,
     BaseResource,
+    Constructor,
     exceptions,
     handlerEvent,
+    HandlerSignatures,
     LoggerProxy,
     OperationStatus,
     Optional,
@@ -12,7 +15,6 @@ import {
 } from '@amazon-web-services-cloudformation/cloudformation-cli-typescript-lib';
 import {ResourceModel} from './models';
 import {Octokit} from "@octokit/rest";
-import {OctokitResponse, RequestError} from "@octokit/types";
 import {Endpoints, OctokitResponse, RequestError} from "@octokit/types";
 
 interface CallbackContext extends Record<string, any> {
@@ -118,6 +120,7 @@ class Resource extends BaseResource<ResourceModel> {
         });
 
         try {
+            logger.log(`jdc Creating repo for {}`,JSON.stringify(model));
             // TODO: Convert the model to a dictionary corresponding the type for the request
             // TODO: This does not support organization repositories yet.
             const response = await octokit.request<CreateOrgRepoEndpoint | CreateUserRepoEndpoint>(model.org ? 'POST /orgs/{org}/repos' : 'POST /user/repos', {
@@ -141,10 +144,10 @@ class Resource extends BaseResource<ResourceModel> {
                 gitignore_template: model.gitIgnoreTemplate,
                 license_template: model.licenseTemplate
             });
-
+            logger.log(`jdc response: {}`,JSON.stringify(response));
             return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(this.setModelFromApiResponse(model, response.data as RepoData));
         } catch (e) {
-            logger.log(e);
+            logger.log(`jdc error: {}`,e);
             // TODO: Should have utility to get the right exception
             throw new exceptions.InternalFailure(e.message);
         }
@@ -241,7 +244,7 @@ class Resource extends BaseResource<ResourceModel> {
                 owner: model.org,
                 repo: model.name
             });
-            return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(this.setModelFromApiResponse(model, response));
+            return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>();
         } catch (err) {
             logger.log(err);
             if (err instanceof exceptions.BaseHandlerException) {
@@ -314,6 +317,7 @@ class Resource extends BaseResource<ResourceModel> {
         const models :ResourceModel[] = [];
         for(const repoItem of response) {
             let resourceModel = new ResourceModel();
+            resourceModel.owner = repoItem.owner.login;
             resourceModel.org = repoItem.org ?  repoItem.org : undefined,
             resourceModel.name = repoItem.name,
             resourceModel.private_ = repoItem.private_,

@@ -35,7 +35,6 @@ To declare this entity in your AWS CloudFormation template, use the following sy
         "<a href="#allowforking" title="AllowForking">AllowForking</a>" : <i>Boolean</i>,
         "<a href="#archived" title="Archived">Archived</a>" : <i>Boolean</i>,
         "<a href="#securityandanalysis" title="SecurityAndAnalysis">SecurityAndAnalysis</a>" : <i><a href="securityandanalysis.md">SecurityAndAnalysis</a></i>,
-        "<a href="#forkscount" title="ForksCount">ForksCount</a>" : <i>Double</i>,
     }
 }
 </pre>
@@ -68,7 +67,6 @@ Properties:
     <a href="#allowforking" title="AllowForking">AllowForking</a>: <i>Boolean</i>
     <a href="#archived" title="Archived">Archived</a>: <i>Boolean</i>
     <a href="#securityandanalysis" title="SecurityAndAnalysis">SecurityAndAnalysis</a>: <i><a href="securityandanalysis.md">SecurityAndAnalysis</a></i>
-    <a href="#forkscount" title="ForksCount">ForksCount</a>: <i>Double</i>
 </pre>
 
 ## Properties
@@ -305,16 +303,6 @@ _Type_: <a href="securityandanalysis.md">SecurityAndAnalysis</a>
 
 _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
 
-#### ForksCount
-
-Number of forks for this GitHub repository.
-
-_Required_: No
-
-_Type_: Double
-
-_Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
-
 ## Return Values
 
 ### Fn::GetAtt
@@ -343,9 +331,9 @@ Updates the default branch for this repository.
 
 The main programming language used for this GitHub repository.
 
-#### ForkCount
+#### ForksCount
 
-Returns the <code>ForkCount</code> value.
+Number of forks for this GitHub repository.
 
 #### StarsCount
 

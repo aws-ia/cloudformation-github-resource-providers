@@ -38,7 +38,11 @@
       "properties": {
         "Status": {
           "description": "Can be enabled or disabled.",
-          "type": "string"
+          "type": "string",
+          "enum": [
+            "enabled",
+            "disabled"
+          ]
         }
       },
       "required": [
@@ -52,7 +56,11 @@
       "properties": {
         "Status": {
           "description": "Can be enabled or disabled.",
-          "type": "string"
+          "type": "string",
+          "enum": [
+            "enabled",
+            "disabled"
+            ]
         }
       },
       "required": [
@@ -66,7 +74,11 @@
       "properties": {
         "Status": {
           "description": "Can be enabled or disabled.",
-          "type": "string"
+          "type": "string",
+          "enum": [
+            "enabled",
+            "disabled"
+          ]
         }
       },
       "required": [
@@ -238,7 +250,7 @@
     "/properties/GitUrl",
     "/properties/DefaultBranch",
     "/properties/Language",
-    "/properties/ForkCount",
+    "/properties/ForksCount",
     "/properties/StarsCount",
     "/properties/WatchersCount",
     "/properties/IssuesCount"
