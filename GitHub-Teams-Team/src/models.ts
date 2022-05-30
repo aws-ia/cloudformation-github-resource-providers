@@ -1,11 +1,6 @@
 // This is a generated file. Modifications will be overwritten.
-import {
-    BaseModel,
-    Dict,
-    Optional,
-    transformValue
-} from '@amazon-web-services-cloudformation/cloudformation-cli-typescript-lib';
-import {Exclude, Expose, Transform} from 'class-transformer';
+import { BaseModel, Dict, integer, Integer, Optional, transformValue } from '@amazon-web-services-cloudformation/cloudformation-cli-typescript-lib';
+import { Exclude, Expose, Type, Transform } from 'class-transformer';
 
 export class ResourceModel extends BaseModel {
     ['constructor']: typeof ResourceModel;
@@ -14,7 +9,7 @@ export class ResourceModel extends BaseModel {
     public static readonly TYPE_NAME: string = 'GitHub::Teams::Team';
 
     @Exclude()
-    protected readonly IDENTIFIER_KEY_ORGANIZATION: string = '/properties/organization';
+    protected readonly IDENTIFIER_KEY_ORGANIZATION: string = '/properties/Organization';
     @Exclude()
     protected readonly IDENTIFIER_KEY_NAME: string = '/properties/Name';
     @Exclude()
@@ -29,7 +24,7 @@ export class ResourceModel extends BaseModel {
         }
     )
     name?: Optional<string>;
-    @Expose({ name: 'organization' })
+    @Expose({ name: 'Organization' })
     @Transform(
         (value: any, obj: any) =>
             transformValue(String, 'organization', value, obj, []),

@@ -34,8 +34,8 @@
       "type": "string",
       "pattern": "^[a-zA-Z0-9_-]{1,512}$"
     },
-    "organization": {
-      "description": "The organization that the team will belong to",
+    "Organization": {
+      "description": "The Organization that the team will belong to",
       "type": "string",
       "pattern": "^[a-zA-Z0-9_-]{1-39}$"
     },
@@ -53,7 +53,7 @@
       ]
     },
     "Slug": {
-      "description": "The organization unique identifier for the team",
+      "description": "The Organization unique identifier for the team",
       "type": "string"
     },
     "GitHubAccess": {
@@ -64,18 +64,18 @@
   "additionalProperties": false,
   "required": [
     "Name",
-    "organization",
+    "Organization",
     "GitHubAccess"
   ],
   "createOnlyProperties": [
     "/properties/Name",
-    "/properties/organization"
+    "/properties/Organization"
   ],
   "readOnlyProperties": [
     "/properties/Slug"
   ],
   "primaryIdentifier": [
-    "/properties/organization",
+    "/properties/Organization",
     "/properties/Name"
   ],
   "additionalIdentifiers": [

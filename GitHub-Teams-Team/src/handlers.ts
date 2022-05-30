@@ -32,7 +32,7 @@ class Resource extends BaseResource<ResourceModel> {
         } else if (response.status > 400) {
             throw new exceptions.InternalFailure();
         }
-        throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
+        throw new exceptions.InternalFailure();
     }
 
     /**
@@ -53,7 +53,6 @@ class Resource extends BaseResource<ResourceModel> {
         logger: LoggerProxy
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
-        const progress = ProgressEvent.progress<ProgressEvent<ResourceModel, CallbackContext>>(model);
         const octokit = new Octokit({auth: model.gitHubAccess});
 
         let response: OctokitResponse<any>;
@@ -71,9 +70,8 @@ class Resource extends BaseResource<ResourceModel> {
         }
 
         model.slug = response.data.slug;
-        progress.status = OperationStatus.Success;
 
-        return progress;
+        return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(model);
     }
 
     /**
@@ -94,7 +92,6 @@ class Resource extends BaseResource<ResourceModel> {
         logger: LoggerProxy
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
-        const progress = ProgressEvent.progress<ProgressEvent<ResourceModel, CallbackContext>>(model);
 
         const octokit = new Octokit({auth: model.gitHubAccess});
 
@@ -112,9 +109,8 @@ class Resource extends BaseResource<ResourceModel> {
             this.handleError(e, request);
         }
 
-        progress.status = OperationStatus.Success;
         model.slug = response.data.slug;
-        return progress;
+        return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(model);
     }
 
     /**
@@ -136,7 +132,6 @@ class Resource extends BaseResource<ResourceModel> {
         logger: LoggerProxy
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
-        const progress = ProgressEvent.progress<ProgressEvent<ResourceModel, CallbackContext>>();
         const octokit = new Octokit({auth: model.gitHubAccess});
 
         try {
@@ -148,8 +143,7 @@ class Resource extends BaseResource<ResourceModel> {
             this.handleError(e, request);
         }
 
-        progress.status = OperationStatus.Success;
-        return progress;
+        return ProgressEvent.progress<ProgressEvent<ResourceModel, CallbackContext>>();
     }
 
     /**
