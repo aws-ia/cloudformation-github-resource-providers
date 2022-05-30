@@ -123,9 +123,7 @@ class Resource extends BaseResource<ResourceModel> {
 
         await this.putTeamRepoAccess(model, request);
 
-        const progressEvent = ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(model);
-        progressEvent.status = OperationStatus.Success;
-        return progressEvent;
+        return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(model);
     }
 
     /**
@@ -153,9 +151,7 @@ class Resource extends BaseResource<ResourceModel> {
 
         await this.putTeamRepoAccess(model, request);
 
-        const progressEvent = ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(model);
-        progressEvent.status = OperationStatus.Success;
-        return progressEvent;
+        return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(model);
     }
 
     /**
@@ -184,9 +180,7 @@ class Resource extends BaseResource<ResourceModel> {
 
         await this.deleteTeamRepoAccess(model, request);
 
-        const progressEvent = ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>();
-        progressEvent.status = OperationStatus.Success;
-        return progressEvent;
+        return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>();
     }
 
     /**
@@ -210,9 +204,7 @@ class Resource extends BaseResource<ResourceModel> {
 
         await this.getTeamRepoAccess(model, request);
 
-        const progressEvent = ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(model);
-        progressEvent.status = OperationStatus.Success;
-        return progressEvent;
+        return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(model);
     }
 }
 
