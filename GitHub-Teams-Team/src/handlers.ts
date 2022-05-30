@@ -143,7 +143,7 @@ class Resource extends BaseResource<ResourceModel> {
             this.handleError(e, request);
         }
 
-        return ProgressEvent.progress<ProgressEvent<ResourceModel, CallbackContext>>();
+        return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>();
     }
 
     /**
