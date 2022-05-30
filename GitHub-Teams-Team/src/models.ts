@@ -1,6 +1,11 @@
 // This is a generated file. Modifications will be overwritten.
-import { BaseModel, Dict, integer, Integer, Optional, transformValue } from '@amazon-web-services-cloudformation/cloudformation-cli-typescript-lib';
-import { Exclude, Expose, Type, Transform } from 'class-transformer';
+import {
+    BaseModel,
+    Dict,
+    Optional,
+    transformValue
+} from '@amazon-web-services-cloudformation/cloudformation-cli-typescript-lib';
+import {Exclude, Expose, Transform} from 'class-transformer';
 
 export class ResourceModel extends BaseModel {
     ['constructor']: typeof ResourceModel;
@@ -10,6 +15,8 @@ export class ResourceModel extends BaseModel {
 
     @Exclude()
     protected readonly IDENTIFIER_KEY_ORGANISATION: string = '/properties/Organisation';
+    @Exclude()
+    protected readonly IDENTIFIER_KEY_NAME: string = '/properties/Name';
     @Exclude()
     protected readonly IDENTIFIER_KEY_SLUG: string = '/properties/Slug';
 
@@ -75,8 +82,8 @@ export class ResourceModel extends BaseModel {
             identifier[this.IDENTIFIER_KEY_ORGANISATION] = this.organisation;
         }
 
-        if (this.slug != null) {
-            identifier[this.IDENTIFIER_KEY_SLUG] = this.slug;
+        if (this.name != null) {
+            identifier[this.IDENTIFIER_KEY_NAME] = this.name;
         }
 
         // only return the identifier if it can be used, i.e. if all components are present
@@ -86,8 +93,22 @@ export class ResourceModel extends BaseModel {
     @Exclude()
     public getAdditionalIdentifiers(): Array<Dict> {
         const identifiers: Array<Dict> = new Array<Dict>();
+        if (this.getIdentifier_Slug() != null) {
+            identifiers.push(this.getIdentifier_Slug());
+        }
         // only return the identifiers if any can be used
         return identifiers.length === 0 ? null : identifiers;
+    }
+
+    @Exclude()
+    public getIdentifier_Slug(): Dict {
+        const identifier: Dict = {};
+        if ((this as any).slug != null) {
+            identifier[this.IDENTIFIER_KEY_SLUG] = (this as any).slug;
+        }
+
+        // only return the identifier if it can be used, i.e. if all components are present
+        return Object.keys(identifier).length === 1 ? identifier : null;
     }
 }
 

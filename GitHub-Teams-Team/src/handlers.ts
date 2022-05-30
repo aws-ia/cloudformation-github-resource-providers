@@ -49,7 +49,7 @@ class Resource extends BaseResource<ResourceModel> {
                 privacy: privacy
             });
         }catch (e) {
-            throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
+            throw new exceptions.AlreadyExists(this.typeName, request.logicalResourceIdentifier);
         }
 
 

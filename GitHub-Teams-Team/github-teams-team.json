@@ -76,7 +76,10 @@
   ],
   "primaryIdentifier": [
     "/properties/Organisation",
-    "/properties/Slug"
+    "/properties/Name"
+  ],
+  "additionalIdentifiers": [
+    ["/properties/Slug"]
   ],
   "handlers": {
     "create": {
