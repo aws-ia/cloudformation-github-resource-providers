@@ -147,10 +147,9 @@ class Resource extends BaseResource<ResourceModel> {
             logger.log(`jdc response: {}`,JSON.stringify(response));
             return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(this.setModelFromApiResponse(model, response.data as RepoData));
         } catch (e) {
-            logger.log(`jdc error: {}`,e);
+            logger.log(`jdc error creating: {}`,e);
             // TODO: Should have utility to get the right exception
-            throw new exceptions.InternalFailure(e.message);
-        }
+            this.handleError(e, request)}
     }
 
     /**
@@ -171,6 +170,7 @@ class Resource extends BaseResource<ResourceModel> {
         logger: LoggerProxy
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
+        logger.log(`jdc updating repo for {}`,JSON.stringify(model));
 
         if (!(await this.assertRepoExist(model, request))) {
             throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
@@ -208,12 +208,12 @@ class Resource extends BaseResource<ResourceModel> {
                         secret_scanning: model.securityAndAnalysis.secretScanning
                     } : {}
             });
-
             return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(this.setModelFromApiResponse(model, response.data as RepoData));
         } catch (e) {
+            logger.log(`jdc error updating: {}`,e);
             logger.log(e);
             // TODO: Should have utility to get the right exception
-            throw new exceptions.InternalFailure(e);
+            this.handleError(e, request)
         }
     }
 
@@ -245,13 +245,13 @@ class Resource extends BaseResource<ResourceModel> {
                 repo: model.name
             });
             return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>();
-        } catch (err) {
-            logger.log(err);
-            if (err instanceof exceptions.BaseHandlerException) {
-                throw err;
+        } catch (e) {
+            logger.log(e);
+            if (e instanceof exceptions.BaseHandlerException) {
+                throw e;
             }
             // TODO: handle not authorized error
-            throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
+            this.handleError(e, request)
         }
     }
 
@@ -273,10 +273,14 @@ class Resource extends BaseResource<ResourceModel> {
         logger: LoggerProxy
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
+        try{
+            const response = await this.getRepo(model, request);
+            return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(this.setModelFromApiResponse(model, response.data as RepoData));
+        }catch (e) {
+            logger.log(e);
+            this.handleError(e, request);
+        }
 
-        const response = await this.getRepo(model, request);
-
-        return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(this.setModelFromApiResponse(model, response.data as RepoData));
     }
 
     /**
@@ -311,7 +315,7 @@ class Resource extends BaseResource<ResourceModel> {
         } catch (e) {
             // TODO: handle unauthorized
             logger.log(`Error response: {}`, e)
-            throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
+            this.handleError(e, request)
         }
 
         const models :ResourceModel[] = [];
@@ -343,6 +347,21 @@ class Resource extends BaseResource<ResourceModel> {
         return ProgressEvent.builder<ProgressEvent<ResourceModel, CallbackContext>>()
             .status(OperationStatus.Success)
             .resourceModels(models).build();
+    }
+
+    private handleError(response: OctokitResponse<any>, request: ResourceHandlerRequest<ResourceModel>) {
+        if (response.status === 400) {
+            throw new exceptions.AlreadyExists(this.typeName, request.logicalResourceIdentifier);
+        } else if (response.status === 401) {
+            throw new exceptions.AccessDenied();
+        } else if (response.status === 403) {
+            throw new exceptions.AccessDenied();
+        } else if (response.status === 404) {
+            throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
+        } else if (response.status === 422) {
+            throw new exceptions.AlreadyExists(this.typeName, request.logicalResourceIdentifier);
+        }
+        throw new exceptions.InternalFailure();
     }
 }
 

@@ -1,13 +1,14 @@
 {
   "CREATE": {
     "/GitHubAccess": "<TOKEN>",
-    "/Org": "<YOUR-USERNAME>",
+    "/Org": "Cloudsoft-CloudFormation",
     "/Name": "foo",
     "/Description": "GitHub repo created from the CloudFormation contract tests",
     "/Homepage": "https://GitHub.com",
     "/LicenseTemplate": "mit",
     "/GitIgnoreTemplate": "Node",
-    "/TeamId": null
+    "/TeamId": null,
+    "/AllowMergeCommit": true
   },
   "UPDATE": {
     "/SecurityAndAnalysis": null
