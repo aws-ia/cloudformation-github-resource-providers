@@ -42,9 +42,6 @@ type RepoData = CreateOrgRepoResponseData
     & ListUserRepoResponseData;
 
 class Resource extends BaseResource<ResourceModel> {
-    constructor(typeName: string, modelTypeReference: Constructor<ResourceModel>, workerPool?: AwsTaskWorkerPool, handlers?: HandlerSignatures<ResourceModel>) {
-        super(typeName, modelTypeReference, workerPool, handlers);
-    }
 
     private setModelFromApiResponse(baseModel: ResourceModel, data: RepoData): ResourceModel {
         baseModel.owner = data.owner.login;
@@ -233,7 +230,7 @@ class Resource extends BaseResource<ResourceModel> {
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
         if (!(await this.assertRepoExist(model, request))) {
-            return ProgressEvent.failed<ProgressEvent<ResourceModel, CallbackContext>>(HandlerErrorCode.NotFound, this.typeName);
+            throw new exceptions.NotFound(this.typeName,request.logicalResourceIdentifier);
         }
         const octokit = new Octokit({auth: model.gitHubAccess})
         try {
@@ -244,9 +241,6 @@ class Resource extends BaseResource<ResourceModel> {
             });
             return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>();
         } catch (e) {
-            if (e instanceof exceptions.BaseHandlerException) {
-                throw e;
-            }
             this.handleError(e, request)
         }
     }
