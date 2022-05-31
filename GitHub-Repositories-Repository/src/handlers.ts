@@ -74,15 +74,16 @@ class Resource extends BaseResource<ResourceModel> {
                 repo: model.name
             });
         } catch (e) {
-            if (this.isRequestError(e) && (e as RequestError).status === 404) {
-                throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
-            }
-            if (this.isRequestError(e) && (e as RequestError).status === 403) {
-                if(e.hasOwnProperty('errors'))
-                    throw new exceptions.AccessDenied((e as RequestError).errors.map(e => e.message).join('\n'));
-                throw new exceptions.AccessDenied();
-            }
-            throw new exceptions.InternalFailure(e);
+            this.handleError(e, request);
+            // if (this.isRequestError(e) && (e as RequestError).status === 404) {
+            //     throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
+            // }
+            // if (this.isRequestError(e) && (e as RequestError).status === 403) {
+            //     if(e.hasOwnProperty('errors'))
+            //         throw new exceptions.AccessDenied((e as RequestError).errors.map(e => e.message).join('\n'));
+            //     throw new exceptions.AccessDenied();
+            // }
+            // throw new exceptions.InternalFailure(e);
         }
     }
 
@@ -277,16 +278,8 @@ class Resource extends BaseResource<ResourceModel> {
         logger: LoggerProxy
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
-        try{
-            const response = await this.getRepo(model, request);
-            return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(this.setModelFromApiResponse(model, response.data as RepoData));
-        }catch (e) {
-            if(e instanceof exceptions.NotFound){
-                    return ProgressEvent.failed<ProgressEvent<ResourceModel, CallbackContext>>(HandlerErrorCode.NotFound, this.typeName);
-            }
-            this.handleError(e, request);
-        }
-
+        const response = await this.getRepo(model, request);
+        return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(this.setModelFromApiResponse(model, response.data as RepoData));
     }
 
     /**

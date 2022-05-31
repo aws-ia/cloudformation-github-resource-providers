@@ -17,11 +17,7 @@
   "UPDATE": {
     "/SecurityAndAnalysis": null,
     "/Archived": false,
-    "/Name": "newName",
     "/AllowMergeCommit": true,
-    "/AllowForking": false,
-    "/Visibility": "public",
-    "/Private": false,
-    "/Homepage": "https://github.com/aws"
+    "/AllowForking": false
   }
 }
