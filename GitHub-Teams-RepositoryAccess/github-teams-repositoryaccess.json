@@ -58,7 +58,8 @@
                 "admin",
                 "maintain",
                 "triage"
-            ]
+            ],
+            "default": "push"
         }
     },
     "additionalProperties": false,

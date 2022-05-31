@@ -98,6 +98,22 @@ class Resource extends BaseResource<ResourceModel> {
         return true;
     }
 
+    private parsePermission(data: GetTeamRepoAccessResponseData) {
+        if (data.permissions.admin === true) {
+            return 'admin';
+        }
+        if (data.permissions.maintain === true) {
+            return 'maintain';
+        }
+        if (data.permissions.triage === true) {
+            return 'triage';
+        }
+        if (data.permissions.pull) {
+            return 'pull';
+        }
+        return 'push';
+    }
+
     /**
      * CloudFormation invokes this handler when the resource is initially created
      * during stack create operations.
@@ -202,7 +218,9 @@ class Resource extends BaseResource<ResourceModel> {
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
 
-        await this.getTeamRepoAccess(model, request);
+        const response = await this.getTeamRepoAccess(model, request);
+
+        model.permission = this.parsePermission(response.data);
 
         return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(model);
     }
