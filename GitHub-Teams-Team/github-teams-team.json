@@ -78,9 +78,6 @@
     "/properties/Organization",
     "/properties/Name"
   ],
-  "additionalIdentifiers": [
-    ["/properties/Slug"]
-  ],
   "handlers": {
     "create": {
       "permissions": [

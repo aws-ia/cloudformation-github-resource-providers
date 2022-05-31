@@ -13,13 +13,16 @@ import {
 import {ResourceModel} from './models';
 import {Octokit} from "@octokit/rest";
 import {OctokitResponse} from "@octokit/types"
+import {isOctokitRequestError} from "../../Common/util"
 
 interface CallbackContext extends Record<string, any> {}
 
 class Resource extends BaseResource<ResourceModel> {
 
     private handleError(response: OctokitResponse<any>, request: ResourceHandlerRequest<ResourceModel>) {
-        if (response.status === 400) {
+        if (!isOctokitRequestError(request)) {
+            throw new exceptions.InternalFailure();
+        } else if (response.status === 400) {
             throw new exceptions.AlreadyExists(this.typeName, request.logicalResourceIdentifier);
         } else if (response.status === 401) {
             throw new exceptions.AccessDenied();
