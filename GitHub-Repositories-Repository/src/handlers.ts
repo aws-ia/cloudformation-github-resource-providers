@@ -75,15 +75,6 @@ class Resource extends BaseResource<ResourceModel> {
             });
         } catch (e) {
             this.handleError(e, request);
-            // if (this.isRequestError(e) && (e as RequestError).status === 404) {
-            //     throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
-            // }
-            // if (this.isRequestError(e) && (e as RequestError).status === 403) {
-            //     if(e.hasOwnProperty('errors'))
-            //         throw new exceptions.AccessDenied((e as RequestError).errors.map(e => e.message).join('\n'));
-            //     throw new exceptions.AccessDenied();
-            // }
-            // throw new exceptions.InternalFailure(e);
         }
     }
 
