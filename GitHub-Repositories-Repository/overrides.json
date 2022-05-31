@@ -8,9 +8,20 @@
     "/LicenseTemplate": "mit",
     "/GitIgnoreTemplate": "Node",
     "/TeamId": null,
-    "/AllowMergeCommit": true
+    "/AllowMergeCommit": true,
+    "/AllowForking": false,
+    "/Visibility": "public",
+    "/Private": false,
+    "/Homepage": "https://github.com"
   },
   "UPDATE": {
-    "/SecurityAndAnalysis": null
+    "/SecurityAndAnalysis": null,
+    "/Archived": false,
+    "/Name": "newName",
+    "/AllowMergeCommit": true,
+    "/AllowForking": false,
+    "/Visibility": "public",
+    "/Private": false,
+    "/Homepage": "https://github.com/aws"
   }
 }

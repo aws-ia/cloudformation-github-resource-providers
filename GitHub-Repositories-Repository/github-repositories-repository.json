@@ -117,7 +117,8 @@
     },
     "Homepage": {
       "description": "A URL with more information about the repository.",
-      "type": "string"
+      "type": "string",
+      "pattern": "https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)"
     },
     "Private": {
       "description": "Whether the repository is private.",
@@ -256,6 +257,7 @@
     "/properties/IssuesCount"
   ],
   "createOnlyProperties": [
+    "/properties/GitHubAccess",
     "/properties/Org",
     "/properties/Name",
     "/properties/TeamId",

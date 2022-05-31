@@ -4,6 +4,7 @@ import {
     BaseResource,
     Constructor,
     exceptions,
+    HandlerErrorCode,
     handlerEvent,
     HandlerSignatures,
     LoggerProxy,
@@ -59,7 +60,7 @@ class Resource extends BaseResource<ResourceModel> {
     }
 
     private isRequestError(ex: object) {
-        return ex.hasOwnProperty('status') && ex.hasOwnProperty('name') && ex.hasOwnProperty('errors');
+        return ex.hasOwnProperty('status') && ex.hasOwnProperty('name');
     }
 
     private async getRepo(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>): Promise<OctokitResponse<GetRepoResponseData>> {
@@ -77,7 +78,9 @@ class Resource extends BaseResource<ResourceModel> {
                 throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
             }
             if (this.isRequestError(e) && (e as RequestError).status === 403) {
-                throw new exceptions.AccessDenied((e as RequestError).errors.map(e => e.message).join('\n'));
+                if(e.hasOwnProperty('errors'))
+                    throw new exceptions.AccessDenied((e as RequestError).errors.map(e => e.message).join('\n'));
+                throw new exceptions.AccessDenied();
             }
             throw new exceptions.InternalFailure(e);
         }
@@ -120,7 +123,6 @@ class Resource extends BaseResource<ResourceModel> {
         });
 
         try {
-            logger.log(`jdc Creating repo for {}`,JSON.stringify(model));
             // TODO: Convert the model to a dictionary corresponding the type for the request
             // TODO: This does not support organization repositories yet.
             const response = await octokit.request<CreateOrgRepoEndpoint | CreateUserRepoEndpoint>(model.org ? 'POST /orgs/{org}/repos' : 'POST /user/repos', {
@@ -144,11 +146,8 @@ class Resource extends BaseResource<ResourceModel> {
                 gitignore_template: model.gitIgnoreTemplate,
                 license_template: model.licenseTemplate
             });
-            logger.log(`jdc response: {}`,JSON.stringify(response));
             return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(this.setModelFromApiResponse(model, response.data as RepoData));
         } catch (e) {
-            logger.log(`jdc error creating: {}`,e);
-            // TODO: Should have utility to get the right exception
             this.handleError(e, request)}
     }
 
@@ -170,7 +169,6 @@ class Resource extends BaseResource<ResourceModel> {
         logger: LoggerProxy
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
-        logger.log(`jdc updating repo for {}`,JSON.stringify(model));
 
         if (!(await this.assertRepoExist(model, request))) {
             throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
@@ -180,9 +178,13 @@ class Resource extends BaseResource<ResourceModel> {
             auth: model.gitHubAccess
         });
 
+        function allowForkingUpdated() {
+            return request.previousResourceState.allowForking !== request.desiredResourceState.allowForking;
+        }
+
         try {
             // TODO: Convert the model to a dictionary corresponding the type for the request
-            const response = await octokit.request<UpdateRepoEndpoint>('PATCH /repos/{owner}/{repo}', {
+            let payload = {
                 owner: model.owner,
                 repo: model.name,
                 name: model.name,
@@ -199,7 +201,6 @@ class Resource extends BaseResource<ResourceModel> {
                 has_projects: model.hasProjects,
                 has_wiki: model.hasWiki,
                 is_template: model.isTemplate,
-                allow_forking: model.allowForking,
                 archived: model.archived,
                 default_branch: model.defaultBranch,
                 security_and_analysis: !!model.securityAndAnalysis
@@ -207,12 +208,15 @@ class Resource extends BaseResource<ResourceModel> {
                         advanced_security: model.securityAndAnalysis.advanceSecurity,
                         secret_scanning: model.securityAndAnalysis.secretScanning
                     } : {}
-            });
+            };
+            const response = await octokit.request<UpdateRepoEndpoint>('PATCH /repos/{owner}/{repo}', allowForkingUpdated() ?
+                {
+                    ...payload,
+                    allow_forking: model.allowForking
+                }:
+                payload);
             return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(this.setModelFromApiResponse(model, response.data as RepoData));
         } catch (e) {
-            logger.log(`jdc error updating: {}`,e);
-            logger.log(e);
-            // TODO: Should have utility to get the right exception
             this.handleError(e, request)
         }
     }
@@ -236,8 +240,10 @@ class Resource extends BaseResource<ResourceModel> {
         logger: LoggerProxy
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
+        if (!(await this.assertRepoExist(model, request))) {
+            return ProgressEvent.failed<ProgressEvent<ResourceModel, CallbackContext>>(HandlerErrorCode.NotFound, this.typeName);
+        }
         const octokit = new Octokit({auth: model.gitHubAccess})
-
         try {
             // TODO: Convert the model to a dictionary corresponding the type for the request
             const response = await octokit.request('DELETE /repos/{owner}/{repo}', {
@@ -246,11 +252,9 @@ class Resource extends BaseResource<ResourceModel> {
             });
             return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>();
         } catch (e) {
-            logger.log(e);
             if (e instanceof exceptions.BaseHandlerException) {
                 throw e;
             }
-            // TODO: handle not authorized error
             this.handleError(e, request)
         }
     }
@@ -277,7 +281,9 @@ class Resource extends BaseResource<ResourceModel> {
             const response = await this.getRepo(model, request);
             return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(this.setModelFromApiResponse(model, response.data as RepoData));
         }catch (e) {
-            logger.log(e);
+            if(e instanceof exceptions.NotFound){
+                    return ProgressEvent.failed<ProgressEvent<ResourceModel, CallbackContext>>(HandlerErrorCode.NotFound, this.typeName);
+            }
             this.handleError(e, request);
         }
 
@@ -313,8 +319,6 @@ class Resource extends BaseResource<ResourceModel> {
                     return response1.data
                 });
         } catch (e) {
-            // TODO: handle unauthorized
-            logger.log(`Error response: {}`, e)
             this.handleError(e, request)
         }
 
@@ -350,6 +354,7 @@ class Resource extends BaseResource<ResourceModel> {
     }
 
     private handleError(response: OctokitResponse<any>, request: ResourceHandlerRequest<ResourceModel>) {
+        // TODO: Should have utility to get the right exception
         if (response.status === 400) {
             throw new exceptions.AlreadyExists(this.typeName, request.logicalResourceIdentifier);
         } else if (response.status === 401) {
@@ -359,7 +364,7 @@ class Resource extends BaseResource<ResourceModel> {
         } else if (response.status === 404) {
             throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
         } else if (response.status === 422) {
-            throw new exceptions.AlreadyExists(this.typeName, request.logicalResourceIdentifier);
+            throw new exceptions.InvalidRequest(this.typeName);
         }
         throw new exceptions.InternalFailure();
     }
