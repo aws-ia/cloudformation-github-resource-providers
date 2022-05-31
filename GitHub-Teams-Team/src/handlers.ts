@@ -13,10 +13,30 @@ import {
 import {ResourceModel} from './models';
 import {Octokit} from "@octokit/rest";
 import {OctokitResponse} from "@octokit/types"
+import {isOctokitRequestError} from "../../Common/util"
 
 interface CallbackContext extends Record<string, any> {}
 
 class Resource extends BaseResource<ResourceModel> {
+
+    private handleError(response: OctokitResponse<any>, request: ResourceHandlerRequest<ResourceModel>) {
+        if (!isOctokitRequestError(request)) {
+            throw new exceptions.InternalFailure();
+        } else if (response.status === 400) {
+            throw new exceptions.AlreadyExists(this.typeName, request.logicalResourceIdentifier);
+        } else if (response.status === 401) {
+            throw new exceptions.AccessDenied();
+        } else if (response.status === 403) {
+            throw new exceptions.AccessDenied();
+        } else if (response.status === 404) {
+            throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
+        } else if (response.status === 422) {
+            throw new exceptions.AlreadyExists(this.typeName, request.logicalResourceIdentifier);
+        } else if (response.status > 400) {
+            throw new exceptions.InternalFailure();
+        }
+        throw new exceptions.InternalFailure();
+    }
 
     /**
      * CloudFormation invokes this handler when the resource is initially created
@@ -36,27 +56,25 @@ class Resource extends BaseResource<ResourceModel> {
         logger: LoggerProxy
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
-        const progress = ProgressEvent.progress<ProgressEvent<ResourceModel, CallbackContext>>(model);
         const octokit = new Octokit({auth: model.gitHubAccess});
 
         let response: OctokitResponse<any>;
         try {
             const privacy = model.privacy as "closed" | "secret";
             response = await octokit.request('POST /orgs/{org}/teams', {
-                org: model.organisation,
+                org: model.organization,
                 name: model.name,
                 description: model.description,
                 privacy: privacy
             });
-        }catch (e) {
-            throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
+        } catch (e) {
+            logger.log("Create failed " + e.status);
+            this.handleError(e, request)
         }
 
-
         model.slug = response.data.slug;
-        progress.status = OperationStatus.Success;
 
-        return progress;
+        return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(model);
     }
 
     /**
@@ -77,7 +95,6 @@ class Resource extends BaseResource<ResourceModel> {
         logger: LoggerProxy
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
-        const progress = ProgressEvent.progress<ProgressEvent<ResourceModel, CallbackContext>>(model);
 
         const octokit = new Octokit({auth: model.gitHubAccess});
 
@@ -85,19 +102,18 @@ class Resource extends BaseResource<ResourceModel> {
         try {
             const privacy = model.privacy as "closed" | "secret";
             response = await octokit.request('PATCH /orgs/{org}/teams/{team_slug}', {
-                org: model.organisation,
+                org: model.organization,
                 team_slug: request.previousResourceState.slug,
                 name: model.name,
                 description: model.description,
                 privacy: privacy
             });
         }catch (e) {
-            throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
+            this.handleError(e, request);
         }
 
-        progress.status = OperationStatus.Success;
         model.slug = response.data.slug;
-        return progress;
+        return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(model);
     }
 
     /**
@@ -119,21 +135,18 @@ class Resource extends BaseResource<ResourceModel> {
         logger: LoggerProxy
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
-        const progress = ProgressEvent.progress<ProgressEvent<ResourceModel, CallbackContext>>();
         const octokit = new Octokit({auth: model.gitHubAccess});
 
-        let response: OctokitResponse<any>;
         try {
-            response = await octokit.request('DELETE /orgs/{org}/teams/{team_slug}', {
-                org: model.organisation,
+             await octokit.request('DELETE /orgs/{org}/teams/{team_slug}', {
+                org: model.organization,
                 team_slug: model.slug
             });
         } catch (e) {
-            throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
+            this.handleError(e, request);
         }
 
-        progress.status = OperationStatus.Success;
-        return progress;
+        return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>();
     }
 
     /**
@@ -159,20 +172,20 @@ class Resource extends BaseResource<ResourceModel> {
         let response: OctokitResponse<any>;
         try {
             response = await octokit.request('GET /orgs/{org}/teams/{team_slug}', {
-                org: model.organisation,
+                org: model.organization,
                 team_slug: model.slug
             });
         }catch (e) {
-            throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
+            this.handleError(e, request);
         }
 
         model.description = response.data.description;
         model.name = response.data.name;
         model.privacy = response.data.privacy;
 
-        const progress = ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(model);
-        return progress;
+        return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(model);
     }
+
 
     /**
      * CloudFormation invokes this handler when summary information about multiple
@@ -198,14 +211,14 @@ class Resource extends BaseResource<ResourceModel> {
 
         try{
             response = await octokit.paginate('GET /orgs/{org}/teams', {
-                    org: model.organisation,
+                    org: model.organization,
                     per_page: 100
                 },
                 response1 => {
                     return response1.data
             });
         } catch (e) {
-            throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
+            this.handleError(e, request);
         }
 
         let models = [];
@@ -215,7 +228,7 @@ class Resource extends BaseResource<ResourceModel> {
             resourceModel.description = m.description;
             resourceModel.privacy =  m.privacy;
             resourceModel.slug = m.slug;
-            resourceModel.organisation = model.organisation;
+            resourceModel.organization = model.organization;
             models.push(resourceModel);
         }
 

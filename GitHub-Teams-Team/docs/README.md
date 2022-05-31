@@ -13,7 +13,7 @@ To declare this entity in your AWS CloudFormation template, use the following sy
     "Type" : "GitHub::Teams::Team",
     "Properties" : {
         "<a href="#name" title="Name">Name</a>" : <i>String</i>,
-        "<a href="#organisation" title="Organisation">Organisation</a>" : <i>String</i>,
+        "<a href="#organization" title="Organization">Organization</a>" : <i>String</i>,
         "<a href="#description" title="Description">Description</a>" : <i>String</i>,
         "<a href="#privacy" title="Privacy">Privacy</a>" : <i>String</i>,
         "<a href="#githubaccess" title="GitHubAccess">GitHubAccess</a>" : <i>String</i>
@@ -27,7 +27,7 @@ To declare this entity in your AWS CloudFormation template, use the following sy
 Type: GitHub::Teams::Team
 Properties:
     <a href="#name" title="Name">Name</a>: <i>String</i>
-    <a href="#organisation" title="Organisation">Organisation</a>: <i>String</i>
+    <a href="#organization" title="Organization">Organization</a>: <i>String</i>
     <a href="#description" title="Description">Description</a>: <i>String</i>
     <a href="#privacy" title="Privacy">Privacy</a>: <i>String</i>
     <a href="#githubaccess" title="GitHubAccess">GitHubAccess</a>: <i>String</i>
@@ -43,19 +43,15 @@ _Required_: Yes
 
 _Type_: String
 
-_Pattern_: <code>^[a-zA-Z0-9_-]{1,512}$</code>
-
 _Update requires_: [Replacement](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-replacement)
 
-#### Organisation
+#### Organization
 
-The organisation that the team will belong to
+The Organization that the team will belong to
 
 _Required_: Yes
 
 _Type_: String
-
-_Pattern_: <code>^[a-zA-Z0-9_-]{1-39}$</code>
 
 _Update requires_: [Replacement](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-replacement)
 
@@ -66,8 +62,6 @@ Describe the team
 _Required_: No
 
 _Type_: String
-
-_Pattern_: <code>^[a-zA-Z0-9_-]{1,512}$</code>
 
 _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
 
@@ -103,5 +97,5 @@ For more information about using the `Fn::GetAtt` intrinsic function, see [Fn::G
 
 #### Slug
 
-The organisation unique identifier for the team
+The Organization unique identifier for the team
 

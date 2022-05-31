@@ -31,18 +31,15 @@
   "properties": {
     "Name": {
       "description": "Team name",
-      "type": "string",
-      "pattern": "^[a-zA-Z0-9_-]{1,512}$"
+      "type": "string"
     },
-    "Organisation": {
-      "description": "The organisation that the team will belong to",
-      "type": "string",
-      "pattern": "^[a-zA-Z0-9_-]{1-39}$"
+    "Organization": {
+      "description": "The Organization that the team will belong to",
+      "type": "string"
     },
     "Description": {
       "description": "Describe the team",
-      "type": "string",
-      "pattern": "^[a-zA-Z0-9_-]{1,512}$"
+      "type": "string"
     },
     "Privacy": {
       "description": "The privacy for the team - must be either secret or closed",
@@ -53,7 +50,7 @@
       ]
     },
     "Slug": {
-      "description": "The organisation unique identifier for the team",
+      "description": "The Organization unique identifier for the team",
       "type": "string"
     },
     "GitHubAccess": {
@@ -64,19 +61,19 @@
   "additionalProperties": false,
   "required": [
     "Name",
-    "Organisation",
+    "Organization",
     "GitHubAccess"
   ],
   "createOnlyProperties": [
     "/properties/Name",
-    "/properties/Organisation"
+    "/properties/Organization"
   ],
   "readOnlyProperties": [
     "/properties/Slug"
   ],
   "primaryIdentifier": [
-    "/properties/Organisation",
-    "/properties/Slug"
+    "/properties/Organization",
+    "/properties/Name"
   ],
   "handlers": {
     "create": {
