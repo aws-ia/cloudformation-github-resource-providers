@@ -12,8 +12,6 @@ export class ResourceModel extends BaseModel {
     protected readonly IDENTIFIER_KEY_ORGANIZATION: string = '/properties/Organization';
     @Exclude()
     protected readonly IDENTIFIER_KEY_NAME: string = '/properties/Name';
-    @Exclude()
-    protected readonly IDENTIFIER_KEY_SLUG: string = '/properties/Slug';
 
     @Expose({ name: 'Name' })
     @Transform(
@@ -88,22 +86,8 @@ export class ResourceModel extends BaseModel {
     @Exclude()
     public getAdditionalIdentifiers(): Array<Dict> {
         const identifiers: Array<Dict> = new Array<Dict>();
-        if (this.getIdentifier_Slug() != null) {
-            identifiers.push(this.getIdentifier_Slug());
-        }
         // only return the identifiers if any can be used
         return identifiers.length === 0 ? null : identifiers;
-    }
-
-    @Exclude()
-    public getIdentifier_Slug(): Dict {
-        const identifier: Dict = {};
-        if ((this as any).slug != null) {
-            identifier[this.IDENTIFIER_KEY_SLUG] = (this as any).slug;
-        }
-
-        // only return the identifier if it can be used, i.e. if all components are present
-        return Object.keys(identifier).length === 1 ? identifier : null;
     }
 }
 
