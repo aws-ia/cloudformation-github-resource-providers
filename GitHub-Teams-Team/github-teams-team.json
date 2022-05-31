@@ -31,18 +31,15 @@
   "properties": {
     "Name": {
       "description": "Team name",
-      "type": "string",
-      "pattern": "^[a-zA-Z0-9_-]{1,512}$"
+      "type": "string"
     },
     "Organization": {
       "description": "The Organization that the team will belong to",
-      "type": "string",
-      "pattern": "^[a-zA-Z0-9_-]{1-39}$"
+      "type": "string"
     },
     "Description": {
       "description": "Describe the team",
-      "type": "string",
-      "pattern": "^[a-zA-Z0-9_-]{1,512}$"
+      "type": "string"
     },
     "Privacy": {
       "description": "The privacy for the team - must be either secret or closed",
