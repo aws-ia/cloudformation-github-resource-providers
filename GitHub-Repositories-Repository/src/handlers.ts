@@ -1,12 +1,8 @@
 import {
     Action,
-    AwsTaskWorkerPool,
     BaseResource,
-    Constructor,
     exceptions,
-    HandlerErrorCode,
     handlerEvent,
-    HandlerSignatures,
     LoggerProxy,
     OperationStatus,
     Optional,
@@ -16,7 +12,7 @@ import {
 } from '@amazon-web-services-cloudformation/cloudformation-cli-typescript-lib';
 import {ResourceModel} from './models';
 import {Octokit} from "@octokit/rest";
-import {Endpoints, OctokitResponse, RequestError} from "@octokit/types";
+import {Endpoints, OctokitResponse} from "@octokit/types";
 
 interface CallbackContext extends Record<string, any> {
 }
@@ -46,7 +42,7 @@ type RepoData = CreateOrgRepoResponseData
 
 class Resource extends BaseResource<ResourceModel> {
 
-    private setModelFromApiResponse(baseModel: ResourceModel, data: RepoData): ResourceModel {
+    private static setModelFromApiResponse(baseModel: ResourceModel, data: RepoData): ResourceModel {
         baseModel.owner = data.owner.login;
         baseModel.gitUrl = data.git_url;
         baseModel.htmlUrl = data.html_url;
@@ -59,9 +55,6 @@ class Resource extends BaseResource<ResourceModel> {
         return baseModel;
     }
 
-    private isRequestError(ex: object) {
-        return ex.hasOwnProperty('status') && ex.hasOwnProperty('name');
-    }
 
     private async getRepo(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>): Promise<OctokitResponse<GetUserRepoResponseData>> {
         const octokit = new Octokit({
@@ -138,7 +131,7 @@ class Resource extends BaseResource<ResourceModel> {
                 gitignore_template: model.gitIgnoreTemplate,
                 license_template: model.licenseTemplate
             });
-            return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(this.setModelFromApiResponse(model, response.data as RepoData));
+            return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromApiResponse(model, response.data as RepoData));
         } catch (e) {
             this.handleError(e, request)}
     }
@@ -207,7 +200,7 @@ class Resource extends BaseResource<ResourceModel> {
                     allow_forking: model.allowForking
                 }:
                 payload);
-            return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(this.setModelFromApiResponse(model, response.data as RepoData));
+            return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromApiResponse(model, response.data as RepoData));
         } catch (e) {
             this.handleError(e, request)
         }
@@ -238,7 +231,7 @@ class Resource extends BaseResource<ResourceModel> {
         const octokit = new Octokit({auth: model.gitHubAccess})
         try {
             // TODO: Convert the model to a dictionary corresponding the type for the request
-            const response = await octokit.request('DELETE /repos/{owner}/{repo}', {
+            await octokit.request('DELETE /repos/{owner}/{repo}', {
                 owner: model.org,
                 repo: model.name
             });
@@ -267,7 +260,7 @@ class Resource extends BaseResource<ResourceModel> {
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
         const response = await this.getRepo(model, request);
-        return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(this.setModelFromApiResponse(model, response.data as RepoData));
+        return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromApiResponse(model, response.data as RepoData));
     }
 
     /**
@@ -319,18 +312,17 @@ class Resource extends BaseResource<ResourceModel> {
 
     private handleError(response: OctokitResponse<any>, request: ResourceHandlerRequest<ResourceModel>) {
         // TODO: Should have utility to get the right exception
-        if (response.status === 400) {
-            throw new exceptions.AlreadyExists(this.typeName, request.logicalResourceIdentifier);
-        } else if (response.status === 401) {
-            throw new exceptions.AccessDenied();
-        } else if (response.status === 403) {
-            throw new exceptions.AccessDenied();
-        } else if (response.status === 404) {
-            throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
-        } else if (response.status === 422) {
-            throw new exceptions.InvalidRequest(this.typeName);
+        switch (response.status){
+            case 401:
+            case 403:
+                throw new exceptions.AccessDenied();
+            case 404:
+                throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
+            case 422:
+                throw new exceptions.InvalidRequest(this.typeName);
+            default:
+                throw new exceptions.InternalFailure();
         }
-        throw new exceptions.InternalFailure();
     }
 }
 
