@@ -24,20 +24,23 @@ interface CallbackContext extends Record<string, any> {
 type CreateOrgRepoEndpoint = 'POST /orgs/{org}/repos';
 type CreateUserRepoEndpoint = 'POST /user/repos';
 type UpdateRepoEndpoint = 'PATCH /repos/{owner}/{repo}';
-type GetRepoEndpoint = 'GET /repos/{owner}/{repo}';
+type GetUserRepoEndpoint = 'GET /repos/{owner}/{repo}';
+type GetOrgRepoEndpoint = 'GET /orgs/{org}/repos';
 type ListOrgRepoEndpoint = 'GET /orgs/{org}/repos';
 type ListUserRepoEndpoint = 'GET /users/{username}/repos';
 
 type CreateOrgRepoResponseData = Endpoints[CreateOrgRepoEndpoint]['response']['data'];
 type CreateUserRepoResponseData = Endpoints[CreateUserRepoEndpoint]['response']['data'];
 type UpdateRepoResponseData = Endpoints[UpdateRepoEndpoint]['response']['data'];
-type GetRepoResponseData = Endpoints[GetRepoEndpoint]['response']['data'];
+type GetUserRepoResponseData = Endpoints[GetUserRepoEndpoint]['response']['data']
+type GetOrgRepoResponseData = Endpoints[GetOrgRepoEndpoint]['response']['data'];
 type ListOrgRepoResponseData = Endpoints[ListOrgRepoEndpoint]['response']['data'];
 type ListUserRepoResponseData = Endpoints[ListUserRepoEndpoint]['response']['data'];
 type RepoData = CreateOrgRepoResponseData
     & CreateUserRepoResponseData
     & UpdateRepoResponseData
-    & GetRepoResponseData
+    & GetUserRepoResponseData
+    & GetOrgRepoResponseData
     & ListOrgRepoResponseData
     & ListUserRepoResponseData;
 
@@ -60,7 +63,7 @@ class Resource extends BaseResource<ResourceModel> {
         return ex.hasOwnProperty('status') && ex.hasOwnProperty('name');
     }
 
-    private async getRepo(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>): Promise<OctokitResponse<GetRepoResponseData>> {
+    private async getRepo(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>): Promise<OctokitResponse<GetUserRepoResponseData>> {
         const octokit = new Octokit({
             auth: model.gitHubAccess
         });
@@ -286,49 +289,32 @@ class Resource extends BaseResource<ResourceModel> {
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
         const octokit = new Octokit({auth: model.gitHubAccess});
-        let response: any;
 
-        try{
-            response = await octokit.paginate(model.org ? 'GET /orgs/{org}/repos' : 'GET /user/repos', {
-                    org: model.org ? model.org : undefined,
-                    per_page: 100
-                },
-                response1 => {
-                    return response1.data
-                });
+        try {
+            let requestMethod, requestParams = undefined;
+            model.org ? (requestMethod = octokit.repos.listForOrg, requestParams = {org: model.org}) : (requestMethod = octokit.repos.listForUser);
+            const models = await octokit.paginate(requestMethod, requestParams
+                , response => response.data.map(repoItem => {
+                    let resourceModel = new ResourceModel();
+                    resourceModel.owner = repoItem.owner.login;
+                    resourceModel.org = model.org ? repoItem.owner.login : undefined;
+                    resourceModel.name = repoItem.name;
+                    resourceModel.private_ = repoItem.private;
+                    resourceModel.description = repoItem.description;
+                    resourceModel.homepage = repoItem.homepage;
+                    resourceModel.visibility = repoItem.visibility;
+                    resourceModel.hasIssues = repoItem.has_issues;
+                    resourceModel.hasProjects = repoItem.has_projects;
+                    resourceModel.hasWiki = repoItem.has_wiki;
+                    resourceModel.isTemplate = repoItem.is_template;
+                    return resourceModel;
+                }));
+            return ProgressEvent.builder<ProgressEvent<ResourceModel, CallbackContext>>()
+                .status(OperationStatus.Success)
+                .resourceModels(models).build();
         } catch (e) {
             this.handleError(e, request)
         }
-
-        const models :ResourceModel[] = [];
-        for(const repoItem of response) {
-            let resourceModel = new ResourceModel();
-            resourceModel.owner = repoItem.owner.login;
-            resourceModel.org = repoItem.org ?  repoItem.org : undefined,
-            resourceModel.name = repoItem.name,
-            resourceModel.private_ = repoItem.private_,
-            resourceModel.description = repoItem.description,
-            resourceModel.homepage = repoItem.homepage,
-            resourceModel.visibility = repoItem.visibility,
-            resourceModel.allowAutoMerge = repoItem.allowAutoMerge,
-            resourceModel.allowMergeCommit = repoItem.allowMergeCommit,
-            resourceModel.allowRebaseMerge = repoItem.allowRebaseMerge,
-            resourceModel.allowSquashMerge = repoItem.allowSquashMerge,
-            resourceModel.autoInit = repoItem.autoInit,
-            resourceModel.teamId = repoItem.teamId,
-            resourceModel.deleteBranchOnMerge = repoItem.deleteBranchOnMerge,
-            resourceModel.hasIssues = repoItem.hasIssues,
-            resourceModel.hasProjects = repoItem.hasProjects,
-            resourceModel.hasWiki = repoItem.hasWiki,
-            resourceModel.isTemplate = repoItem.isTemplate,
-            resourceModel.gitIgnoreTemplate = repoItem.gitIgnoreTemplate,
-            resourceModel.licenseTemplate = repoItem.licenseTemplate
-            models.push(resourceModel)
-        }
-
-        return ProgressEvent.builder<ProgressEvent<ResourceModel, CallbackContext>>()
-            .status(OperationStatus.Success)
-            .resourceModels(models).build();
     }
 
     private handleError(response: OctokitResponse<any>, request: ResourceHandlerRequest<ResourceModel>) {
