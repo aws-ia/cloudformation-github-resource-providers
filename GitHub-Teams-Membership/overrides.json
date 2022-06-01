@@ -1,0 +1,11 @@
+{
+  "CREATE": {
+    "/GitHubAccess": "<GITHUB_TOKEN>",
+    "/Org": "Cloudsoft-CloudFormation",
+    "/TeamSlug": "test-membership-team",
+    "/Role": "member"
+  },
+  "UPDATE": {
+    "/Role": "maintainer"
+  }
+}

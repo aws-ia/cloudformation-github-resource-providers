@@ -11,11 +11,29 @@ import {
     ResourceHandlerRequest,
     SessionProxy,
 } from '@amazon-web-services-cloudformation/cloudformation-cli-typescript-lib';
-import { ResourceModel } from './models';
+import {ResourceModel} from './models';
+import {Endpoints, OctokitResponse} from "@octokit/types";
+import {Octokit} from "@octokit/rest";
 
-interface CallbackContext extends Record<string, any> {}
+type GetMembershipEndpoint = 'GET /orgs/{org}/teams/{team_slug}/memberships/{username}';
+type AddOrUpdateMembershipEndpoint = 'PUT /orgs/{org}/teams/{team_slug}/memberships/{username}';
+
+type GetMembershipResponseData = Endpoints[GetMembershipEndpoint]['response']['data'];
+type AddOrUpdateMembershipResponseData = Endpoints[AddOrUpdateMembershipEndpoint]['response']['data'];
+
+type MembershipData =
+    GetMembershipResponseData &
+    AddOrUpdateMembershipResponseData;
+
+
+interface CallbackContext extends Record<string, any> {
+}
 
 class Resource extends BaseResource<ResourceModel> {
+    private static setModelFromApiResponse(baseModel: ResourceModel, data: MembershipData): ResourceModel {
+        baseModel.role = data.role;
+        return baseModel;
+    }
 
     /**
      * CloudFormation invokes this handler when the resource is initially created
@@ -35,24 +53,12 @@ class Resource extends BaseResource<ResourceModel> {
         logger: LoggerProxy
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
-        const progress = ProgressEvent.progress<ProgressEvent<ResourceModel, CallbackContext>>(model);
-        // TODO: put code here
 
-        // Example:
-        try {
-            if (session instanceof SessionProxy) {
-                const client = session.client('S3');
-            }
-            // Setting Status to success will signal to CloudFormation that the operation is complete
-            progress.status = OperationStatus.Success;
-        } catch(err) {
-            logger.log(err);
-            // exceptions module lets CloudFormation know the type of failure that occurred
-            throw new exceptions.InternalFailure(err.message);
-            // this can also be done by returning a failed progress event
-            // return ProgressEvent.failed(HandlerErrorCode.InternalFailure, err.message);
+        if (await this.assertMembershipExist(model, request)) {
+            throw new exceptions.AlreadyExists(this.typeName, request.logicalResourceIdentifier);
         }
-        return progress;
+        const response = await this.addOrUpdateMembership(model, request, logger);
+        return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromApiResponse(model, response.data as MembershipData));
     }
 
     /**
@@ -73,10 +79,11 @@ class Resource extends BaseResource<ResourceModel> {
         logger: LoggerProxy
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
-        const progress = ProgressEvent.progress<ProgressEvent<ResourceModel, CallbackContext>>(model);
-        // TODO: put code here
-        progress.status = OperationStatus.Success;
-        return progress;
+        if (await this.assertMembershipExist(model, request)) {
+            throw new exceptions.AlreadyExists(this.typeName, request.logicalResourceIdentifier);
+        }
+        const response = await this.addOrUpdateMembership(model, request);
+        return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromApiResponse(model, response.data as MembershipData));
     }
 
     /**
@@ -98,10 +105,21 @@ class Resource extends BaseResource<ResourceModel> {
         logger: LoggerProxy
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
-        const progress = ProgressEvent.progress<ProgressEvent<ResourceModel, CallbackContext>>();
-        // TODO: put code here
-        progress.status = OperationStatus.Success;
-        return progress;
+
+        const octokit = new Octokit({
+            auth: model.gitHubAccess
+        });
+
+        try {
+            await octokit.request('DELETE /orgs/{org}/teams/{team_slug}/memberships/{username}', {
+                org: model.org,
+                team_slug: model.teamSlug,
+                username: model.username
+            });
+            return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>();
+        } catch (e) {
+            this.handleError(e, request);
+        }
     }
 
     /**
@@ -122,9 +140,8 @@ class Resource extends BaseResource<ResourceModel> {
         logger: LoggerProxy
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
-        // TODO: put code here
-        const progress = ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(model);
-        return progress;
+        const response = await this.getMembership(model, request);
+        return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromApiResponse(model, response.data as MembershipData));
     }
 
     /**
@@ -145,12 +162,88 @@ class Resource extends BaseResource<ResourceModel> {
         logger: LoggerProxy
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
-        // TODO: put code here
-        const progress = ProgressEvent.builder<ProgressEvent<ResourceModel, CallbackContext>>()
-            .status(OperationStatus.Success)
-            .resourceModels([model])
-            .build();
-        return progress;
+
+        const octokit = new Octokit({
+            auth: model.gitHubAccess
+        });
+
+        try {
+            const models = await octokit.paginate(octokit.teams.listMembersInOrg, {
+                org: model.org,
+                team_slug: model.teamSlug,
+            },response => response.data.map(membershipItem => {
+                const resourceModel = new ResourceModel();
+                resourceModel.username = membershipItem.login;
+                resourceModel.org = model.org;
+                resourceModel.teamSlug = model.teamSlug;
+                return resourceModel;
+            }));
+            return ProgressEvent.builder<ProgressEvent<ResourceModel, CallbackContext>>()
+                .status(OperationStatus.Success)
+                .resourceModels(models).build();
+        } catch (e) {
+            this.handleError(e, request);
+        }
+    }
+
+    private handleError(response: OctokitResponse<any>, request: ResourceHandlerRequest<ResourceModel>, logger?:LoggerProxy) {
+        // TODO: Should have utility to get the right exception
+        if(logger){
+            logger.log(`Error response: ${JSON.stringify(response)}`)
+        }
+        switch (response.status) {
+            case 401:
+            case 403:
+                throw new exceptions.AccessDenied();
+            case 404:
+                throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
+            case 422:
+                throw new exceptions.InvalidRequest(this.typeName);
+            default:
+                throw new exceptions.InternalFailure();
+        }
+    }
+
+    private async assertMembershipExist(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>) {
+        try {
+            await this.getMembership(model, request);
+        } catch (e) {
+            return false;
+        }
+        return true;
+    }
+
+    private async getMembership(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>): Promise<OctokitResponse<GetMembershipResponseData>> {
+        const octokit = new Octokit({
+            auth: model.gitHubAccess
+        });
+
+        try {
+            return await octokit.request('GET /orgs/{org}/teams/{team_slug}/memberships/{username}', {
+                org: model.org,
+                team_slug: model.teamSlug,
+                username: model.username
+            });
+        } catch (e) {
+            this.handleError(e, request);
+        }
+    }
+
+    private async addOrUpdateMembership(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>, logger?: LoggerProxy): Promise<OctokitResponse<AddOrUpdateMembershipResponseData>> {
+        const octokit = new Octokit({
+            auth: model.gitHubAccess
+        });
+
+        try {
+            return await octokit.request('PUT /orgs/{org}/teams/{team_slug}/memberships/{username}', {
+                org: model.org,
+                team_slug: model.teamSlug,
+                username: model.username,
+                role: model.role as "member" | "maintainer"
+            });
+        } catch (e) {
+            this.handleError(e, request, logger);
+        }
     }
 }
 
