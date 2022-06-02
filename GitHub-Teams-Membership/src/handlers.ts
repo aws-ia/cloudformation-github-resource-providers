@@ -53,13 +53,10 @@ class Resource extends BaseResource<ResourceModel> {
         logger: LoggerProxy,
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
-        logger.log(`jdc Create model: ${JSON.stringify(model)}`);
-        const exist = await this.assertMembershipExist(model, request);
-        logger.log(`jdc Exist on create: ${JSON.stringify(exist)}`);
-        if (exist) {
+        if (!! await this.assertMembershipExist(model, request)) {
             throw new exceptions.AlreadyExists(this.typeName, request.logicalResourceIdentifier);
         }
-        const response = await this.addOrUpdateMembership(model, request, logger);
+        const response = await this.addOrUpdateMembership(model, request);
         return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromApiResponse(model, response.data as MembershipData));
     }
 
@@ -81,9 +78,7 @@ class Resource extends BaseResource<ResourceModel> {
         logger: LoggerProxy
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
-        const exist = await this.assertMembershipExist(model, request);
-        logger.log(`jdc Exist on update: ${JSON.stringify(exist)}`);
-        if (!exist) {
+        if (!await this.assertMembershipExist(model, request)) {
             throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
         }
         const response = await this.addOrUpdateMembership(model, request);
@@ -113,21 +108,18 @@ class Resource extends BaseResource<ResourceModel> {
         const octokit = new Octokit({
             auth: model.gitHubAccess
         });
-        const exist = await this.assertMembershipExist(model, request);
-        logger.log(`jdc Exist on deletion: ${JSON.stringify(exist)}`);
-        if (!exist) {
+        if (!await this.assertMembershipExist(model, request)) {
             throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
         }
         try {
-            const deleteResponse = await octokit.request('DELETE /orgs/{org}/teams/{team_slug}/memberships/{username}', {
+            await octokit.request('DELETE /orgs/{org}/teams/{team_slug}/memberships/{username}', {
                 org: model.org,
                 team_slug: model.teamSlug,
                 username: model.username
             });
-            logger.log(`Delete response: ${JSON.stringify(deleteResponse)}`)
             return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>();
         } catch (e) {
-            this.handleError(e, request, logger);
+            this.handleError(e, request);
         }
     }
 
@@ -150,7 +142,6 @@ class Resource extends BaseResource<ResourceModel> {
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
         const response = await this.getMembership(model, request);
-        logger.log(`jdc Read response: ${JSON.stringify(response)}`);
         return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromApiResponse(model, response.data as MembershipData));
     }
 
@@ -207,11 +198,8 @@ class Resource extends BaseResource<ResourceModel> {
         }
     }
 
-    private handleError(response: OctokitResponse<any>, request: ResourceHandlerRequest<ResourceModel>, logger?:LoggerProxy) {
+    private handleError(response: OctokitResponse<any>, request: ResourceHandlerRequest<ResourceModel>) {
         // TODO: Should have utility to get the right exception
-        if(logger){
-            logger.log(`Error response: ${JSON.stringify(response)}`)
-        }
         switch (response.status) {
             case 401:
             case 403:
@@ -249,7 +237,7 @@ class Resource extends BaseResource<ResourceModel> {
         }
     }
 
-    private async addOrUpdateMembership(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>, logger?: LoggerProxy): Promise<OctokitResponse<AddOrUpdateMembershipResponseData>> {
+    private async addOrUpdateMembership(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>): Promise<OctokitResponse<AddOrUpdateMembershipResponseData>> {
         const octokit = new Octokit({
             auth: model.gitHubAccess
         });
@@ -262,7 +250,7 @@ class Resource extends BaseResource<ResourceModel> {
                 role: model.role as "member" | "maintainer"
             });
         } catch (e) {
-            this.handleError(e, request, logger);
+            this.handleError(e, request);
         }
     }
 }
