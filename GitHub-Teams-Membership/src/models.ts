@@ -60,6 +60,15 @@ export class ResourceModel extends BaseModel {
         }
     )
     role?: Optional<string>;
+    @Expose({ name: 'State' })
+    @Transform(
+        (value: any, obj: any) =>
+            transformValue(String, 'state', value, obj, []),
+        {
+            toClassOnly: true,
+        }
+    )
+    state?: Optional<string>;
 
     @Exclude()
     public getPrimaryIdentifier(): Dict {

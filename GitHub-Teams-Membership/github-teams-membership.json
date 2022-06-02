@@ -47,12 +47,21 @@
             "pattern": "^(?=[a-zA-Z0-9._]{8,20}$)(?!.*[_.]{2})[^_.].*[^_.]$"
         },
         "Role": {
-            "description": "The handle for the GitHub user account.\n\n",
+            "description": "The handle for the GitHub user account.",
             "type": "string",
             "default": "member",
             "enum": [
                 "member",
                 "maintainer"
+            ]
+        },
+        "State": {
+            "description": "Membership state",
+            "type": "string",
+            "default": "pending",
+            "enum": [
+                "active",
+                "pending"
             ]
         }
     },
@@ -72,6 +81,9 @@
         "/properties/Org",
         "/properties/TeamSlug",
         "/properties/Username"
+    ],
+    "readOnlyProperties": [
+        "/properties/State"
     ],
     "handlers": {
         "create": {

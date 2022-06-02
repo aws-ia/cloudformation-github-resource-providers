@@ -3,7 +3,6 @@ import {
     BaseResource,
     exceptions,
     handlerEvent,
-    HandlerErrorCode,
     LoggerProxy,
     OperationStatus,
     Optional,
@@ -32,6 +31,7 @@ interface CallbackContext extends Record<string, any> {
 class Resource extends BaseResource<ResourceModel> {
     private static setModelFromApiResponse(baseModel: ResourceModel, data: MembershipData): ResourceModel {
         baseModel.role = data.role;
+        baseModel.state = data.state;
         return baseModel;
     }
 
@@ -50,11 +50,11 @@ class Resource extends BaseResource<ResourceModel> {
         session: Optional<SessionProxy>,
         request: ResourceHandlerRequest<ResourceModel>,
         callbackContext: CallbackContext,
-        logger: LoggerProxy
+        logger: LoggerProxy,
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
         logger.log(`jdc Create model: ${JSON.stringify(model)}`);
-        var exist = await this.assertMembershipExist(model, request);
+        const exist = await this.assertMembershipExist(model, request);
         logger.log(`jdc Exist on create: ${JSON.stringify(exist)}`);
         if (exist) {
             throw new exceptions.AlreadyExists(this.typeName, request.logicalResourceIdentifier);
@@ -81,7 +81,7 @@ class Resource extends BaseResource<ResourceModel> {
         logger: LoggerProxy
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
-        var exist = await this.assertMembershipExist(model, request);
+        const exist = await this.assertMembershipExist(model, request);
         logger.log(`jdc Exist on update: ${JSON.stringify(exist)}`);
         if (!exist) {
             throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
@@ -113,13 +113,13 @@ class Resource extends BaseResource<ResourceModel> {
         const octokit = new Octokit({
             auth: model.gitHubAccess
         });
-        var exist = await this.assertMembershipExist(model, request);
+        const exist = await this.assertMembershipExist(model, request);
         logger.log(`jdc Exist on deletion: ${JSON.stringify(exist)}`);
         if (!exist) {
             throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
         }
         try {
-            var deleteResponse = await octokit.request('DELETE /orgs/{org}/teams/{team_slug}/memberships/{username}', {
+            const deleteResponse = await octokit.request('DELETE /orgs/{org}/teams/{team_slug}/memberships/{username}', {
                 org: model.org,
                 team_slug: model.teamSlug,
                 username: model.username
@@ -178,19 +178,30 @@ class Resource extends BaseResource<ResourceModel> {
         });
 
         try {
-            const models = await octokit.paginate(octokit.teams.listMembersInOrg, {
+            const orgAndTeam = {
                 org: model.org,
                 team_slug: model.teamSlug,
-            },response => response.data.map(membershipItem => {
+            };
+            const currentMembers = await octokit.paginate(octokit.teams.listMembersInOrg, orgAndTeam,response => response.data.map(membershipItem => {
                 const resourceModel = new ResourceModel();
                 resourceModel.username = membershipItem.login;
                 resourceModel.org = model.org;
                 resourceModel.teamSlug = model.teamSlug;
+                resourceModel.state = "active"
+                return resourceModel;
+            }));
+
+            const pendingInvites = await octokit.paginate(octokit.teams.listPendingInvitationsInOrg, orgAndTeam,response => response.data.map(membershipItem => {
+                const resourceModel = new ResourceModel();
+                resourceModel.username = membershipItem.login;
+                resourceModel.org = model.org;
+                resourceModel.teamSlug = model.teamSlug;
+                resourceModel.state = "pending";
                 return resourceModel;
             }));
             return ProgressEvent.builder<ProgressEvent<ResourceModel, CallbackContext>>()
                 .status(OperationStatus.Success)
-                .resourceModels(models).build();
+                .resourceModels(currentMembers.concat(pendingInvites)).build();
         } catch (e) {
             this.handleError(e, request);
         }
