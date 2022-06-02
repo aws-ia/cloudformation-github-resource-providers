@@ -3,7 +3,8 @@
     "/GitHubAccess": "<GITHUB_TOKEN>",
     "/Org": "Cloudsoft-CloudFormation",
     "/TeamSlug": "test-membership-team",
-    "/Role": "member"
+    "/Username": "jcabrerizo",
+    "/Role": "maintainer"
   },
   "UPDATE": {
     "/Role": "maintainer"

@@ -43,7 +43,8 @@
         },
         "Username": {
             "description": "The handle for the GitHub user account.",
-            "type": "string"
+            "type": "string",
+            "pattern": "^(?=[a-zA-Z0-9._]{8,20}$)(?!.*[_.]{2})[^_.].*[^_.]$"
         },
         "Role": {
             "description": "The handle for the GitHub user account.\n\n",
@@ -57,12 +58,9 @@
     },
     "additionalProperties": false,
     "required": [
-        "GitHubAccess"
-    ],
-    "readOnlyProperties": [
-        "/properties/Org",
-        "/properties/TeamSlug",
-        "/properties/Username"
+        "GitHubAccess",
+        "Org",
+        "TeamSlug"
     ],
     "primaryIdentifier": [
         "/properties/Org",
@@ -71,7 +69,9 @@
     ],
     "createOnlyProperties": [
         "/properties/GitHubAccess",
-        "/properties/Role"
+        "/properties/Org",
+        "/properties/TeamSlug",
+        "/properties/Username"
     ],
     "handlers": {
         "create": {

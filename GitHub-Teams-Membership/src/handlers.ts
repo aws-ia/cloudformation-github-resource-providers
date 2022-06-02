@@ -53,8 +53,10 @@ class Resource extends BaseResource<ResourceModel> {
         logger: LoggerProxy
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
-
-        if (await this.assertMembershipExist(model, request)) {
+        logger.log(`jdc Create model: ${JSON.stringify(model)}`);
+        var exist = await this.assertMembershipExist(model, request);
+        logger.log(`jdc Exist on create: ${JSON.stringify(exist)}`);
+        if (exist) {
             throw new exceptions.AlreadyExists(this.typeName, request.logicalResourceIdentifier);
         }
         const response = await this.addOrUpdateMembership(model, request, logger);
@@ -79,8 +81,10 @@ class Resource extends BaseResource<ResourceModel> {
         logger: LoggerProxy
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
-        if (await this.assertMembershipExist(model, request)) {
-            throw new exceptions.AlreadyExists(this.typeName, request.logicalResourceIdentifier);
+        var exist = await this.assertMembershipExist(model, request);
+        logger.log(`jdc Exist on update: ${JSON.stringify(exist)}`);
+        if (!exist) {
+            throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
         }
         const response = await this.addOrUpdateMembership(model, request);
         return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromApiResponse(model, response.data as MembershipData));
@@ -109,16 +113,21 @@ class Resource extends BaseResource<ResourceModel> {
         const octokit = new Octokit({
             auth: model.gitHubAccess
         });
-
+        var exist = await this.assertMembershipExist(model, request);
+        logger.log(`jdc Exist on deletion: ${JSON.stringify(exist)}`);
+        if (!exist) {
+            throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
+        }
         try {
-            await octokit.request('DELETE /orgs/{org}/teams/{team_slug}/memberships/{username}', {
+            var deleteResponse = await octokit.request('DELETE /orgs/{org}/teams/{team_slug}/memberships/{username}', {
                 org: model.org,
                 team_slug: model.teamSlug,
                 username: model.username
             });
+            logger.log(`Delete response: ${JSON.stringify(deleteResponse)}`)
             return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>();
         } catch (e) {
-            this.handleError(e, request);
+            this.handleError(e, request, logger);
         }
     }
 
@@ -141,6 +150,7 @@ class Resource extends BaseResource<ResourceModel> {
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
         const response = await this.getMembership(model, request);
+        logger.log(`jdc Read response: ${JSON.stringify(response)}`);
         return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromApiResponse(model, response.data as MembershipData));
     }
 
@@ -206,11 +216,10 @@ class Resource extends BaseResource<ResourceModel> {
 
     private async assertMembershipExist(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>) {
         try {
-            await this.getMembership(model, request);
+            return await this.getMembership(model, request);
         } catch (e) {
             return false;
         }
-        return true;
     }
 
     private async getMembership(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>): Promise<OctokitResponse<GetMembershipResponseData>> {
@@ -222,7 +231,7 @@ class Resource extends BaseResource<ResourceModel> {
             return await octokit.request('GET /orgs/{org}/teams/{team_slug}/memberships/{username}', {
                 org: model.org,
                 team_slug: model.teamSlug,
-                username: model.username
+                username: model.username,
             });
         } catch (e) {
             this.handleError(e, request);
