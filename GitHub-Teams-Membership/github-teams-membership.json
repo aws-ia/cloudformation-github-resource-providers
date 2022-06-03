@@ -1,0 +1,100 @@
+{
+    "typeName": "GitHub::Teams::Membership",
+    "description": "An example resource schema demonstrating some basic constructs and validation rules.",
+    "sourceUrl": "https://github.com/aws-cloudformation/aws-cloudformation-rpdk.git",
+    "definitions": {
+        "GitHubAccess": {
+            "type": "object",
+            "properties": {
+                "AccessToken": {
+                    "description": "Personal Access Token",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "AccessToken"
+            ],
+            "additionalProperties": false
+        }
+    },
+    "typeConfiguration": {
+        "properties": {
+            "GitHubAccess": {
+                "$ref": "#/definitions/GitHubAccess"
+            }
+        },
+        "additionalProperties": false,
+        "required": [
+            "GitHubAccess"
+        ]
+    },
+    "properties": {
+        "GitHubAccess": {
+            "description": "Personal access token",
+            "type": "string"
+        },
+        "Org": {
+            "description": "The organization name. The name is not case sensitive. If not specified, then the managed repository will be within the currently logged-in user account.",
+            "type": "string"
+        },
+        "TeamSlug": {
+            "description": "TThe slug of the team name.",
+            "type": "string"
+        },
+        "Username": {
+            "description": "The handle for the GitHub user account.",
+            "type": "string",
+            "pattern": "^(?=[a-zA-Z0-9._]{8,20}$)(?!.*[_.]{2})[^_.].*[^_.]$"
+        },
+        "Role": {
+            "description": "The handle for the GitHub user account.",
+            "type": "string",
+            "default": "member",
+            "enum": [
+                "member",
+                "maintainer"
+            ]
+        },
+        "State": {
+            "description": "Membership state",
+            "type": "string"
+        }
+    },
+    "additionalProperties": false,
+    "required": [
+        "GitHubAccess",
+        "Org",
+        "TeamSlug"
+    ],
+    "primaryIdentifier": [
+        "/properties/Org",
+        "/properties/TeamSlug",
+        "/properties/Username"
+    ],
+    "createOnlyProperties": [
+        "/properties/GitHubAccess",
+        "/properties/Org",
+        "/properties/TeamSlug",
+        "/properties/Username"
+    ],
+    "readOnlyProperties": [
+        "/properties/State"
+    ],
+    "handlers": {
+        "create": {
+            "permissions": []
+        },
+        "read": {
+            "permissions": []
+        },
+        "update": {
+            "permissions": []
+        },
+        "delete": {
+            "permissions": []
+        },
+        "list": {
+            "permissions": []
+        }
+    }
+}
