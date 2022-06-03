@@ -57,12 +57,7 @@
         },
         "State": {
             "description": "Membership state",
-            "type": "string",
-            "default": "pending",
-            "enum": [
-                "active",
-                "pending"
-            ]
+            "type": "string"
         }
     },
     "additionalProperties": false,

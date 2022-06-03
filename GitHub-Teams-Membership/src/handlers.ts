@@ -11,8 +11,9 @@ import {
     SessionProxy,
 } from '@amazon-web-services-cloudformation/cloudformation-cli-typescript-lib';
 import {ResourceModel} from './models';
-import {Endpoints, OctokitResponse} from "@octokit/types";
+import {Endpoints, OctokitResponse, RequestError} from "@octokit/types";
 import {Octokit} from "@octokit/rest";
+import {isOctokitRequestError} from "../../Common/util";
 
 type GetMembershipEndpoint = 'GET /orgs/{org}/teams/{team_slug}/memberships/{username}';
 type AddOrUpdateMembershipEndpoint = 'PUT /orgs/{org}/teams/{team_slug}/memberships/{username}';
@@ -33,6 +34,10 @@ class Resource extends BaseResource<ResourceModel> {
         baseModel.role = data.role;
         baseModel.state = data.state;
         return baseModel;
+    }
+
+    private static getErrorMessage(requestError: RequestError, errorResponse: Error) {
+        return requestError.errors?.map(e => e.message).join('\n') || errorResponse.message;
     }
 
     /**
@@ -57,7 +62,7 @@ class Resource extends BaseResource<ResourceModel> {
             throw new exceptions.AlreadyExists(this.typeName, request.logicalResourceIdentifier);
         }
         const response = await this.addOrUpdateMembership(model, request);
-        return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromApiResponse(model, response.data as MembershipData));
+        return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromApiResponse(model, response.data));
     }
 
     /**
@@ -82,7 +87,7 @@ class Resource extends BaseResource<ResourceModel> {
             throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
         }
         const response = await this.addOrUpdateMembership(model, request);
-        return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromApiResponse(model, response.data as MembershipData));
+        return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromApiResponse(model, response.data));
     }
 
     /**
@@ -142,7 +147,7 @@ class Resource extends BaseResource<ResourceModel> {
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
         const response = await this.getMembership(model, request);
-        return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromApiResponse(model, response.data as MembershipData));
+        return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromApiResponse(model, response.data));
     }
 
     /**
@@ -198,18 +203,22 @@ class Resource extends BaseResource<ResourceModel> {
         }
     }
 
-    private handleError(response: OctokitResponse<any>, request: ResourceHandlerRequest<ResourceModel>) {
+    private handleError(errorResponse: Error, request: ResourceHandlerRequest<ResourceModel>) {
         // TODO: Should have utility to get the right exception
-        switch (response.status) {
+        if(!isOctokitRequestError(errorResponse))
+            throw new exceptions.InternalFailure(errorResponse);
+
+        const requestError = errorResponse as unknown as RequestError;
+        switch (requestError.status) {
             case 401:
             case 403:
                 throw new exceptions.AccessDenied();
             case 404:
                 throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
             case 422:
-                throw new exceptions.InvalidRequest(this.typeName);
+                throw new exceptions.InvalidRequest(Resource.getErrorMessage(requestError, errorResponse));
             default:
-                throw new exceptions.InternalFailure();
+                throw new exceptions.InternalFailure(Resource.getErrorMessage(requestError, errorResponse));
         }
     }
 
