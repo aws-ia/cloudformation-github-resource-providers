@@ -13,13 +13,13 @@ cat << EOF >> .git/config
 [filter "github-token"]
 	clean = sed \\
 		-e 's:[githubAccessToken]:<GITHUB_TOKEN>:g' \\
-		-e 's:[organizacionForTesting]:<ORG>:g' \\
-		-e 's:[existingTeamForTesting]:<TEAM>:g' \\
-		-e 's:[existingGithubUserForTesting]:<USERNAME>:g' 
+		-e 's:[organizacionForTesting]:<GITHUB_ORG>:g' \\
+		-e 's:[existingTeamForTesting]:<GITHUB_TEAM>:g' \\
+		-e 's:[existingGithubUserForTesting]:<GITHUB_USERNAME>:g' 
 	smudge = sed \\
 		-e 's:<GITHUB_TOKEN>:[githubAccessToken]:g' \\
-		-e 's:<ORG>:[organizacionForTesting]:g' \\
-		-e 's:<TEAM>:[existingTeamForTesting]:g' \\
-		-e 's:<USERNAME>:[existingGithubUserForTesting]:g'
+		-e 's:<GITHUB_ORG>:[organizacionForTesting]:g' \\
+		-e 's:<GITHUB_TEAM>:[existingTeamForTesting]:g' \\
+		-e 's:<GITHUB_USERNAME>:[existingGithubUserForTesting]:g'
 EOF
 ```
