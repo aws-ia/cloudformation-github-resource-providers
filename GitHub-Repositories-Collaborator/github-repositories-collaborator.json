@@ -3,135 +3,94 @@
     "description": "An example resource schema demonstrating some basic constructs and validation rules.",
     "sourceUrl": "https://github.com/aws-cloudformation/aws-cloudformation-rpdk.git",
     "definitions": {
-        "InitechDateFormat": {
-            "$comment": "Use the `definitions` block to provide shared resource property schemas",
-            "type": "string",
-            "format": "date-time"
-        },
-        "Memo": {
+        "GitHubAccess": {
             "type": "object",
             "properties": {
-                "Heading": {
+                "AccessToken": {
+                    "description": "Personal Access Token",
                     "type": "string"
-                },
-                "Body": {
-                    "type": "string"
-                }
-            },
-            "additionalProperties": false
-        },
-        "Tag": {
-            "description": "A key-value pair to associate with a resource.",
-            "type": "object",
-            "properties": {
-                "Key": {
-                    "type": "string",
-                    "description": "The key name of the tag. You can specify a value that is 1 to 128 Unicode characters in length and cannot be prefixed with aws:. You can use any of the following characters: the set of Unicode letters, digits, whitespace, _, ., /, =, +, and -.",
-                    "minLength": 1,
-                    "maxLength": 128
-                },
-                "Value": {
-                    "type": "string",
-                    "description": "The value for the tag. You can specify a value that is 0 to 256 Unicode characters in length and cannot be prefixed with aws:. You can use any of the following characters: the set of Unicode letters, digits, whitespace, _, ., /, =, +, and -.",
-                    "minLength": 0,
-                    "maxLength": 256
                 }
             },
             "required": [
-                "Key",
-                "Value"
+                "AccessToken"
             ],
             "additionalProperties": false
         }
-    },
+    },    "typeConfiguration": {
     "properties": {
-        "TPSCode": {
-            "description": "A TPS Code is automatically generated on creation and assigned as the unique identifier.",
-            "type": "string",
-            "pattern": "^[A-Z]{3,5}[0-9]{8}-[0-9]{4}$"
-        },
-        "Title": {
-            "description": "The title of the TPS report is a mandatory element.",
-            "type": "string",
-            "minLength": 20,
-            "maxLength": 250
-        },
-        "CoverSheetIncluded": {
-            "description": "Required for all TPS Reports submitted after 2/19/1999",
-            "type": "boolean"
-        },
-        "DueDate": {
-            "$ref": "#/definitions/InitechDateFormat"
-        },
-        "ApprovalDate": {
-            "$ref": "#/definitions/InitechDateFormat"
-        },
-        "Memo": {
-            "$ref": "#/definitions/Memo"
-        },
-        "SecondCopyOfMemo": {
-            "description": "In case you didn't get the first one.",
-            "$ref": "#/definitions/Memo"
-        },
-        "TestCode": {
-            "type": "string",
-            "enum": [
-                "NOT_STARTED",
-                "CANCELLED"
-            ]
-        },
-        "Authors": {
-            "type": "array",
-            "items": {
-                "type": "string"
-            }
-        },
-        "Tags": {
-            "description": "An array of key-value pairs to apply to this resource.",
-            "type": "array",
-            "uniqueItems": true,
-            "insertionOrder": false,
-            "items": {
-                "$ref": "#/definitions/Tag"
-            }
+        "GitHubAccess": {
+            "$ref": "#/definitions/GitHubAccess"
         }
     },
     "additionalProperties": false,
     "required": [
-        "TestCode",
-        "Title"
-    ],
-    "readOnlyProperties": [
-        "/properties/TPSCode"
+        "GitHubAccess"
+    ]
+},
+    "properties": {
+        "GitHubAccess": {
+            "description": "Personal Access Token",
+            "type": "string"
+        },
+        "Owner": {
+            "description": "The account owner of the repository. The name is not case sensitive.",
+            "type": "string"
+        },
+        "Repository": {
+            "description": "The name of the repository. The name is not case sensitive.",
+            "type": "string"
+        },
+        "Username": {
+            "description": "The handle for the GitHub user account.",
+            "type": "string",
+            "pattern": "^(?=[a-zA-Z0-9._]{8,20}$)(?!.*[_.]{2})[^_.].*[^_.]$"
+        },
+        "Permission": {
+            "description": "The permission to grant the collaborator. Only valid on organization-owned repositories. In addition to the enumerated values, you can also specify a custom repository role name, if the owning organization has defined any..",
+            "type": "string",
+            "default": "push",
+            "enum": [
+                "pull",
+                "push",
+                "admin",
+                "maintain",
+                "triage"
+            ]
+        }
+    },
+    "additionalProperties": false,
+    "required": [
+        "GitHubAccess",
+        "Owner",
+        "Repository",
+        "Username"
     ],
     "primaryIdentifier": [
-        "/properties/TPSCode"
+        "/properties/Owner",
+        "/properties/Repository",
+        "/properties/Username"
+    ],
+    "createOnlyProperties": [
+        "/properties/GitHubAccess",
+        "/properties/Owner",
+        "/properties/Repository",
+        "/properties/Username"
     ],
     "handlers": {
         "create": {
-            "permissions": [
-                "initech:CreateReport"
-            ]
+            "permissions": []
         },
         "read": {
-            "permissions": [
-                "initech:DescribeReport"
-            ]
+            "permissions": []
         },
         "update": {
-            "permissions": [
-                "initech:UpdateReport"
-            ]
+            "permissions": []
         },
         "delete": {
-            "permissions": [
-                "initech:DeleteReport"
-            ]
+            "permissions": []
         },
         "list": {
-            "permissions": [
-                "initech:ListReports"
-            ]
+            "permissions": []
         }
     }
 }

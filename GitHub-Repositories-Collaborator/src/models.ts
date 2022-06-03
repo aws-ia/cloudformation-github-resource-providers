@@ -9,96 +9,75 @@ export class ResourceModel extends BaseModel {
     public static readonly TYPE_NAME: string = 'GitHub::Repositories::Collaborator';
 
     @Exclude()
-    protected readonly IDENTIFIER_KEY_TPSCODE: string = '/properties/TPSCode';
+    protected readonly IDENTIFIER_KEY_OWNER: string = '/properties/Owner';
+    @Exclude()
+    protected readonly IDENTIFIER_KEY_REPOSITORY: string = '/properties/Repository';
+    @Exclude()
+    protected readonly IDENTIFIER_KEY_USERNAME: string = '/properties/Username';
 
-    @Expose({ name: 'TPSCode' })
+    @Expose({ name: 'GitHubAccess' })
     @Transform(
         (value: any, obj: any) =>
-            transformValue(String, 'tPSCode', value, obj, []),
+            transformValue(String, 'gitHubAccess', value, obj, []),
         {
             toClassOnly: true,
         }
     )
-    tPSCode?: Optional<string>;
-    @Expose({ name: 'Title' })
+    gitHubAccess?: Optional<string>;
+    @Expose({ name: 'Owner' })
     @Transform(
         (value: any, obj: any) =>
-            transformValue(String, 'title', value, obj, []),
+            transformValue(String, 'owner', value, obj, []),
         {
             toClassOnly: true,
         }
     )
-    title?: Optional<string>;
-    @Expose({ name: 'CoverSheetIncluded' })
+    owner?: Optional<string>;
+    @Expose({ name: 'Repository' })
     @Transform(
         (value: any, obj: any) =>
-            transformValue(Boolean, 'coverSheetIncluded', value, obj, []),
+            transformValue(String, 'repository', value, obj, []),
         {
             toClassOnly: true,
         }
     )
-    coverSheetIncluded?: Optional<boolean>;
-    @Expose({ name: 'DueDate' })
+    repository?: Optional<string>;
+    @Expose({ name: 'Username' })
     @Transform(
         (value: any, obj: any) =>
-            transformValue(String, 'dueDate', value, obj, []),
+            transformValue(String, 'username', value, obj, []),
         {
             toClassOnly: true,
         }
     )
-    dueDate?: Optional<string>;
-    @Expose({ name: 'ApprovalDate' })
+    username?: Optional<string>;
+    @Expose({ name: 'Permission' })
     @Transform(
         (value: any, obj: any) =>
-            transformValue(String, 'approvalDate', value, obj, []),
+            transformValue(String, 'permission', value, obj, []),
         {
             toClassOnly: true,
         }
     )
-    approvalDate?: Optional<string>;
-    @Expose({ name: 'Memo' })
-    @Type(() => Memo)
-    memo?: Optional<Memo>;
-    @Expose({ name: 'SecondCopyOfMemo' })
-    @Type(() => Memo)
-    secondCopyOfMemo?: Optional<Memo>;
-    @Expose({ name: 'TestCode' })
-    @Transform(
-        (value: any, obj: any) =>
-            transformValue(String, 'testCode', value, obj, []),
-        {
-            toClassOnly: true,
-        }
-    )
-    testCode?: Optional<string>;
-    @Expose({ name: 'Authors' })
-    @Transform(
-        (value: any, obj: any) =>
-            transformValue(String, 'authors', value, obj, [Array]),
-        {
-            toClassOnly: true,
-        }
-    )
-    authors?: Optional<Array<string>>;
-    @Expose({ name: 'Tags' })
-    @Transform(
-        (value: any, obj: any) =>
-            transformValue(Tag, 'tags', value, obj, [Set]),
-        {
-            toClassOnly: true,
-        }
-    )
-    tags?: Optional<Set<Tag>>;
+    permission?: Optional<string>;
 
     @Exclude()
     public getPrimaryIdentifier(): Dict {
         const identifier: Dict = {};
-        if (this.tPSCode != null) {
-            identifier[this.IDENTIFIER_KEY_TPSCODE] = this.tPSCode;
+        if (this.owner != null) {
+            identifier[this.IDENTIFIER_KEY_OWNER] = this.owner;
+        }
+
+        if (this.repository != null) {
+            identifier[this.IDENTIFIER_KEY_REPOSITORY] = this.repository;
+        }
+
+        if (this.username != null) {
+            identifier[this.IDENTIFIER_KEY_USERNAME] = this.username;
         }
 
         // only return the identifier if it can be used, i.e. if all components are present
-        return Object.keys(identifier).length === 1 ? identifier : null;
+        return Object.keys(identifier).length === 3 ? identifier : null;
     }
 
     @Exclude()
@@ -107,55 +86,5 @@ export class ResourceModel extends BaseModel {
         // only return the identifiers if any can be used
         return identifiers.length === 0 ? null : identifiers;
     }
-}
-
-export class Memo extends BaseModel {
-    ['constructor']: typeof Memo;
-
-
-    @Expose({ name: 'Heading' })
-    @Transform(
-        (value: any, obj: any) =>
-            transformValue(String, 'heading', value, obj, []),
-        {
-            toClassOnly: true,
-        }
-    )
-    heading?: Optional<string>;
-    @Expose({ name: 'Body' })
-    @Transform(
-        (value: any, obj: any) =>
-            transformValue(String, 'body', value, obj, []),
-        {
-            toClassOnly: true,
-        }
-    )
-    body?: Optional<string>;
-
-}
-
-export class Tag extends BaseModel {
-    ['constructor']: typeof Tag;
-
-
-    @Expose({ name: 'Key' })
-    @Transform(
-        (value: any, obj: any) =>
-            transformValue(String, 'key', value, obj, []),
-        {
-            toClassOnly: true,
-        }
-    )
-    key?: Optional<string>;
-    @Expose({ name: 'Value' })
-    @Transform(
-        (value: any, obj: any) =>
-            transformValue(String, 'value_', value, obj, []),
-        {
-            toClassOnly: true,
-        }
-    )
-    value_?: Optional<string>;
-
 }
 
