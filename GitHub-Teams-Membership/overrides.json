@@ -1,9 +1,9 @@
 {
   "CREATE": {
     "/GitHubAccess": "<GITHUB_TOKEN>",
-    "/Org": "<ORG>",
-    "/TeamSlug": "<TEAM>",
-    "/Username": "<USERNAME>",
+    "/Org": "<GITHUB_ORG>",
+    "/TeamSlug": "<GITHUB_TEAM>",
+    "/Username": "<GITHUB_USERNAME>",
     "/Role": "maintainer"
   },
   "UPDATE": {
