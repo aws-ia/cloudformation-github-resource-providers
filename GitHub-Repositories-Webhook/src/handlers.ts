@@ -19,7 +19,7 @@ interface CallbackContext extends Record<string, any> {}
 
 class Resource extends BaseResource<ResourceModel> {
 
-    public handleError(response: OctokitResponse<any>, request: ResourceHandlerRequest<ResourceModel>, logger: LoggerProxy) {
+    public handleError(response: OctokitResponse<any>, request: ResourceHandlerRequest<ResourceModel>) {
         if (!isOctokitRequestError(response)) {
             throw new exceptions.InternalFailure();
         } else if (response.status === 400) {
@@ -77,10 +77,10 @@ class Resource extends BaseResource<ResourceModel> {
                 config: {...model.config}
             });
         } catch (e) {
-            this.handleError(e, request, logger);
+            this.handleError(e, request);
         }
 
-        return this.createResponseModel(model, response.data);
+        return Resource.createResponseModel(model, response.data);
     }
 
     /**
@@ -194,7 +194,7 @@ class Resource extends BaseResource<ResourceModel> {
                 hook_id: model.id
             });
         } catch (e) {
-            this.handleError(e, request, logger);
+            this.handleError(e, request);
         }
         return response;
     }
@@ -211,12 +211,12 @@ class Resource extends BaseResource<ResourceModel> {
                 hook_id: model.id
             });
         } catch (e) {
-            this.handleError(e, request, logger);
+            this.handleError(e, request);
         }
-        return this.createResponseModel(model, response.data);
+        return Resource.createResponseModel(model, response.data);
     }
 
-    private createResponseModel(model: ResourceModel, data: any) {
+    private static createResponseModel(model: ResourceModel, data: any) {
         let config = data.config;
         delete config.secret;
         return new ResourceModel({
@@ -243,7 +243,7 @@ class Resource extends BaseResource<ResourceModel> {
                 return resourceModel;
             }));
         } catch (e) {
-            this.handleError(e, request, logger);
+            this.handleError(e, request);
         }
 
         return models;
@@ -265,10 +265,10 @@ class Resource extends BaseResource<ResourceModel> {
                 config: {url: model.config.url, secret: model.config.secret, content_type: model.config.contentType, insecure_ssl: model.config.insecureSsl}
             });
         } catch (e) {
-            this.handleError(e, request, logger);
+            this.handleError(e, request);
         }
 
-        return this.createResponseModel(model, response.data);
+        return Resource.createResponseModel(model, response.data);
     }
 }
 
