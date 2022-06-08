@@ -11,7 +11,7 @@ import {
     SessionProxy,
 } from '@amazon-web-services-cloudformation/cloudformation-cli-typescript-lib';
 import {Permissions, ResourceModel} from './models';
-import {isOctokitRequestError} from "../../Common/util";
+import {isOctokitRequestError} from "../../GitHub-Common/src/util";
 import {Octokit} from "@octokit/rest";
 import {Endpoints, OctokitResponse, RequestError} from "@octokit/types";
 

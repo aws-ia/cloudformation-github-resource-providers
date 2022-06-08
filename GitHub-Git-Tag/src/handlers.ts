@@ -13,7 +13,7 @@ import {
 import {ResourceModel} from './models';
 import {Octokit} from "@octokit/rest";
 import {RequestError} from "@octokit/types";
-import {isOctokitRequestError} from "../../Common/util";
+import {isOctokitRequestError} from "../../GitHub-Common/src/util";
 
 interface CallbackContext extends Record<string, any> {}
 

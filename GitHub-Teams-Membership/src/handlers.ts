@@ -13,7 +13,7 @@ import {
 import {ResourceModel} from './models';
 import {Endpoints, OctokitResponse, RequestError} from "@octokit/types";
 import {Octokit} from "@octokit/rest";
-import {isOctokitRequestError} from "../../Common/util";
+import {isOctokitRequestError} from "../../GitHub-Common/src/util";
 
 type GetMembershipEndpoint = 'GET /orgs/{org}/teams/{team_slug}/memberships/{username}';
 type AddOrUpdateMembershipEndpoint = 'PUT /orgs/{org}/teams/{team_slug}/memberships/{username}';
