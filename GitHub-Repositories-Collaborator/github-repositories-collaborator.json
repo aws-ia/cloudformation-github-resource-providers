@@ -1,6 +1,6 @@
 {
     "typeName": "GitHub::Repositories::Collaborator",
-    "description": "An example resource schema demonstrating some basic constructs and validation rules.",
+    "description": "The Collaborators resource allows you to add, invite, and remove collaborators from a repository.",
     "sourceUrl": "https://github.com/aws-cloudformation/aws-cloudformation-rpdk.git",
     "definitions": {
         "GitHubAccess": {
