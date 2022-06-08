@@ -11,9 +11,9 @@ import {
     SessionProxy,
 } from '@amazon-web-services-cloudformation/cloudformation-cli-typescript-lib';
 import {Permissions, ResourceModel} from './models';
-import {isOctokitRequestError} from "../../GitHub-Common/src/util";
+import {handleError} from "../../GitHub-Common/src/util";
 import {Octokit} from "@octokit/rest";
-import {Endpoints, OctokitResponse, RequestError} from "@octokit/types";
+import {Endpoints, OctokitResponse} from "@octokit/types";
 
 interface CallbackContext extends Record<string, any> {
 }
@@ -81,10 +81,6 @@ class Resource extends BaseResource<ResourceModel> {
             return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromCreateOrUpdateApiResponse(model, response.data as CollaboratorData));
         }
         throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
-    }
-
-    private static getErrorMessage(requestError: RequestError, errorResponse: Error) {
-        return requestError.errors?.map(e => e.message).join('\n') || errorResponse.message;
     }
 
     /**
@@ -159,7 +155,7 @@ class Resource extends BaseResource<ResourceModel> {
                 return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>();
             }
         } catch (e) {
-            this.handleError(e, request);
+            handleError(e, request);
         }
         throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
     }
@@ -248,7 +244,7 @@ class Resource extends BaseResource<ResourceModel> {
                 .status(OperationStatus.Success)
                 .resourceModels(currentAndPendingCollaborators).build();
         } catch (e) {
-            this.handleError(e, request);
+            handleError(e, request);
         }
     }
 
@@ -282,7 +278,7 @@ class Resource extends BaseResource<ResourceModel> {
             });
             return response;
         } catch (e) {
-            this.handleError(e, request);
+            handleError(e, request);
         }
     }
 
@@ -304,7 +300,7 @@ class Resource extends BaseResource<ResourceModel> {
                 permission: model.permission as "pull" | "push" | "admin" | "maintain" | "triage"
             });
         } catch (e) {
-            this.handleError(e, request);
+            handleError(e, request);
         }
     }
 
@@ -319,7 +315,7 @@ class Resource extends BaseResource<ResourceModel> {
                     repo: model.repository
                 });
         } catch (e) {
-            this.handleError(e, request);
+            handleError(e, request);
         }
     }
 
@@ -337,7 +333,7 @@ class Resource extends BaseResource<ResourceModel> {
                     permissions: model.permission as "read" | "write" | "maintain" | "triage" | "admin"
                 });
         } catch (e) {
-            this.handleError(e, request);
+            handleError(e, request);
         }
     }
 
@@ -363,25 +359,6 @@ class Resource extends BaseResource<ResourceModel> {
             return 'pull';
 
         throw new exceptions.InternalFailure('Error mapping the permissions');
-    }
-
-    private handleError(errorResponse: Error, request: ResourceHandlerRequest<ResourceModel>) {
-        // TODO: Should have utility to get the right exception
-        if (!isOctokitRequestError(errorResponse))
-            throw new exceptions.InternalFailure(errorResponse);
-
-        const requestError = errorResponse as unknown as RequestError;
-        switch (requestError.status) {
-            case 401:
-            case 403:
-                throw new exceptions.AccessDenied();
-            case 404:
-                throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
-            case 422:
-                throw new exceptions.InvalidRequest(Resource.getErrorMessage(requestError, errorResponse));
-            default:
-                throw new exceptions.InternalFailure(Resource.getErrorMessage(requestError, errorResponse));
-        }
     }
 
     private static permissionsToPermission(permissions: string) {

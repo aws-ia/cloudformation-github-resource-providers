@@ -38,20 +38,11 @@ class Resource extends BaseResource<ResourceModel> {
         const progress = ProgressEvent.progress<ProgressEvent<ResourceModel, CallbackContext>>(model);
         // TODO: put code here
 
-        // Example:
-        try {
-            if (session instanceof SessionProxy) {
-                const client = session.client('S3');
-            }
-            // Setting Status to success will signal to CloudFormation that the operation is complete
-            progress.status = OperationStatus.Success;
-        } catch(err) {
-            logger.log(err);
-            // exceptions module lets CloudFormation know the type of failure that occurred
-            throw new exceptions.InternalFailure(err.message);
-            // this can also be done by returning a failed progress event
-            // return ProgressEvent.failed(HandlerErrorCode.InternalFailure, err.message);
-        }
+        // if actual member:https://docs.github.com/en/rest/orgs/members#check-organization-membership-for-a-user
+        // or has a pending invitation: https://docs.github.com/en/rest/orgs/members#list-failed-organization-invitations
+        // throw already exist
+        // create: https://docs.github.com/en/rest/orgs/members#create-an-organization-invitation
+
         return progress;
     }
 
@@ -75,6 +66,7 @@ class Resource extends BaseResource<ResourceModel> {
         const model = new ResourceModel(request.desiredResourceState);
         const progress = ProgressEvent.progress<ProgressEvent<ResourceModel, CallbackContext>>(model);
         // TODO: put code here
+        // if is an actual member-> update
         progress.status = OperationStatus.Success;
         return progress;
     }
