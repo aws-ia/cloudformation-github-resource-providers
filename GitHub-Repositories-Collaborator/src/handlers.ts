@@ -105,12 +105,10 @@ class Resource extends BaseResource<ResourceModel> {
         logger: LoggerProxy
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
-        logger.log('jdc creating')
         if (await this.assertIsCollaborator(model, request) || await this.assertHasInvitationPending(model, request)) {
             throw new exceptions.AlreadyExists(this.typeName, request.logicalResourceIdentifier);
         }
         const response = await this.createOrUpdateCollaborator(model, request);
-        logger.log(`jdc create response: ${response}`);
 
         // Adding invitation ID in a readonly field
         model.invitationId = response.data.id;
@@ -271,7 +269,7 @@ class Resource extends BaseResource<ResourceModel> {
         return invitations.some(invitation => invitation.invitee.login === model.username);
     }
 
-    private async getCollaborator(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>, logger?: LoggerProxy): Promise<OctokitResponse<GetCollaboratorResponseData>> {
+    private async getCollaborator(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>): Promise<OctokitResponse<GetCollaboratorResponseData>> {
         const octokit = new Octokit({
             auth: model.gitHubAccess
         });
@@ -282,9 +280,6 @@ class Resource extends BaseResource<ResourceModel> {
                 username: model.username,
                 permission: model.permission
             });
-            if (logger) {
-                logger.log(`jdc read response: ${JSON.stringify(response)}`)
-            }
             return response;
         } catch (e) {
             this.handleError(e, request);
