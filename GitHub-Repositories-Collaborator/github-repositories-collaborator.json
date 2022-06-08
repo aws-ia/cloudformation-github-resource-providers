@@ -15,18 +15,49 @@
                 "AccessToken"
             ],
             "additionalProperties": false
-        }
-    },    "typeConfiguration": {
-    "properties": {
-        "GitHubAccess": {
-            "$ref": "#/definitions/GitHubAccess"
+        },
+        "Permissions": {
+            "description": "The permission granted the collaborator.",
+            "type": "object",
+            "properties": {
+                "Pull": {
+                    "description": "Recommended for non-code contributors who want to view or discuss your project.",
+                    "type": "boolean"
+                },
+                "Triage": {
+                    "description": "Recommended for contributors who need to manage issues and pull requests without write access.",
+                    "type": "boolean"
+                },
+                "Push": {
+                    "description": "Recommended for contributors who actively push to your project.",
+                    "type": "boolean"
+                },
+                "Maintain": {
+                    "description": "Recommended for project managers who need to manage the repository without access to sensitive or destructive actions.",
+                    "type": "boolean"
+                },
+                "Admin": {
+                    "description": "Recommended for people who need full access to the project, including sensitive and destructive actions like managing security or deleting a repository.",
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "Status"
+            ],
+            "additionalProperties": false
         }
     },
-    "additionalProperties": false,
-    "required": [
-        "GitHubAccess"
-    ]
-},
+    "typeConfiguration": {
+        "properties": {
+            "GitHubAccess": {
+                "$ref": "#/definitions/GitHubAccess"
+            }
+        },
+        "additionalProperties": false,
+        "required": [
+            "GitHubAccess"
+        ]
+    },
     "properties": {
         "GitHubAccess": {
             "description": "Personal Access Token",
@@ -56,6 +87,13 @@
                 "maintain",
                 "triage"
             ]
+        },
+        "Permissions": {
+            "$ref": "#/definitions/Permissions"
+        },
+        "InvitationId": {
+            "description": "Invitation identifier",
+            "type": "number"
         }
     },
     "additionalProperties": false,
@@ -75,6 +113,9 @@
         "/properties/Owner",
         "/properties/Repository",
         "/properties/Username"
+    ],
+    "readOnlyProperties": [
+        "/properties/InvitationId"
     ],
     "handlers": {
         "create": {

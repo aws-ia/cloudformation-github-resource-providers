@@ -16,7 +16,8 @@ To declare this entity in your AWS CloudFormation template, use the following sy
         "<a href="#owner" title="Owner">Owner</a>" : <i>String</i>,
         "<a href="#repository" title="Repository">Repository</a>" : <i>String</i>,
         "<a href="#username" title="Username">Username</a>" : <i>String</i>,
-        "<a href="#permission" title="Permission">Permission</a>" : <i>String</i>
+        "<a href="#permission" title="Permission">Permission</a>" : <i>String</i>,
+        "<a href="#permissions" title="Permissions">Permissions</a>" : <i><a href="permissions.md">Permissions</a></i>,
     }
 }
 </pre>
@@ -31,6 +32,7 @@ Properties:
     <a href="#repository" title="Repository">Repository</a>: <i>String</i>
     <a href="#username" title="Username">Username</a>: <i>String</i>
     <a href="#permission" title="Permission">Permission</a>: <i>String</i>
+    <a href="#permissions" title="Permissions">Permissions</a>: <i><a href="permissions.md">Permissions</a></i>
 </pre>
 
 ## Properties
@@ -88,4 +90,26 @@ _Type_: String
 _Allowed Values_: <code>pull</code> | <code>push</code> | <code>admin</code> | <code>maintain</code> | <code>triage</code>
 
 _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
+
+#### Permissions
+
+The permission granted the collaborator.
+
+_Required_: No
+
+_Type_: <a href="permissions.md">Permissions</a>
+
+_Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
+
+## Return Values
+
+### Fn::GetAtt
+
+The `Fn::GetAtt` intrinsic function returns a value for a specified attribute of this type. The following are the available attributes and sample return values.
+
+For more information about using the `Fn::GetAtt` intrinsic function, see [Fn::GetAtt](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-getatt.html).
+
+#### InvitationId
+
+Invitation identifier
 
