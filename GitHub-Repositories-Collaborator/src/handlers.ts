@@ -38,15 +38,6 @@ type CollaboratorData =
     ListInvitationsResponseData &
     UpdateInvitationsResponseData;
 
-type InvitationModel = {
-    invitationId: number,
-    owner: string,
-    repository: string,
-    user: string,
-    permissions: string,
-    createdAt: string,
-}
-
 class Resource extends BaseResource<ResourceModel> {
 
     private static setModelFromCreateOrUpdateApiResponse(model: ResourceModel, data: CollaboratorData, logger?: LoggerProxy): ResourceModel {
@@ -73,21 +64,6 @@ class Resource extends BaseResource<ResourceModel> {
         model.permission = data.permission;
         if (!!logger) {
             logger.log(`jdc final read model ${JSON.stringify(model)}`);
-        }
-        return model;
-    }
-
-    private static setModelFromInvitationApiResponse(model: ResourceModel, data: InvitationModel, logger: LoggerProxy) {
-        if (!!logger) {
-            logger.log(`jdc initial invitation model: ${JSON.stringify(model)}`);
-            logger.log(`jdc initial invitation data: ${JSON.stringify(data)}`);
-        }
-        model.owner = data.owner;
-        model.repository = data.repository;
-        model.username = data.user;
-        model.permission = Resource.permissionsToPermission(data.permissions);
-        if (!!logger) {
-            logger.log(`jdc final invitation read model ${JSON.stringify(model)}`);
         }
         return model;
     }
@@ -150,7 +126,7 @@ class Resource extends BaseResource<ResourceModel> {
         const response = await this.createOrUpdateCollaborator(model, request);
         logger.log(`jdc create response: ${response}`);
 
-        // Add invitation ID in a readonly field
+        // Adding invitation ID in a readonly field
         model.invitationId = response.data.id;
 
         return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromCreateOrUpdateApiResponse(model, response.data as CollaboratorData, logger));
@@ -179,35 +155,29 @@ class Resource extends BaseResource<ResourceModel> {
             auth: model.gitHubAccess
         });
 
-        //todojd refactor to minimize calls
-        const isCollaborator = await this.assertIsCollaborator(model, request);
-        const hasInvitations = this.assertHasInvitationPending(model, request);
-
-        if (!isCollaborator && !hasInvitations) {
-            logger.log(`jdc it exist: ${JSON.stringify(isCollaborator)}`);
-            throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
-        }
         try {
-            if (isCollaborator) {
+            if (await this.assertIsCollaborator(model, request)) {
                 // https://docs.github.com/en/rest/collaborators/collaborators#add-a-repository-collaborator
                 await octokit.request('DELETE /repos/{owner}/{repo}/collaborators/{username}', {
                     owner: model.owner,
                     repo: model.repository,
                     username: model.username,
                 });
+                return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>();
             }
-            if (hasInvitations) {
+            if (await this.assertHasInvitationPending(model, request)) {
                 // https://docs.github.com/en/rest/collaborators/invitations#delete-a-repository-invitation
                 await octokit.request('DELETE /repos/{owner}/{repo}/invitations/{invitation_id}}', {
                     owner: model.owner,
                     repo: model.repository,
                     invitation_id: model.invitationId
                 });
+                return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>();
             }
-            return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>();
         } catch (e) {
             this.handleError(e, request);
         }
+        throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
     }
 
     /**
@@ -236,12 +206,12 @@ class Resource extends BaseResource<ResourceModel> {
         if (await this.assertHasInvitationPending(model, request)) {
             const pendingInvitations = await this.listInvitationsByRepo(model, request);
             const relatedInvitations = pendingInvitations.filter(inv => {
-                return inv.invitationId === model.invitationId
+                return inv.id === model.invitationId
             });
             if (relatedInvitations.length > 1) {
                 logger.log(`User ${model.username} has ${relatedInvitations.length} pending invitations for this repo`);
             }
-            return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromInvitationApiResponse(model, relatedInvitations[0], logger));
+            return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromCreateOrUpdateApiResponse(model, relatedInvitations[0] as CollaboratorData, logger));
         }
         throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
     }
@@ -283,12 +253,12 @@ class Resource extends BaseResource<ResourceModel> {
                 }));
             const invitations = await this.listInvitationsByRepo(model, request);
             const currentAndPendingCollaborators = collaborators.concat(invitations.map(invitation => {
-                const invitationAsRM = new ResourceModel();
-                invitationAsRM.owner = invitation.owner;
-                invitationAsRM.repository = invitation.repository;
-                invitationAsRM.username = invitation.user;
-                invitationAsRM.permission = Resource.permissionsToPermission(invitation.permissions);
-                return invitationAsRM;
+                const invitationAsResourceModel = new ResourceModel();
+                invitationAsResourceModel.owner = invitation.repository.owner.login;
+                invitationAsResourceModel.repository = invitation.repository.name;
+                invitationAsResourceModel.username = invitation.invitee.login;
+                invitationAsResourceModel.permission = Resource.permissionsToPermission(invitation.permissions);
+                return invitationAsResourceModel;
             }))
             return ProgressEvent.builder<ProgressEvent<ResourceModel, CallbackContext>>()
                 .status(OperationStatus.Success)
@@ -312,7 +282,7 @@ class Resource extends BaseResource<ResourceModel> {
 
     private async assertHasInvitationPending(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>) {
         const invitations = await this.listInvitationsByRepo(model, request);
-        return invitations.some(invitation => invitation.user === model.username);
+        return invitations.some(invitation => invitation.invitee.login === model.username);
     }
 
     private async getCollaborator(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>, logger?: LoggerProxy): Promise<OctokitResponse<GetCollaboratorResponseData>> {
@@ -362,23 +332,11 @@ class Resource extends BaseResource<ResourceModel> {
             auth: model.gitHubAccess
         });
         try {
-            const pendingInvites = await octokit.paginate(octokit.repos.listInvitations,
+            return await octokit.paginate(octokit.repos.listInvitations,
                 {
                     owner: model.owner,
                     repo: model.repository
-                },
-                response => response.data.map(invitation => {
-                    return {
-                        user: invitation.invitee.login,
-                        repository: invitation.repository.name,
-                        owner: invitation.repository.owner.login,
-                        invitationId: invitation.id,
-                        permissions: invitation.permissions,
-                        createdAt: invitation.created_at
-                    };
-                }));
-
-            return pendingInvites as InvitationModel[];
+                });
         } catch (e) {
             this.handleError(e, request);
         }
@@ -390,14 +348,13 @@ class Resource extends BaseResource<ResourceModel> {
             auth: model.gitHubAccess
         });
         try {
-            const response = await octokit.request("PATCH /repos/{owner}/{repo}/invitations/{invitation_id}",
+            return await octokit.request("PATCH /repos/{owner}/{repo}/invitations/{invitation_id}",
                 {
                     owner: model.owner,
                     repo: model.repository,
                     invitation_id: model.invitationId,
                     permissions: model.permission as "read" | "write" | "maintain" | "triage" | "admin"
                 });
-            return response;
         } catch (e) {
             this.handleError(e, request);
         }
