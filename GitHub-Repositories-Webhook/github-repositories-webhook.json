@@ -1,6 +1,6 @@
 {
     "typeName": "GitHub::Repositories::Webhook",
-    "description": "An example resource schema demonstrating some basic constructs and validation rules.",
+    "description": "Repositories can have multiple webhooks installed. Each webhook should have a unique config. Multiple webhooks can share the same config as long as those webhooks do not have any events that overlap.",
     "sourceUrl": "https://github.com/aws-cloudformation/aws-cloudformation-rpdk.git",
     "typeConfiguration": {
         "properties": {
@@ -96,7 +96,7 @@
     },
     "additionalProperties": false,
     "required": [
-       "GitHubAccess",
+        "GitHubAccess",
         "Org",
         "Owner",
         "Name"

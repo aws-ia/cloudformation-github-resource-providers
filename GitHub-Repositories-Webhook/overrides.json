@@ -11,9 +11,6 @@
   },
   "UPDATE": {
     "/Events": ["pull_request"],
-    "/GitHubAccess": "<GITHUB_TOKEN>",
-    "/Owner": "<GITHUB_ORG>",
-    "/Repository": "CloudFormation-GitHub-Test",
     "/Config": {
       "Url": "http://some.url.com",
       "Secret": "123444"
