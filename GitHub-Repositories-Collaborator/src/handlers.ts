@@ -40,31 +40,17 @@ type CollaboratorData =
 
 class Resource extends BaseResource<ResourceModel> {
 
-    private static setModelFromCreateOrUpdateApiResponse(model: ResourceModel, data: CollaboratorData, logger?: LoggerProxy): ResourceModel {
-        if (!!logger) {
-            logger.log(`jdc initial model: ${JSON.stringify(model)}`);
-            logger.log(`jdc initial data: ${JSON.stringify(data)}`);
-        }
+    private static setModelFromCreateOrUpdateApiResponse(model: ResourceModel, data: CollaboratorData): ResourceModel {
         model.owner = data.repository.owner.login;
         model.repository = data.repository.name;
         model.username = data.invitee.login;
         model.permission = Resource.permissionsToPermission(data.permissions);
-        if (!!logger) {
-            logger.log(`jdc final model ${JSON.stringify(model)}`);
-        }
         return model;
     }
 
-    private static setModelFromReadApiResponse(model: ResourceModel, data: CollaboratorData, logger?: LoggerProxy): ResourceModel {
-        if (!!logger) {
-            logger.log(`jdc initial model: ${JSON.stringify(model)}`);
-            logger.log(`jdc initial data: ${JSON.stringify(data)}`);
-        }
+    private static setModelFromReadApiResponse(model: ResourceModel, data: CollaboratorData): ResourceModel {
         model.username = data.user.login;
         model.permission = data.permission;
-        if (!!logger) {
-            logger.log(`jdc final read model ${JSON.stringify(model)}`);
-        }
         return model;
     }
 
@@ -88,11 +74,11 @@ class Resource extends BaseResource<ResourceModel> {
         const model = new ResourceModel(request.desiredResourceState);
         if (await this.assertIsCollaborator(model, request)) {
             const response = await this.createOrUpdateCollaborator(model, request);
-            return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromCreateOrUpdateApiResponse(model, response.data as CollaboratorData, logger));
+            return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromCreateOrUpdateApiResponse(model, response.data as CollaboratorData));
         }
         if (await this.assertHasInvitationPending(model, request)) {
             const response = await this.updateRepoInvitation(model, request);
-            return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromCreateOrUpdateApiResponse(model, response.data as CollaboratorData, logger));
+            return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromCreateOrUpdateApiResponse(model, response.data as CollaboratorData));
         }
         throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
     }
@@ -129,7 +115,7 @@ class Resource extends BaseResource<ResourceModel> {
         // Adding invitation ID in a readonly field
         model.invitationId = response.data.id;
 
-        return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromCreateOrUpdateApiResponse(model, response.data as CollaboratorData, logger));
+        return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromCreateOrUpdateApiResponse(model, response.data as CollaboratorData));
     }
 
     /**
@@ -200,8 +186,8 @@ class Resource extends BaseResource<ResourceModel> {
         const model = new ResourceModel(request.desiredResourceState);
 
         if (await this.assertIsCollaborator(model, request)) {
-            const actualCollaborator = await this.getCollaborator(model, request, logger);
-            return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromReadApiResponse(model, actualCollaborator.data as CollaboratorData, logger));
+            const actualCollaborator = await this.getCollaborator(model, request);
+            return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromReadApiResponse(model, actualCollaborator.data as CollaboratorData));
         }
         if (await this.assertHasInvitationPending(model, request)) {
             const pendingInvitations = await this.listInvitationsByRepo(model, request);
@@ -211,7 +197,7 @@ class Resource extends BaseResource<ResourceModel> {
             if (relatedInvitations.length > 1) {
                 logger.log(`User ${model.username} has ${relatedInvitations.length} pending invitations for this repo`);
             }
-            return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromCreateOrUpdateApiResponse(model, relatedInvitations[0] as CollaboratorData, logger));
+            return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromCreateOrUpdateApiResponse(model, relatedInvitations[0] as CollaboratorData));
         }
         throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
     }
