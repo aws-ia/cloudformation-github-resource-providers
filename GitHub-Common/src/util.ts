@@ -9,7 +9,7 @@ export function isOctokitRequestError(ex: object) {
     return ex instanceof Object && ex.hasOwnProperty('status') && ex.hasOwnProperty('name');
 }
 
-export function handleError(errorResponse: Error, request: ResourceHandlerRequest<BaseModel>) {
+export function handleError(errorResponse: Error, request: ResourceHandlerRequest<BaseModel>, typeName: string) {
     if (!isOctokitRequestError(errorResponse))
         throw new exceptions.InternalFailure(errorResponse);
 
@@ -19,7 +19,7 @@ export function handleError(errorResponse: Error, request: ResourceHandlerReques
         case 403:
             throw new exceptions.AccessDenied();
         case 404:
-            throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
+            throw new exceptions.NotFound(typeName, request.logicalResourceIdentifier);
         case 422:
             throw new exceptions.InvalidRequest(getErrorMessage(requestError, errorResponse));
         default:
