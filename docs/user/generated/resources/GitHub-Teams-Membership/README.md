@@ -1,6 +1,6 @@
-# GitHub::Repositories::Collaborator
+# GitHub::Teams::Membership
 
-The Collaborators resource allows you to add, invite, and remove collaborators from a repository.
+An example resource schema demonstrating some basic constructs and validation rules.
 
 ## Syntax
 
@@ -10,14 +10,13 @@ To declare this entity in your AWS CloudFormation template, use the following sy
 
 <pre>
 {
-    "Type" : "GitHub::Repositories::Collaborator",
+    "Type" : "GitHub::Teams::Membership",
     "Properties" : {
         "<a href="#githubaccess" title="GitHubAccess">GitHubAccess</a>" : <i>String</i>,
-        "<a href="#owner" title="Owner">Owner</a>" : <i>String</i>,
-        "<a href="#repository" title="Repository">Repository</a>" : <i>String</i>,
+        "<a href="#org" title="Org">Org</a>" : <i>String</i>,
+        "<a href="#teamslug" title="TeamSlug">TeamSlug</a>" : <i>String</i>,
         "<a href="#username" title="Username">Username</a>" : <i>String</i>,
-        "<a href="#permission" title="Permission">Permission</a>" : <i>String</i>,
-        "<a href="#permissions" title="Permissions">Permissions</a>" : <i><a href="permissions.md">Permissions</a></i>,
+        "<a href="#role" title="Role">Role</a>" : <i>String</i>,
     }
 }
 </pre>
@@ -25,21 +24,20 @@ To declare this entity in your AWS CloudFormation template, use the following sy
 ### YAML
 
 <pre>
-Type: GitHub::Repositories::Collaborator
+Type: GitHub::Teams::Membership
 Properties:
     <a href="#githubaccess" title="GitHubAccess">GitHubAccess</a>: <i>String</i>
-    <a href="#owner" title="Owner">Owner</a>: <i>String</i>
-    <a href="#repository" title="Repository">Repository</a>: <i>String</i>
+    <a href="#org" title="Org">Org</a>: <i>String</i>
+    <a href="#teamslug" title="TeamSlug">TeamSlug</a>: <i>String</i>
     <a href="#username" title="Username">Username</a>: <i>String</i>
-    <a href="#permission" title="Permission">Permission</a>: <i>String</i>
-    <a href="#permissions" title="Permissions">Permissions</a>: <i><a href="permissions.md">Permissions</a></i>
+    <a href="#role" title="Role">Role</a>: <i>String</i>
 </pre>
 
 ## Properties
 
 #### GitHubAccess
 
-Personal Access Token
+Personal access token
 
 _Required_: Yes
 
@@ -47,9 +45,9 @@ _Type_: String
 
 _Update requires_: [Replacement](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-replacement)
 
-#### Owner
+#### Org
 
-The account owner of the repository. The name is not case sensitive.
+The organization name. The name is not case sensitive. If not specified, then the managed repository will be within the currently logged-in user account.
 
 _Required_: Yes
 
@@ -57,9 +55,9 @@ _Type_: String
 
 _Update requires_: [Replacement](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-replacement)
 
-#### Repository
+#### TeamSlug
 
-The name of the repository. The name is not case sensitive.
+TThe slug of the team name.
 
 _Required_: Yes
 
@@ -71,7 +69,7 @@ _Update requires_: [Replacement](https://docs.aws.amazon.com/AWSCloudFormation/l
 
 The handle for the GitHub user account.
 
-_Required_: Yes
+_Required_: No
 
 _Type_: String
 
@@ -79,25 +77,15 @@ _Pattern_: <code>^(?=[a-zA-Z0-9._]{8,20}$)(?!.*[_.]{2})[^_.].*[^_.]$</code>
 
 _Update requires_: [Replacement](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-replacement)
 
-#### Permission
+#### Role
 
-The permission to grant the collaborator. Only valid on organization-owned repositories. In addition to the enumerated values, you can also specify a custom repository role name, if the owning organization has defined any..
+The handle for the GitHub user account.
 
 _Required_: No
 
 _Type_: String
 
-_Allowed Values_: <code>pull</code> | <code>push</code> | <code>admin</code> | <code>maintain</code> | <code>triage</code>
-
-_Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
-
-#### Permissions
-
-The permission granted the collaborator.
-
-_Required_: No
-
-_Type_: <a href="permissions.md">Permissions</a>
+_Allowed Values_: <code>member</code> | <code>maintainer</code>
 
 _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
 
@@ -109,7 +97,7 @@ The `Fn::GetAtt` intrinsic function returns a value for a specified attribute of
 
 For more information about using the `Fn::GetAtt` intrinsic function, see [Fn::GetAtt](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-getatt.html).
 
-#### InvitationId
+#### State
 
-Invitation identifier
+Membership state
 
