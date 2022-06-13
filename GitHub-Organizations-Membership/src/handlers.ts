@@ -11,33 +11,73 @@ import {
     SessionProxy,
 } from '@amazon-web-services-cloudformation/cloudformation-cli-typescript-lib';
 import {ResourceModel} from './models';
-import {Endpoints, OctokitResponse, RequestError} from "@octokit/types";
-import {Octokit} from "@octokit/rest";
 import {handleError} from "../../GitHub-Common/src/util";
+import {Octokit} from "@octokit/rest";
+import {Endpoints, OctokitResponse} from "@octokit/types";
+import {NotFound} from "@amazon-web-services-cloudformation/cloudformation-cli-typescript-lib/dist/exceptions";
 
-type GetMembershipEndpoint = 'GET /orgs/{org}/teams/{team_slug}/memberships/{username}';
-type AddOrUpdateMembershipEndpoint = 'PUT /orgs/{org}/teams/{team_slug}/memberships/{username}';
+interface CallbackContext extends Record<string, any> {}
 
-type GetMembershipResponseData = Endpoints[GetMembershipEndpoint]['response']['data'];
-type AddOrUpdateMembershipResponseData = Endpoints[AddOrUpdateMembershipEndpoint]['response']['data'];
+type GetMemberEndpoint = 'GET /orgs/{org}/memberships/{username}';
+type DeleteMemberEndpoint = 'DELETE /orgs/{org}/members/{username}';
+type CreateMemberEndpoint = 'PUT /orgs/{org}/memberships/{username}';
+type ListMemberEndpoint = 'GET /orgs/{org}/members';
 
-type MembershipData =
-    GetMembershipResponseData &
-    AddOrUpdateMembershipResponseData;
+type GetMemberResponseData = Endpoints[GetMemberEndpoint]['response']['data'];
+type CreateMemberResponseData = Endpoints[CreateMemberEndpoint]['response']['data'];
+type DeleteMemberResponseData = Endpoints[DeleteMemberEndpoint]['response']['data']
+type ListMemberResponseData = Endpoints[ListMemberEndpoint]['response']['data']
 
-
-interface CallbackContext extends Record<string, any> {
-}
+type MemberData = GetMemberResponseData &
+    CreateMemberResponseData
 
 class Resource extends BaseResource<ResourceModel> {
-    private static setModelFromApiResponse(baseModel: ResourceModel, data: MembershipData): ResourceModel {
-        baseModel.role = data.role;
-        baseModel.state = data.state;
-        return baseModel;
+
+    private static setModelFromResponse(model: ResourceModel, data: CreateMemberResponseData|MemberData): ResourceModel {
+        model.role = data.role;
+        return model;
+    }
+    private async getMember(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>): Promise<OctokitResponse<GetMemberResponseData>> {
+        const octokit = new Octokit({
+            auth: model.gitHubAccess
+        });
+        try {
+            const response = await octokit.request('GET /orgs/{org}/memberships/{username}', {
+                org: model.organization,
+                username: model.username
+            });
+            return response;
+        } catch (e) {
+            handleError(e, request, this.typeName);
+        }
     }
 
-    private static getErrorMessage(requestError: RequestError, errorResponse: Error) {
-        return requestError.errors?.map(e => e.message).join('\n') || errorResponse.message;
+    private async assertIsMember(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>) {
+        try {
+            const member = await this.getMember(model, request);
+            return !!member
+        } catch (e) {
+            if (e instanceof NotFound) {
+                return false;
+            }
+            throw e;
+        }
+    }
+
+    private async createOrUpdateMember(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>): Promise<OctokitResponse<CreateMemberResponseData>> {
+        const octokit = new Octokit({
+            auth: model.gitHubAccess
+        });
+        try {
+            let newVar = await octokit.request('PUT /orgs/{org}/memberships/{username}', {
+                org: model.organization,
+                username: model.username,
+                role: model.role as "admin"|"member"
+            });
+            return newVar;
+        } catch (e) {
+            handleError(e, request, this.typeName);
+        }
     }
 
     /**
@@ -55,14 +95,17 @@ class Resource extends BaseResource<ResourceModel> {
         session: Optional<SessionProxy>,
         request: ResourceHandlerRequest<ResourceModel>,
         callbackContext: CallbackContext,
-        logger: LoggerProxy,
+        logger: LoggerProxy
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
-        if (!! await this.assertMembershipExist(model, request)) {
+        if (await this.assertIsMember(model, request)) {
             throw new exceptions.AlreadyExists(this.typeName, request.logicalResourceIdentifier);
         }
-        const response = await this.addOrUpdateMembership(model, request);
-        return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromApiResponse(model, response.data));
+
+        const response = await this.createOrUpdateMember(model, request);
+
+        return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromResponse(model, response.data as MemberData));
+
     }
 
     /**
@@ -83,11 +126,14 @@ class Resource extends BaseResource<ResourceModel> {
         logger: LoggerProxy
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
-        if (!await this.assertMembershipExist(model, request)) {
+
+        if (!await this.assertIsMember(model, request)) {
             throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
         }
-        const response = await this.addOrUpdateMembership(model, request);
-        return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromApiResponse(model, response.data));
+
+        const response = await this.createOrUpdateMember(model, request);
+
+        return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromResponse(model, response.data as MemberData));
     }
 
     /**
@@ -109,23 +155,22 @@ class Resource extends BaseResource<ResourceModel> {
         logger: LoggerProxy
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
-
         const octokit = new Octokit({
             auth: model.gitHubAccess
         });
-        if (!await this.assertMembershipExist(model, request)) {
-            throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
-        }
+
         try {
-            await octokit.request('DELETE /orgs/{org}/teams/{team_slug}/memberships/{username}', {
-                org: model.org,
-                team_slug: model.teamSlug,
-                username: model.username
-            });
-            return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>();
+            if (await this.assertIsMember(model, request)) {
+                await octokit.request('DELETE /orgs/{org}/memberships/{username}', {
+                    org: model.organization,
+                    username: model.username
+                });
+                return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>();
+            }
         } catch (e) {
             handleError(e, request, this.typeName);
         }
+        throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
     }
 
     /**
@@ -146,8 +191,13 @@ class Resource extends BaseResource<ResourceModel> {
         logger: LoggerProxy
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
-        const response = await this.getMembership(model, request);
-        return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromApiResponse(model, response.data));
+
+        if (await this.assertIsMember(model, request)) {
+            const member = await this.getMember(model, request);
+            return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromResponse(model, member.data as MemberData));
+        }
+
+        throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
     }
 
     /**
@@ -168,77 +218,33 @@ class Resource extends BaseResource<ResourceModel> {
         logger: LoggerProxy
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
-
         const octokit = new Octokit({
             auth: model.gitHubAccess
         });
-
         try {
-            const orgAndTeam = {
-                org: model.org,
-                team_slug: model.teamSlug,
-            };
-            const currentMembers = await octokit.paginate(octokit.teams.listMembersInOrg, orgAndTeam,response => response.data.map(membershipItem => {
-                const resourceModel = new ResourceModel();
-                resourceModel.username = membershipItem.login;
-                resourceModel.org = model.org;
-                resourceModel.teamSlug = model.teamSlug;
-                resourceModel.state = "active"
-                return resourceModel;
-            }));
+            const members = await octokit.paginate(octokit.orgs.listMembers,
+                {
+                    org: model.organization
+                },
+                response => response.data.map(membershipItem => {
+                    const resourceModel = new ResourceModel(model);
+                    resourceModel.username = membershipItem.login
+                    return resourceModel;
+                }));
 
-            const pendingInvites = await octokit.paginate(octokit.teams.listPendingInvitationsInOrg, orgAndTeam,response => response.data.map(membershipItem => {
-                const resourceModel = new ResourceModel();
-                resourceModel.username = membershipItem.login;
-                resourceModel.org = model.org;
-                resourceModel.teamSlug = model.teamSlug;
-                resourceModel.state = "pending";
-                return resourceModel;
-            }));
+            const invitations = await octokit.paginate(octokit.orgs.listPendingInvitations,
+                {
+                    org: model.organization
+                },
+                response => response.data.map(membershipItem => {
+                    const resourceModel = new ResourceModel(model);
+                    resourceModel.username = membershipItem.login
+                    return resourceModel;
+                }));
+
             return ProgressEvent.builder<ProgressEvent<ResourceModel, CallbackContext>>()
                 .status(OperationStatus.Success)
-                .resourceModels(currentMembers.concat(pendingInvites)).build();
-        } catch (e) {
-            handleError(e, request, this.typeName);
-        }
-    }
-
-    private async assertMembershipExist(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>) {
-        try {
-            return await this.getMembership(model, request);
-        } catch (e) {
-            return false;
-        }
-    }
-
-    private async getMembership(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>): Promise<OctokitResponse<GetMembershipResponseData>> {
-        const octokit = new Octokit({
-            auth: model.gitHubAccess
-        });
-
-        try {
-            return await octokit.request('GET /orgs/{org}/teams/{team_slug}/memberships/{username}', {
-                org: model.org,
-                team_slug: model.teamSlug,
-                username: model.username,
-            });
-        } catch (e) {
-            handleError(e, request, this.typeName);
-        }
-    }
-
-    private async addOrUpdateMembership(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>): Promise<OctokitResponse<AddOrUpdateMembershipResponseData>> {
-        const octokit = new Octokit({
-            auth: model.gitHubAccess
-        });
-
-        try {
-            return await octokit.request('PUT /orgs/{org}/teams/{team_slug}/memberships/{username}', {
-                org: model.org,
-                team_slug: model.teamSlug,
-                username: model.username,
-                role: model.role as "member" | "maintainer"
-            });
+                .resourceModels([...members, ...invitations]).build();
         } catch (e) {
             handleError(e, request, this.typeName);
         }

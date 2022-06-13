@@ -1,6 +1,6 @@
 # GitHub::Repositories::Collaborator
 
-An example resource schema demonstrating some basic constructs and validation rules.
+The Collaborators resource allows you to add, invite, and remove collaborators from a repository.
 
 ## Syntax
 

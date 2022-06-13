@@ -12,7 +12,7 @@ import {
 } from '@amazon-web-services-cloudformation/cloudformation-cli-typescript-lib';
 import {ResourceModel} from './models';
 import {Octokit} from "@octokit/core";
-import {isOctokitRequestError} from "../../Common/util";
+import {isOctokitRequestError} from "../../GitHub-Common/src/util";
 import {Endpoints, OctokitResponse, RequestError} from "@octokit/types";
 
 interface CallbackContext extends Record<string, any> {}
