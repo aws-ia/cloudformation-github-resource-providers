@@ -1,7 +1,6 @@
 import {
     Action,
     BaseResource,
-    exceptions,
     handlerEvent,
     LoggerProxy,
     OperationStatus,
@@ -13,31 +12,12 @@ import {
 import {ResourceModel} from './models';
 import {Octokit} from "@octokit/rest";
 import {OctokitResponse} from "@octokit/types"
-import {isOctokitRequestError} from "../../GitHub-Common/src/util"
+import {handleError} from "../../GitHub-Common/src/util"
 
 interface CallbackContext extends Record<string, any> {}
 
+
 class Resource extends BaseResource<ResourceModel> {
-
-    private handleError(response: OctokitResponse<any>, request: ResourceHandlerRequest<ResourceModel>) {
-        if (!isOctokitRequestError(request)) {
-            throw new exceptions.InternalFailure();
-        } else if (response.status === 400) {
-            throw new exceptions.AlreadyExists(this.typeName, request.logicalResourceIdentifier);
-        } else if (response.status === 401) {
-            throw new exceptions.AccessDenied();
-        } else if (response.status === 403) {
-            throw new exceptions.AccessDenied();
-        } else if (response.status === 404) {
-            throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
-        } else if (response.status === 422) {
-            throw new exceptions.AlreadyExists(this.typeName, request.logicalResourceIdentifier);
-        } else if (response.status > 400) {
-            throw new exceptions.InternalFailure();
-        }
-        throw new exceptions.InternalFailure();
-    }
-
     /**
      * CloudFormation invokes this handler when the resource is initially created
      * during stack create operations.
@@ -69,7 +49,7 @@ class Resource extends BaseResource<ResourceModel> {
             });
         } catch (e) {
             logger.log("Create failed " + e.status);
-            this.handleError(e, request)
+            handleError(e, request, this.typeName);
         }
 
         model.slug = response.data.slug;
@@ -109,7 +89,7 @@ class Resource extends BaseResource<ResourceModel> {
                 privacy: privacy
             });
         }catch (e) {
-            this.handleError(e, request);
+            handleError(e, request, this.typeName);
         }
 
         model.slug = response.data.slug;
@@ -143,7 +123,7 @@ class Resource extends BaseResource<ResourceModel> {
                 team_slug: model.slug
             });
         } catch (e) {
-            this.handleError(e, request);
+            handleError(e, request, this.typeName);
         }
 
         return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>();
@@ -176,7 +156,7 @@ class Resource extends BaseResource<ResourceModel> {
                 team_slug: model.slug
             });
         }catch (e) {
-            this.handleError(e, request);
+            handleError(e, request, this.typeName);
         }
 
         model.description = response.data.description;
@@ -218,7 +198,7 @@ class Resource extends BaseResource<ResourceModel> {
                     return response1.data
             });
         } catch (e) {
-            this.handleError(e, request);
+            handleError(e, request, this.typeName);
         }
 
         let models = [];

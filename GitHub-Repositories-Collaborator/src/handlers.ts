@@ -155,7 +155,7 @@ class Resource extends BaseResource<ResourceModel> {
                 return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>();
             }
         } catch (e) {
-            handleError(e, request);
+            handleError(e, request, this.typeName);
         }
         throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
     }
@@ -244,7 +244,7 @@ class Resource extends BaseResource<ResourceModel> {
                 .status(OperationStatus.Success)
                 .resourceModels(currentAndPendingCollaborators).build();
         } catch (e) {
-            handleError(e, request);
+            handleError(e, request, this.typeName);
         }
     }
 
@@ -278,7 +278,7 @@ class Resource extends BaseResource<ResourceModel> {
             });
             return response;
         } catch (e) {
-            handleError(e, request);
+            handleError(e, request, this.typeName);
         }
     }
 
@@ -300,7 +300,7 @@ class Resource extends BaseResource<ResourceModel> {
                 permission: model.permission as "pull" | "push" | "admin" | "maintain" | "triage"
             });
         } catch (e) {
-            handleError(e, request);
+            handleError(e, request, this.typeName);
         }
     }
 
@@ -315,7 +315,7 @@ class Resource extends BaseResource<ResourceModel> {
                     repo: model.repository
                 });
         } catch (e) {
-            handleError(e, request);
+            handleError(e, request, this.typeName);
         }
     }
 
@@ -333,7 +333,7 @@ class Resource extends BaseResource<ResourceModel> {
                     permissions: model.permission as "read" | "write" | "maintain" | "triage" | "admin"
                 });
         } catch (e) {
-            handleError(e, request);
+            handleError(e, request, this.typeName);
         }
     }
 

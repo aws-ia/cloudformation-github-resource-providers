@@ -13,7 +13,7 @@ import {
 import {ResourceModel} from './models';
 import {Endpoints, OctokitResponse, RequestError} from "@octokit/types";
 import {Octokit} from "@octokit/rest";
-import {isOctokitRequestError} from "../../GitHub-Common/src/util";
+import {handleError} from "../../GitHub-Common/src/util";
 
 type GetMembershipEndpoint = 'GET /orgs/{org}/teams/{team_slug}/memberships/{username}';
 type AddOrUpdateMembershipEndpoint = 'PUT /orgs/{org}/teams/{team_slug}/memberships/{username}';
@@ -124,7 +124,7 @@ class Resource extends BaseResource<ResourceModel> {
             });
             return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>();
         } catch (e) {
-            this.handleError(e, request);
+            handleError(e, request, this.typeName);
         }
     }
 
@@ -199,26 +199,7 @@ class Resource extends BaseResource<ResourceModel> {
                 .status(OperationStatus.Success)
                 .resourceModels(currentMembers.concat(pendingInvites)).build();
         } catch (e) {
-            this.handleError(e, request);
-        }
-    }
-
-    private handleError(errorResponse: Error, request: ResourceHandlerRequest<ResourceModel>) {
-        // TODO: Should have utility to get the right exception
-        if(!isOctokitRequestError(errorResponse))
-            throw new exceptions.InternalFailure(errorResponse);
-
-        const requestError = errorResponse as unknown as RequestError;
-        switch (requestError.status) {
-            case 401:
-            case 403:
-                throw new exceptions.AccessDenied();
-            case 404:
-                throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
-            case 422:
-                throw new exceptions.InvalidRequest(Resource.getErrorMessage(requestError, errorResponse));
-            default:
-                throw new exceptions.InternalFailure(Resource.getErrorMessage(requestError, errorResponse));
+            handleError(e, request, this.typeName);
         }
     }
 
@@ -242,7 +223,7 @@ class Resource extends BaseResource<ResourceModel> {
                 username: model.username,
             });
         } catch (e) {
-            this.handleError(e, request);
+            handleError(e, request, this.typeName);
         }
     }
 
@@ -259,7 +240,7 @@ class Resource extends BaseResource<ResourceModel> {
                 role: model.role as "member" | "maintainer"
             });
         } catch (e) {
-            this.handleError(e, request);
+            handleError(e, request, this.typeName);
         }
     }
 }

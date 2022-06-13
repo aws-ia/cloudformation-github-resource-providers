@@ -13,6 +13,7 @@ import {
 import {ResourceModel} from './models';
 import {Octokit} from "@octokit/rest";
 import {Endpoints, OctokitResponse} from "@octokit/types";
+import {handleError} from "../../GitHub-Common/src/util"
 
 interface CallbackContext extends Record<string, any> {
 }
@@ -67,7 +68,7 @@ class Resource extends BaseResource<ResourceModel> {
                 repo: model.name
             });
         } catch (e) {
-            this.handleError(e, request);
+            handleError(e, request, this.typeName);
         }
     }
 
@@ -133,7 +134,7 @@ class Resource extends BaseResource<ResourceModel> {
             });
             return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromApiResponse(model, response.data as RepoData));
         } catch (e) {
-            this.handleError(e, request)}
+            handleError(e, request, this.typeName);}
     }
 
     /**
@@ -202,7 +203,7 @@ class Resource extends BaseResource<ResourceModel> {
                 payload);
             return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromApiResponse(model, response.data as RepoData));
         } catch (e) {
-            this.handleError(e, request)
+            handleError(e, request, this.typeName);
         }
     }
 
@@ -237,7 +238,7 @@ class Resource extends BaseResource<ResourceModel> {
             });
             return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>();
         } catch (e) {
-            this.handleError(e, request)
+            handleError(e, request, this.typeName);
         }
     }
 
@@ -306,22 +307,7 @@ class Resource extends BaseResource<ResourceModel> {
                 .status(OperationStatus.Success)
                 .resourceModels(models).build();
         } catch (e) {
-            this.handleError(e, request)
-        }
-    }
-
-    private handleError(response: OctokitResponse<any>, request: ResourceHandlerRequest<ResourceModel>) {
-        // TODO: Should have utility to get the right exception
-        switch (response.status){
-            case 401:
-            case 403:
-                throw new exceptions.AccessDenied();
-            case 404:
-                throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
-            case 422:
-                throw new exceptions.InvalidRequest(this.typeName);
-            default:
-                throw new exceptions.InternalFailure();
+            handleError(e, request, this.typeName);
         }
     }
 }

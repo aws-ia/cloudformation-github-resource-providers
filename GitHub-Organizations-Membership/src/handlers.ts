@@ -14,6 +14,7 @@ import {ResourceModel} from './models';
 import {handleError} from "../../GitHub-Common/src/util";
 import {Octokit} from "@octokit/rest";
 import {Endpoints, OctokitResponse} from "@octokit/types";
+import {NotFound} from "@amazon-web-services-cloudformation/cloudformation-cli-typescript-lib/dist/exceptions";
 
 interface CallbackContext extends Record<string, any> {}
 
@@ -32,16 +33,10 @@ type MemberData = GetMemberResponseData &
 
 class Resource extends BaseResource<ResourceModel> {
 
-    private static setModelFromCreateOrUpdateApiResponse(model: ResourceModel, data: CreateMemberResponseData): ResourceModel {
+    private static setModelFromResponse(model: ResourceModel, data: CreateMemberResponseData|MemberData): ResourceModel {
         model.role = data.role;
         return model;
     }
-
-    private static setModelFromReadApiResponse(model: ResourceModel, data: MemberData): ResourceModel {
-        model.role = data.role;
-        return model;
-    }
-
     private async getMember(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>): Promise<OctokitResponse<GetMemberResponseData>> {
         const octokit = new Octokit({
             auth: model.gitHubAccess
@@ -62,7 +57,7 @@ class Resource extends BaseResource<ResourceModel> {
             const member = await this.getMember(model, request);
             return !!member
         } catch (e) {
-            if (e.errorCode === "NotFound") {
+            if (e instanceof NotFound) {
                 return false;
             }
             throw e;
@@ -109,7 +104,7 @@ class Resource extends BaseResource<ResourceModel> {
 
         const response = await this.createOrUpdateMember(model, request);
 
-        return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromCreateOrUpdateApiResponse(model, response.data as MemberData));
+        return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromResponse(model, response.data as MemberData));
 
     }
 
@@ -138,7 +133,7 @@ class Resource extends BaseResource<ResourceModel> {
 
         const response = await this.createOrUpdateMember(model, request);
 
-        return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromCreateOrUpdateApiResponse(model, response.data as MemberData));
+        return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromResponse(model, response.data as MemberData));
     }
 
     /**
@@ -199,7 +194,7 @@ class Resource extends BaseResource<ResourceModel> {
 
         if (await this.assertIsMember(model, request)) {
             const member = await this.getMember(model, request);
-            return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromReadApiResponse(model, member.data as MemberData));
+            return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(Resource.setModelFromResponse(model, member.data as MemberData));
         }
 
         throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
