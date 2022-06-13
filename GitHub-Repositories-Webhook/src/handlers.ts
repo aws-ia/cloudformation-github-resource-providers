@@ -13,30 +13,11 @@ import {
 import {ResourceModel} from './models';
 import {Octokit} from "@octokit/rest";
 import {OctokitResponse} from "@octokit/types"
-import {isOctokitRequestError} from "../../Common/util";
+import {handleError} from "../../GitHub-Common/src/util";
 
 interface CallbackContext extends Record<string, any> {}
 
 class Resource extends BaseResource<ResourceModel> {
-
-    public handleError(response: OctokitResponse<any>, request: ResourceHandlerRequest<ResourceModel>) {
-        if (!isOctokitRequestError(response)) {
-            throw new exceptions.InternalFailure();
-        } else if (response.status === 400) {
-            throw new exceptions.AlreadyExists(this.typeName, request.logicalResourceIdentifier);
-        } else if (response.status === 401) {
-            throw new exceptions.AccessDenied();
-        } else if (response.status === 403) {
-            throw new exceptions.AccessDenied();
-        } else if (response.status === 404) {
-            throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
-        } else if (response.status === 422) {
-            throw new exceptions.AlreadyExists(this.typeName, request.logicalResourceIdentifier);
-        } else if (response.status > 400) {
-            throw new exceptions.InternalFailure();
-        }
-        throw new exceptions.InternalFailure();
-    }
 
     /**
      * CloudFormation invokes this handler when the resource is initially created
@@ -77,7 +58,7 @@ class Resource extends BaseResource<ResourceModel> {
                 config: {...model.config}
             });
         } catch (e) {
-            this.handleError(e, request);
+            handleError(e, request, this.typeName);
         }
 
         return Resource.createResponseModel(model, response.data);
@@ -194,7 +175,7 @@ class Resource extends BaseResource<ResourceModel> {
                 hook_id: model.id
             });
         } catch (e) {
-            this.handleError(e, request);
+            handleError(e, request, this.typeName);
         }
         return response;
     }
@@ -211,7 +192,7 @@ class Resource extends BaseResource<ResourceModel> {
                 hook_id: model.id
             });
         } catch (e) {
-            this.handleError(e, request);
+            handleError(e, request, this.typeName);
         }
         return Resource.createResponseModel(model, response.data);
     }
@@ -243,7 +224,7 @@ class Resource extends BaseResource<ResourceModel> {
                 return resourceModel;
             }));
         } catch (e) {
-            this.handleError(e, request);
+            handleError(e, request, this.typeName);
         }
 
         return models;
@@ -265,7 +246,7 @@ class Resource extends BaseResource<ResourceModel> {
                 config: {url: model.config.url, secret: model.config.secret, content_type: model.config.contentType, insecure_ssl: model.config.insecureSsl}
             });
         } catch (e) {
-            this.handleError(e, request);
+            handleError(e, request, this.typeName);
         }
 
         return Resource.createResponseModel(model, response.data);
