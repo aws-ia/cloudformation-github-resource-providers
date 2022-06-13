@@ -7,12 +7,13 @@
     "doc": "docs"
   },
   "scripts": {
-    "build:all": "find . -maxdepth 1 -type d -name \"GitHub-*\" -exec bash -c \"cd '{}' && cfn generate && npm install && npm run build\" \\;",
+    "build:all": "find . -depth 1 -type d -name \"*\" -exec bash -c \"test -e {}/.rpdk-config && cd '{}' && cfn generate && npm install && npm run build\" \\;",
     "build:docs-clean": "rm -rf docs/user/generated/resources/*",
-    "build:docs-cp-docs": "find . -maxdepth 1 -type d -name \"GitHub-*\" -exec bash -c \"mkdir -p docs/user/generated/resources/{} && cp {}/docs/* docs/user/generated/resources/{}/\" \\;",
-    "build:docs-cp-extras": "find . -maxdepth 1 -type d -name \"GitHub-*\" -exec bash -c \"mkdir -p docs/user/generated/resources/{} && cp {}/docs-extra/* docs/user/generated/resources/{}/\" \\;",
+    "build:docs-cp-docs": "find . -depth 1 -type d -name \"*\" -exec bash -c \"! test -e {}/.rpdk-config || mkdir -p docs/user/generated/resources/{} && cp {}/docs/* docs/user/generated/resources/{}/\" \\;",
+    "build:docs-cp-extras": "find . -depth 1 -type d -name \"*\" -exec bash -c \"! test -e {}/.rpdk-config || mkdir -p docs/user/generated/resources/{} && cp {}/docs-extra/* docs/user/generated/resources/{}/\" \\;",
     "build:docs-cp": "cp -r docs/user/src/main/docs/* docs/user/generated",
     "build:docs": "npm run build:docs-clean ; npm run build:docs-cp-docs && npm run build:docs-cp-extras",
+    "build": "npm run build:all && npm run build:docs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
