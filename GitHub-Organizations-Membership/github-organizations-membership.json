@@ -50,7 +50,7 @@
     "additionalProperties": false,
     "required": [
         "GitHubAccess",
-        "Org"
+        "Organization"
     ],
     "primaryIdentifier": [
         "/properties/Username",

@@ -3,8 +3,8 @@
     "typeName": "GitHub::Teams::Team",
     "language": "typescript",
     "runtime": "nodejs12.x",
-    "entrypoint": "dist/handlers.entrypoint",
-    "testEntrypoint": "dist/handlers.testEntrypoint",
+    "entrypoint": "dist/GitHub-Teams-Team/src/handlers.entrypoint",
+    "testEntrypoint": "dist/GitHub-Teams-Team/src/handlers.testEntrypoint",
     "settings": {
         "version": false,
         "subparser_name": null,

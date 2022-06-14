@@ -47,7 +47,7 @@ _Update requires_: [Replacement](https://docs.aws.amazon.com/AWSCloudFormation/l
 
 The Organization the user is being added to
 
-_Required_: No
+_Required_: Yes
 
 _Type_: String
 

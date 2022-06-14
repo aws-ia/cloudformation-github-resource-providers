@@ -3,8 +3,8 @@
     "typeName": "GitHub::Organizations::Membership",
     "language": "typescript",
     "runtime": "nodejs12.x",
-    "entrypoint": "dist/handlers.entrypoint",
-    "testEntrypoint": "dist/handlers.testEntrypoint",
+    "entrypoint": "dist/GitHub-Organizations-Membership/src/handlers.entrypoint",
+    "testEntrypoint": "dist/GitHub-Organizations-Membership/src/handlers.testEntrypoint",
     "settings": {
         "version": false,
         "subparser_name": null,
