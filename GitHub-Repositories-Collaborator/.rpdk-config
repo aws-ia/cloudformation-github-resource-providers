@@ -3,8 +3,8 @@
     "typeName": "GitHub::Repositories::Collaborator",
     "language": "typescript",
     "runtime": "nodejs12.x",
-    "entrypoint": "dist/handlers.entrypoint",
-    "testEntrypoint": "dist/handlers.testEntrypoint",
+    "entrypoint": "dist/GitHub-Repositories-Collaborator/src/handlers.entrypoint",
+    "testEntrypoint": "dist/GitHub-Repositories-Collaborator/src/handlers.testEntrypoint",
     "settings": {
         "version": false,
         "subparser_name": null,
