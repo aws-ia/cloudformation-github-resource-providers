@@ -222,11 +222,16 @@ class Resource extends BaseResource<ResourceModel> {
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
 
-        const response = await this.getTeamRepoAccess(model, request, logger);
-
-        logger.log(`Read response ${JSON.stringify(response)}`);
-
-        model.permission = this.parsePermission(response.data);
+        const response = await this.getTeamRepoAccess(model, request);
+        /*
+          GitHub documentation and behaviour are not matching: it should return a 200 response with data, including
+          the permission, but it has changed in the latest days. If the team has access it return 204, if not 400.
+          Seem it's ignoring  the fact the header has been sent
+          See: https://docs.github.com/en/rest/teams/teams#check-team-permissions-for-a-repository
+         */
+        if (response.status !== 204) {
+            model.permission = this.parsePermission(response.data);
+        }
 
         return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(model);
     }
