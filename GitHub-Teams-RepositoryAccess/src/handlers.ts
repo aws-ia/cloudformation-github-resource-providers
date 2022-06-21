@@ -222,7 +222,7 @@ class Resource extends BaseResource<ResourceModel> {
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
 
-        const response = await this.getTeamRepoAccess(model, request);
+        const response = await this.getTeamRepoAccess(model, request, logger);
         /*
           GitHub documentation and behaviour are not matching: it should return a 200 response with data, including
           the permission, but it has changed in the latest days. If the team has access it return 204, if not 400.
