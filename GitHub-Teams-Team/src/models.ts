@@ -11,7 +11,7 @@ export class ResourceModel extends BaseModel {
     @Exclude()
     protected readonly IDENTIFIER_KEY_ORGANIZATION: string = '/properties/Organization';
     @Exclude()
-    protected readonly IDENTIFIER_KEY_NAME: string = '/properties/Name';
+    protected readonly IDENTIFIER_KEY_SLUG: string = '/properties/Slug';
 
     @Expose({ name: 'Name' })
     @Transform(
@@ -75,8 +75,8 @@ export class ResourceModel extends BaseModel {
             identifier[this.IDENTIFIER_KEY_ORGANIZATION] = this.organization;
         }
 
-        if (this.name != null) {
-            identifier[this.IDENTIFIER_KEY_NAME] = this.name;
+        if (this.slug != null) {
+            identifier[this.IDENTIFIER_KEY_SLUG] = this.slug;
         }
 
         // only return the identifier if it can be used, i.e. if all components are present

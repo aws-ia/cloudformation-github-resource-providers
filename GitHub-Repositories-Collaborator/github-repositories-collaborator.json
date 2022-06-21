@@ -74,7 +74,7 @@
         "Username": {
             "description": "The handle for the GitHub user account.",
             "type": "string",
-            "pattern": "^(?=[a-zA-Z0-9._]{8,20}$)(?!.*[_.]{2})[^_.].*[^_.]$"
+            "pattern": "^(?=[a-zA-Z0-9._]{7,20}$)(?!.*[_.]{2})[^_.].*[^_.]$"
         },
         "Permission": {
             "description": "The permission to grant the collaborator. Only valid on organization-owned repositories. In addition to the enumerated values, you can also specify a custom repository role name, if the owning organization has defined any..",
