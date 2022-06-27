@@ -3,7 +3,7 @@
     "/GitHubAccess": "<GITHUB_TOKEN>",
     "/Owner": "<GITHUB_ORG>",
     "/Repository": "<GITHUB_REPOSITORY>",
-    "/Username": "nakomis",
+    "/Username": "<EXTERNAL_GITHUB_USERNAME>",
     "/Permission": "pull"
   },
   "UPDATE": {

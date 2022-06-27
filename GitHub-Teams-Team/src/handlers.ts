@@ -117,7 +117,6 @@ class Resource extends BaseResource<ResourceModel> {
         const model = new ResourceModel(request.desiredResourceState);
         const octokit = new Octokit({auth: model.gitHubAccess});
 
-        logger.log(`Delete request ${JSON.stringify(request)}`);
         try {
              const deleteResponse = await octokit.request('DELETE /orgs/{org}/teams/{team_slug}', {
                 org: model.organization,
