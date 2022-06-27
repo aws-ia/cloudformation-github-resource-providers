@@ -118,11 +118,13 @@ class Resource extends BaseResource<ResourceModel> {
         const octokit = new Octokit({auth: model.gitHubAccess});
 
         try {
-             await octokit.request('DELETE /orgs/{org}/teams/{team_slug}', {
+             const deleteResponse = await octokit.request('DELETE /orgs/{org}/teams/{team_slug}', {
                 org: model.organization,
                 team_slug: model.slug
             });
+             logger.log(`Delete response ${JSON.stringify(deleteResponse)}`);
         } catch (e) {
+            logger.log(`Delete error ${JSON.stringify(e)}`);
             handleError(e, request, this.typeName);
         }
 
@@ -151,6 +153,7 @@ class Resource extends BaseResource<ResourceModel> {
 
         let response: OctokitResponse<any>;
         try {
+            logger.log(`Read request ${JSON.stringify(model)}`);
             response = await octokit.request('GET /orgs/{org}/teams/{team_slug}', {
                 org: model.organization,
                 team_slug: model.slug

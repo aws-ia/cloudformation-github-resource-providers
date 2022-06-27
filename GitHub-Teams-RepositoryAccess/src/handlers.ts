@@ -27,7 +27,7 @@ type DeleteTeamRepoAccessResponseData = Endpoints[DeleteTeamRepoAccessEndpoint][
 
 class Resource extends BaseResource<ResourceModel> {
 
-    private async getTeamRepoAccess(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>): Promise<OctokitResponse<GetTeamRepoAccessResponseData>> {
+    private async getTeamRepoAccess(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>, logger: LoggerProxy): Promise<OctokitResponse<GetTeamRepoAccessResponseData>> {
         const octokit = new Octokit({
             auth: model.gitHubAccess
         });
@@ -37,14 +37,15 @@ class Resource extends BaseResource<ResourceModel> {
                 org: model.org,
                 team_slug: model.team,
                 owner: model.owner,
-                repo: model.repository
+                repo: model.repository,
+                headers: {Accept: 'application/vnd.github.v3+json'}
             });
         } catch (e) {
-            this.processRequestException(e, request);
+            this.processRequestException(e, request, logger);
         }
     }
 
-    private async putTeamRepoAccess(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>): Promise<OctokitResponse<PutTeamRepoAccessResponseData>> {
+    private async putTeamRepoAccess(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>, logger: LoggerProxy): Promise<OctokitResponse<PutTeamRepoAccessResponseData>> {
         const octokit = new Octokit({
             auth: model.gitHubAccess
         });
@@ -58,7 +59,7 @@ class Resource extends BaseResource<ResourceModel> {
                 permission: model.permission as "pull" | "push" | "admin" | "maintain" | "triage" | undefined
             });
         } catch (e) {
-            this.processRequestException(e, request);
+            this.processRequestException(e, request, logger);
         }
     }
 
@@ -79,7 +80,10 @@ class Resource extends BaseResource<ResourceModel> {
         }
     }
 
-    private processRequestException(e: Error, request: ResourceHandlerRequest<ResourceModel>) {
+    private processRequestException(e: Error, request: ResourceHandlerRequest<ResourceModel>, logger?: LoggerProxy) {
+        if (!!logger) {
+            logger.log(`Error response ${JSON.stringify(e)}`)
+        }
         if (isOctokitRequestError(e) && (e as unknown as RequestError).status === 404) {
             throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
         }
@@ -89,9 +93,9 @@ class Resource extends BaseResource<ResourceModel> {
         throw new exceptions.InternalFailure(e);
     }
 
-    private async assertTeamRepoAccess(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>) {
+    private async assertTeamRepoAccess(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>, logger: LoggerProxy) {
         try {
-            await this.getTeamRepoAccess(model, request);
+            await this.getTeamRepoAccess(model, request, logger);
         } catch (e) {
             return false;
         }
@@ -133,11 +137,11 @@ class Resource extends BaseResource<ResourceModel> {
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
 
-        if (await this.assertTeamRepoAccess(model, request)) {
+        if (await this.assertTeamRepoAccess(model, request, logger)) {
             throw new exceptions.AlreadyExists(this.typeName, request.logicalResourceIdentifier);
         }
 
-        await this.putTeamRepoAccess(model, request);
+        await this.putTeamRepoAccess(model, request, logger);
 
         return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(model);
     }
@@ -161,11 +165,11 @@ class Resource extends BaseResource<ResourceModel> {
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
 
-        if (!(await this.assertTeamRepoAccess(model, request))) {
+        if (!(await this.assertTeamRepoAccess(model, request, logger))) {
             throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
         }
 
-        await this.putTeamRepoAccess(model, request);
+        await this.putTeamRepoAccess(model, request, logger);
 
         return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(model);
     }
@@ -190,7 +194,7 @@ class Resource extends BaseResource<ResourceModel> {
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
 
-        if (!(await this.assertTeamRepoAccess(model, request))) {
+        if (!(await this.assertTeamRepoAccess(model, request, logger))) {
             throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
         }
 
@@ -218,7 +222,7 @@ class Resource extends BaseResource<ResourceModel> {
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
 
-        const response = await this.getTeamRepoAccess(model, request);
+        const response = await this.getTeamRepoAccess(model, request, logger);
         /*
           GitHub documentation and behaviour are not matching: it should return a 200 response with data, including
           the permission, but it has changed in the latest days. If the team has access it return 204, if not 400.

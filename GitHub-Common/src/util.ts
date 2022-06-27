@@ -18,10 +18,12 @@ export function handleError(errorResponse: Error, request: ResourceHandlerReques
         case 401:
         case 403:
             throw new exceptions.AccessDenied();
+        case 400:
+            throw new exceptions.AlreadyExists(typeName, request.logicalResourceIdentifier);
         case 404:
             throw new exceptions.NotFound(typeName, request.logicalResourceIdentifier);
         case 422:
-            throw new exceptions.InvalidRequest(getErrorMessage(requestError, errorResponse));
+            throw new exceptions.AlreadyExists(typeName, request.logicalResourceIdentifier);
         default:
             throw new exceptions.InternalFailure(getErrorMessage(requestError, errorResponse));
     }

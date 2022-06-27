@@ -73,7 +73,10 @@
   ],
   "primaryIdentifier": [
     "/properties/Organization",
-    "/properties/Name"
+    "/properties/Slug"
+  ],
+  "writeOnlyProperties": [
+    "/properties/GitHubAccess"
   ],
   "handlers": {
     "create": {
