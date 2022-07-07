@@ -1,0 +1,8 @@
+{
+  "CREATE": {
+    "/Organization": "Cloudsoft-CloudFormation",
+    "/GitHubAccess": "<GITHUB_TOKEN>",
+    "/Name": "My contract test org",
+    "/Description": "A description of my test company created by contract tests"
+  }
+}

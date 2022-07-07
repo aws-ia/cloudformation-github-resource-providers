@@ -1,0 +1,23 @@
+{
+  "CREATE": {
+    "/GitHubAccess": "<GITHUB_TOKEN>",
+    "/Org": "Cloudsoft-CloudFormation",
+    "/Name": "foo",
+    "/Description": "GitHub repo created from the CloudFormation contract tests",
+    "/Homepage": "https://GitHub.com",
+    "/LicenseTemplate": "mit",
+    "/GitIgnoreTemplate": "Node",
+    "/TeamId": null,
+    "/AllowMergeCommit": true,
+    "/AllowForking": false,
+    "/Visibility": "public",
+    "/Private": false,
+    "/Homepage": "https://github.com"
+  },
+  "UPDATE": {
+    "/SecurityAndAnalysis": null,
+    "/Archived": false,
+    "/AllowMergeCommit": true,
+    "/AllowForking": false
+  }
+}
