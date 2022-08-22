@@ -140,3 +140,29 @@ export class WebhookConfig extends BaseModel {
 
 }
 
+export class TypeConfigurationModel extends BaseModel {
+    ['constructor']: typeof TypeConfigurationModel;
+
+
+    @Expose({ name: 'GitHubAccess' })
+    @Type(() => GitHubAccess)
+    gitHubAccess?: Optional<GitHubAccess>;
+
+}
+
+export class GitHubAccess extends BaseModel {
+    ['constructor']: typeof GitHubAccess;
+
+
+    @Expose({ name: 'AccessToken' })
+    @Transform(
+        (value: any, obj: any) =>
+            transformValue(String, 'accessToken', value, obj, []),
+        {
+            toClassOnly: true,
+        }
+    )
+    accessToken?: Optional<string>;
+
+}
+

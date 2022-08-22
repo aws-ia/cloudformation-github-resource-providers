@@ -13,7 +13,7 @@
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "dependencies": {
-        "@amazon-web-services-cloudformation/cloudformation-cli-typescript-lib": "^1.0.1",
+        "@amazon-web-services-cloudformation/cloudformation-cli-typescript-lib": "^1.0.3",
         "@octokit/rest": "^18.12.0",
         "class-transformer": "0.3.1"
     },

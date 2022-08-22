@@ -15,6 +15,8 @@ import {Endpoints, OctokitResponse, RequestError} from "@octokit/types";
 import {Octokit} from "@octokit/rest";
 import {handleError} from "../../GitHub-Common/src/util";
 
+import {version} from '../package.json';
+
 type GetMembershipEndpoint = 'GET /orgs/{org}/teams/{team_slug}/memberships/{username}';
 type AddOrUpdateMembershipEndpoint = 'PUT /orgs/{org}/teams/{team_slug}/memberships/{username}';
 
@@ -30,6 +32,9 @@ interface CallbackContext extends Record<string, any> {
 }
 
 class Resource extends BaseResource<ResourceModel> {
+
+    private userAgent = `AWS CloudFormation (+https://aws.amazon.com/cloudformation/) CloudFormation resource ${this.typeName}/${version}`;
+
     private static setModelFromApiResponse(baseModel: ResourceModel, data: MembershipData): ResourceModel {
         baseModel.role = data.role;
         baseModel.state = data.state;
@@ -111,7 +116,8 @@ class Resource extends BaseResource<ResourceModel> {
         const model = new ResourceModel(request.desiredResourceState);
 
         const octokit = new Octokit({
-            auth: model.gitHubAccess
+            auth: model.gitHubAccess,
+            userAgent: this.userAgent
         });
         if (!await this.assertMembershipExist(model, request)) {
             throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
@@ -170,7 +176,8 @@ class Resource extends BaseResource<ResourceModel> {
         const model = new ResourceModel(request.desiredResourceState);
 
         const octokit = new Octokit({
-            auth: model.gitHubAccess
+            auth: model.gitHubAccess,
+            userAgent: this.userAgent
         });
 
         try {
@@ -213,7 +220,8 @@ class Resource extends BaseResource<ResourceModel> {
 
     private async getMembership(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>): Promise<OctokitResponse<GetMembershipResponseData>> {
         const octokit = new Octokit({
-            auth: model.gitHubAccess
+            auth: model.gitHubAccess,
+            userAgent: this.userAgent
         });
 
         try {
@@ -229,7 +237,8 @@ class Resource extends BaseResource<ResourceModel> {
 
     private async addOrUpdateMembership(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>): Promise<OctokitResponse<AddOrUpdateMembershipResponseData>> {
         const octokit = new Octokit({
-            auth: model.gitHubAccess
+            auth: model.gitHubAccess,
+            userAgent: this.userAgent
         });
 
         try {

@@ -15,6 +15,8 @@ import {handleError} from "../../GitHub-Common/src/util";
 import {Octokit} from "@octokit/rest";
 import {Endpoints, OctokitResponse} from "@octokit/types";
 
+import {version} from '../package.json';
+
 interface CallbackContext extends Record<string, any> {
 }
 
@@ -39,6 +41,8 @@ type CollaboratorData =
     UpdateInvitationsResponseData;
 
 class Resource extends BaseResource<ResourceModel> {
+
+    private userAgent = `AWS CloudFormation (+https://aws.amazon.com/cloudformation/) CloudFormation resource ${this.typeName}/${version}`;
 
     private static setModelFromCreateOrUpdateApiResponse(model: ResourceModel, data: CollaboratorData): ResourceModel {
         model.owner = data.repository.owner.login;
@@ -132,7 +136,8 @@ class Resource extends BaseResource<ResourceModel> {
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
         const octokit = new Octokit({
-            auth: model.gitHubAccess
+            auth: model.gitHubAccess,
+            userAgent: this.userAgent
         });
 
         try {
@@ -215,7 +220,8 @@ class Resource extends BaseResource<ResourceModel> {
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
         const octokit = new Octokit({
-            auth: model.gitHubAccess
+            auth: model.gitHubAccess,
+            userAgent: this.userAgent
         });
         try {
             const collaborators = await octokit.paginate(octokit.repos.listCollaborators,
@@ -267,7 +273,8 @@ class Resource extends BaseResource<ResourceModel> {
 
     private async getCollaborator(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>): Promise<OctokitResponse<GetCollaboratorResponseData>> {
         const octokit = new Octokit({
-            auth: model.gitHubAccess
+            auth: model.gitHubAccess,
+            userAgent: this.userAgent
         });
         try {
             const response = await octokit.request('GET /repos/{owner}/{repo}/collaborators/{username}/permission', {
@@ -290,7 +297,8 @@ class Resource extends BaseResource<ResourceModel> {
      */
     private async createOrUpdateCollaborator(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>): Promise<OctokitResponse<CreateOrUpdateCollaboratorResponseData>> {
         const octokit = new Octokit({
-            auth: model.gitHubAccess
+            auth: model.gitHubAccess,
+            userAgent: this.userAgent
         });
         try {
             return await octokit.request('PUT /repos/{owner}/{repo}/collaborators/{username}', {
@@ -306,7 +314,8 @@ class Resource extends BaseResource<ResourceModel> {
 
     private async listInvitationsByRepo(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>) {
         const octokit = new Octokit({
-            auth: model.gitHubAccess
+            auth: model.gitHubAccess,
+            userAgent: this.userAgent
         });
         try {
             return await octokit.paginate(octokit.repos.listInvitations,
@@ -322,7 +331,8 @@ class Resource extends BaseResource<ResourceModel> {
     private async updateRepoInvitation(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>) {
         //https://docs.github.com/en/rest/collaborators/invitations#update-a-repository-invitation
         const octokit = new Octokit({
-            auth: model.gitHubAccess
+            auth: model.gitHubAccess,
+            userAgent: this.userAgent
         });
         try {
             return await octokit.request("PATCH /repos/{owner}/{repo}/invitations/{invitation_id}",

@@ -15,6 +15,8 @@ import {Octokit} from "@octokit/rest";
 import {RequestError} from "@octokit/types";
 import {isOctokitRequestError} from "../../GitHub-Common/src/util";
 
+import {version} from '../package.json';
+
 interface CallbackContext extends Record<string, any> {}
 
 type GetTagEndpoint = 'GET /repos/{owner}/{repo}/git/ref/{ref}';
@@ -25,9 +27,12 @@ type CreateTagEndpoint = 'POST /repos/{owner}/{repo}/git/refs';
 
 class Resource extends BaseResource<ResourceModel> {
 
+    private userAgent = `AWS CloudFormation (+https://aws.amazon.com/cloudformation/) CloudFormation resource ${this.typeName}/${version}`;
+
     private async getTag(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>) {
         const octokit = new Octokit({
-            auth: model.gitHubAccess
+            auth: model.gitHubAccess,
+            userAgent: this.userAgent
         });
 
         try {
@@ -84,7 +89,8 @@ class Resource extends BaseResource<ResourceModel> {
         }
 
         const octokit = new Octokit({
-            auth: model.gitHubAccess
+            auth: model.gitHubAccess,
+            userAgent: this.userAgent
         });
 
         try {
@@ -126,7 +132,8 @@ class Resource extends BaseResource<ResourceModel> {
         }
 
         const octokit = new Octokit({
-            auth: model.gitHubAccess
+            auth: model.gitHubAccess,
+            userAgent: this.userAgent
         });
 
         try {
@@ -169,7 +176,8 @@ class Resource extends BaseResource<ResourceModel> {
         }
 
         const octokit = new Octokit({
-            auth: model.gitHubAccess
+            auth: model.gitHubAccess,
+            userAgent: this.userAgent
         });
 
         try {
@@ -230,7 +238,8 @@ class Resource extends BaseResource<ResourceModel> {
         const model = new ResourceModel(request.desiredResourceState);
 
         const octokit = new Octokit({
-            auth: model.gitHubAccess
+            auth: model.gitHubAccess,
+            userAgent: this.userAgent
         });
 
         try {

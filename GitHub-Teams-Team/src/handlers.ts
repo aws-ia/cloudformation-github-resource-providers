@@ -14,10 +14,15 @@ import {Octokit} from "@octokit/rest";
 import {OctokitResponse} from "@octokit/types"
 import {handleError} from "../../GitHub-Common/src/util"
 
+import {version} from '../package.json';
+
 interface CallbackContext extends Record<string, any> {}
 
 
 class Resource extends BaseResource<ResourceModel> {
+
+    private userAgent = `AWS CloudFormation (+https://aws.amazon.com/cloudformation/) CloudFormation resource ${this.typeName}/${version}`;
+
     /**
      * CloudFormation invokes this handler when the resource is initially created
      * during stack create operations.
@@ -36,7 +41,10 @@ class Resource extends BaseResource<ResourceModel> {
         logger: LoggerProxy
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
-        const octokit = new Octokit({auth: model.gitHubAccess});
+        const octokit = new Octokit({
+            auth: model.gitHubAccess,
+            userAgent: this.userAgent
+        });
 
         let response: OctokitResponse<any>;
         try {
@@ -76,7 +84,8 @@ class Resource extends BaseResource<ResourceModel> {
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
 
-        const octokit = new Octokit({auth: model.gitHubAccess});
+        const octokit = new Octokit({auth: model.gitHubAccess,
+            userAgent: this.userAgent});
 
         let response: OctokitResponse<any>;
         try {
@@ -115,7 +124,9 @@ class Resource extends BaseResource<ResourceModel> {
         logger: LoggerProxy
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
-        const octokit = new Octokit({auth: model.gitHubAccess});
+        const octokit = new Octokit({auth: model.gitHubAccess,
+            userAgent: this.userAgent
+        });
 
         try {
              const deleteResponse = await octokit.request('DELETE /orgs/{org}/teams/{team_slug}', {
@@ -149,7 +160,8 @@ class Resource extends BaseResource<ResourceModel> {
         logger: LoggerProxy
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
-        const octokit = new Octokit({auth: model.gitHubAccess});
+        const octokit = new Octokit({auth: model.gitHubAccess,
+            userAgent:this.userAgent});
 
         let response: OctokitResponse<any>;
         try {
@@ -189,7 +201,8 @@ class Resource extends BaseResource<ResourceModel> {
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
 
-        const octokit = new Octokit({auth: model.gitHubAccess});
+        const octokit = new Octokit({auth: model.gitHubAccess,
+            userAgent: this.userAgent});
         let response: any;
 
         try{

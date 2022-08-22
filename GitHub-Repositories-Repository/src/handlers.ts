@@ -15,6 +15,8 @@ import {Octokit} from "@octokit/rest";
 import {Endpoints, OctokitResponse} from "@octokit/types";
 import {handleError} from "../../GitHub-Common/src/util"
 
+import {version} from '../package.json';
+
 interface CallbackContext extends Record<string, any> {
 }
 
@@ -43,6 +45,8 @@ type RepoData = CreateOrgRepoResponseData
 
 class Resource extends BaseResource<ResourceModel> {
 
+    private userAgent = `AWS CloudFormation (+https://aws.amazon.com/cloudformation/) CloudFormation resource ${this.typeName}/${version}`;
+
     private static setModelFromApiResponse(baseModel: ResourceModel, data: RepoData): ResourceModel {
         baseModel.owner = data.owner.login;
         baseModel.gitUrl = data.git_url;
@@ -59,7 +63,8 @@ class Resource extends BaseResource<ResourceModel> {
 
     private async getRepo(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>): Promise<OctokitResponse<GetUserRepoResponseData>> {
         const octokit = new Octokit({
-            auth: model.gitHubAccess
+            auth: model.gitHubAccess,
+            userAgent: this.userAgent
         });
 
         try {
@@ -105,7 +110,8 @@ class Resource extends BaseResource<ResourceModel> {
         }
 
         const octokit = new Octokit({
-            auth: model.gitHubAccess
+            auth: model.gitHubAccess,
+            userAgent: this.userAgent
         });
 
         try {
@@ -161,7 +167,8 @@ class Resource extends BaseResource<ResourceModel> {
         }
 
         const octokit = new Octokit({
-            auth: model.gitHubAccess
+            auth: model.gitHubAccess,
+            userAgent: this.userAgent
         });
 
         function allowForkingUpdated() {
@@ -229,7 +236,10 @@ class Resource extends BaseResource<ResourceModel> {
         if (!(await this.assertRepoExist(model, request))) {
             throw new exceptions.NotFound(this.typeName,request.logicalResourceIdentifier);
         }
-        const octokit = new Octokit({auth: model.gitHubAccess})
+        const octokit = new Octokit({
+            auth: model.gitHubAccess,
+            userAgent: this.userAgent
+        })
         try {
             // TODO: Convert the model to a dictionary corresponding the type for the request
             await octokit.request('DELETE /repos/{owner}/{repo}', {
@@ -282,7 +292,10 @@ class Resource extends BaseResource<ResourceModel> {
         logger: LoggerProxy
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
-        const octokit = new Octokit({auth: model.gitHubAccess});
+        const octokit = new Octokit({
+            auth: model.gitHubAccess,
+            userAgent: this.userAgent
+        });
 
         try {
             let requestMethod, requestParams = undefined;

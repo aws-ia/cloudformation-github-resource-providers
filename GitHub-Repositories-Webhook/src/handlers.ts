@@ -15,9 +15,13 @@ import {Octokit} from "@octokit/rest";
 import {OctokitResponse} from "@octokit/types"
 import {handleError} from "../../GitHub-Common/src/util";
 
+import {version} from '../package.json';
+
 interface CallbackContext extends Record<string, any> {}
 
 class Resource extends BaseResource<ResourceModel> {
+
+    private userAgent = `AWS CloudFormation (+https://aws.amazon.com/cloudformation/) CloudFormation resource ${this.typeName}/${version}`;
 
     /**
      * CloudFormation invokes this handler when the resource is initially created
@@ -45,7 +49,8 @@ class Resource extends BaseResource<ResourceModel> {
 
     private async createWebhook(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>, logger: LoggerProxy) {
         const octokit = new Octokit({
-            auth: model.gitHubAccess
+            auth: model.gitHubAccess,
+            userAgent: this.userAgent
         });
         let response: OctokitResponse<any>;
         try {
@@ -165,7 +170,8 @@ class Resource extends BaseResource<ResourceModel> {
 
     private async deleteWebhook(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>, logger: LoggerProxy) {
         const octokit = new Octokit({
-            auth: model.gitHubAccess
+            auth: model.gitHubAccess,
+            userAgent: this.userAgent
         });
         let response: OctokitResponse<any>;
         try {
@@ -182,7 +188,8 @@ class Resource extends BaseResource<ResourceModel> {
 
     private async readWebhook(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>, logger: LoggerProxy) {
         const octokit = new Octokit({
-            auth: model.gitHubAccess
+            auth: model.gitHubAccess,
+            userAgent: this.userAgent
         });
         let response: OctokitResponse<any>;
         try {
@@ -211,7 +218,8 @@ class Resource extends BaseResource<ResourceModel> {
 
     private async listWebhooks(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>, logger: LoggerProxy) {
         const octokit = new Octokit({
-            auth: model.gitHubAccess
+            auth: model.gitHubAccess,
+            userAgent: this.userAgent
         });
         let models: any;
         try {
@@ -232,7 +240,8 @@ class Resource extends BaseResource<ResourceModel> {
 
     private async updateWebhook(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>, logger: LoggerProxy) {
         const octokit = new Octokit({
-            auth: model.gitHubAccess
+            auth: model.gitHubAccess,
+            userAgent: this.userAgent
         });
         let response: OctokitResponse<any>;
         try {

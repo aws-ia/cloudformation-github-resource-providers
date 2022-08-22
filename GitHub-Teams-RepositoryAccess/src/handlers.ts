@@ -15,6 +15,8 @@ import {Octokit} from "@octokit/core";
 import {isOctokitRequestError} from "../../GitHub-Common/src/util";
 import {Endpoints, OctokitResponse, RequestError} from "@octokit/types";
 
+import {version} from '../package.json';
+
 interface CallbackContext extends Record<string, any> {}
 
 type GetTeamRepoAccessEndpoint = 'GET /orgs/{org}/teams/{team_slug}/repos/{owner}/{repo}';
@@ -27,9 +29,12 @@ type DeleteTeamRepoAccessResponseData = Endpoints[DeleteTeamRepoAccessEndpoint][
 
 class Resource extends BaseResource<ResourceModel> {
 
+    private userAgent = `AWS CloudFormation (+https://aws.amazon.com/cloudformation/) CloudFormation resource ${this.typeName}/${version}`;
+
     private async getTeamRepoAccess(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>, logger: LoggerProxy): Promise<OctokitResponse<GetTeamRepoAccessResponseData>> {
         const octokit = new Octokit({
-            auth: model.gitHubAccess
+            auth: model.gitHubAccess,
+            userAgent: this.userAgent
         });
 
         try {
@@ -47,7 +52,8 @@ class Resource extends BaseResource<ResourceModel> {
 
     private async putTeamRepoAccess(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>, logger: LoggerProxy): Promise<OctokitResponse<PutTeamRepoAccessResponseData>> {
         const octokit = new Octokit({
-            auth: model.gitHubAccess
+            auth: model.gitHubAccess,
+            userAgent: this.userAgent
         });
 
         try {
@@ -65,7 +71,8 @@ class Resource extends BaseResource<ResourceModel> {
 
     private async deleteTeamRepoAccess(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>): Promise<OctokitResponse<DeleteTeamRepoAccessResponseData>> {
         const octokit = new Octokit({
-            auth: model.gitHubAccess
+            auth: model.gitHubAccess,
+            userAgent: this.userAgent
         });
 
         try {

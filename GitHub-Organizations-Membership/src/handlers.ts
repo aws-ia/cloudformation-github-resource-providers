@@ -16,6 +16,8 @@ import {Octokit} from "@octokit/rest";
 import {Endpoints, OctokitResponse} from "@octokit/types";
 import {NotFound} from "@amazon-web-services-cloudformation/cloudformation-cli-typescript-lib/dist/exceptions";
 
+import {version} from '../package.json';
+
 interface CallbackContext extends Record<string, any> {}
 
 type GetMemberEndpoint = 'GET /orgs/{org}/memberships/{username}';
@@ -33,13 +35,16 @@ type MemberData = GetMemberResponseData &
 
 class Resource extends BaseResource<ResourceModel> {
 
+    private userAgent = `AWS CloudFormation (+https://aws.amazon.com/cloudformation/) CloudFormation resource ${this.typeName}/${version}`;
+
     private static setModelFromResponse(model: ResourceModel, data: CreateMemberResponseData|MemberData): ResourceModel {
         model.role = data.role;
         return model;
     }
     private async getMember(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>): Promise<OctokitResponse<GetMemberResponseData>> {
         const octokit = new Octokit({
-            auth: model.gitHubAccess
+            auth: model.gitHubAccess,
+            userAgent: this.userAgent
         });
         try {
             const response = await octokit.request('GET /orgs/{org}/memberships/{username}', {
@@ -66,7 +71,8 @@ class Resource extends BaseResource<ResourceModel> {
 
     private async createOrUpdateMember(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>): Promise<OctokitResponse<CreateMemberResponseData>> {
         const octokit = new Octokit({
-            auth: model.gitHubAccess
+            auth: model.gitHubAccess,
+            userAgent: this.userAgent
         });
         try {
             let newVar = await octokit.request('PUT /orgs/{org}/memberships/{username}', {
@@ -156,7 +162,8 @@ class Resource extends BaseResource<ResourceModel> {
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
         const octokit = new Octokit({
-            auth: model.gitHubAccess
+            auth: model.gitHubAccess,
+            userAgent: this.userAgent
         });
 
         try {
@@ -219,7 +226,8 @@ class Resource extends BaseResource<ResourceModel> {
     ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
         const model = new ResourceModel(request.desiredResourceState);
         const octokit = new Octokit({
-            auth: model.gitHubAccess
+            auth: model.gitHubAccess,
+            userAgent: this.userAgent
         });
         try {
             const members = await octokit.paginate(octokit.orgs.listMembers,
