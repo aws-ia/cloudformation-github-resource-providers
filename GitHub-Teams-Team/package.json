@@ -1,0 +1,28 @@
+{
+    "name": "github-teams-team",
+    "version": "0.1.0",
+    "description": "AWS custom resource provider named GitHub::Teams::Team.",
+    "private": true,
+    "main": "dist/handlers.js",
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "npx tsc",
+        "watch": "npx tsc -w",
+        "prepack": "npm run build",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "dependencies": {
+        "@amazon-web-services-cloudformation/cloudformation-cli-typescript-lib": "^1.0.3",
+        "@octokit/rest": "^18.12.0",
+        "class-transformer": "0.3.1"
+    },
+    "devDependencies": {
+        "@types/node": "^12.0.0",
+        "typescript": "^4.6.4"
+    },
+    "optionalDependencies": {
+        "aws-sdk": "^2.656.0"
+    }
+}

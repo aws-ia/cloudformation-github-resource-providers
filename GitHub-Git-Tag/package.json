@@ -1,0 +1,29 @@
+{
+  "name": "github-git-tag",
+  "version": "0.1.0",
+  "description": "AWS custom resource provider named GitHub::Git::Tag.",
+  "private": true,
+  "main": "dist/handlers.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "npx tsc",
+    "prepack": "npm run build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@amazon-web-services-cloudformation/cloudformation-cli-typescript-lib": "^1.0.3",
+    "class-transformer": "0.3.1",
+    "@octokit/core": "^3.6.0",
+    "@octokit/rest": "^18.12.0"
+  },
+  "devDependencies": {
+    "@octokit/types": "^6.34.0",
+    "@types/node": "^12.0.0",
+    "typescript": "^4.1.2"
+  },
+  "optionalDependencies": {
+    "aws-sdk": "^2.656.0"
+  }
+}

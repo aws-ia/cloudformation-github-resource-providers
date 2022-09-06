@@ -1,0 +1,11 @@
+{
+  "CREATE": {
+    "/GitHubAccess": "<GITHUB_TOKEN>",
+    "/Organization": "<GITHUB_ORG>",
+    "/Username": "<GITHUB_USERNAME>",
+    "/Role": "member"
+  },
+  "UPDATE": {
+    "/Role": "admin"
+  }
+}

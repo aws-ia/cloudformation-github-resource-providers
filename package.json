@@ -1,0 +1,29 @@
+{
+  "name": "cloudformation-github",
+  "version": "1.0.0",
+  "description": "## Set up git filter",
+  "main": " ",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "build:all": "find . -depth 1 -type d -name \"*\" -exec bash -c \"test -e {}/.rpdk-config && cd '{}' && cfn generate && npm install && npm run build\" \\;",
+    "build:docs-clean": "rm -rf docs/user/generated/resources/*",
+    "build:docs-cp-docs": "find . -depth 1 -type d -name \"*\" -exec bash -c \"! test -e {}/.rpdk-config || mkdir -p docs/user/generated/resources/{} && cp {}/docs/* docs/user/generated/resources/{}/\" \\;",
+    "build:docs-cp-extras": "find . -depth 1 -type d -name \"*\" -exec bash -c \"! test -e {}/.rpdk-config || mkdir -p docs/user/generated/resources/{} && cp {}/docs-extra/* docs/user/generated/resources/{}/\" \\;",
+    "build:docs-cp": "cp -r docs/user/src/main/docs/* docs/user/generated",
+    "build:docs": "npm run build:docs-clean ; npm run build:docs-cp && npm run build:docs-cp-docs && npm run build:docs-cp-extras",
+    "build": "npm run build:all && npm run build:docs",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cloudsoft/cloudformation-github.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cloudsoft/cloudformation-github/issues"
+  },
+  "homepage": "https://github.com/cloudsoft/cloudformation-github#readme"
+}
