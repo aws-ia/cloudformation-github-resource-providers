@@ -2,7 +2,7 @@
     "artifact_type": "RESOURCE",
     "typeName": "GitHub::Teams::Membership",
     "language": "typescript",
-    "runtime": "nodejs12.x",
+    "runtime": "nodejs14.x",
     "entrypoint": "dist/GitHub-Teams-Membership/src/handlers.entrypoint",
     "testEntrypoint": "dist/GitHub-Teams-Membership/src/handlers.testEntrypoint",
     "settings": {

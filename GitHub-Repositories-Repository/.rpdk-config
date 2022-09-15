@@ -2,7 +2,7 @@
     "artifact_type": "RESOURCE",
     "typeName": "GitHub::Repositories::Repository",
     "language": "typescript",
-    "runtime": "nodejs12.x",
+    "runtime": "nodejs14.x",
     "entrypoint": "dist/GitHub-Repositories-Repository/src/handlers.entrypoint",
     "testEntrypoint": "dist/GitHub-Repositories-Repository/src/handlers.testEntrypoint",
     "settings": {

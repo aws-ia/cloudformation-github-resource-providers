@@ -2,7 +2,7 @@
     "artifact_type": "RESOURCE",
     "typeName": "GitHub::Teams::RepositoryAccess",
     "language": "typescript",
-    "runtime": "nodejs12.x",
+    "runtime": "nodejs14.x",
     "entrypoint": "dist/GitHub-Teams-RepositoryAccess/src/handlers.entrypoint",
     "testEntrypoint": "dist/GitHub-Teams-RepositoryAccess/src/handlers.testEntrypoint",
     "settings": {

@@ -2,7 +2,7 @@
     "artifact_type": "RESOURCE",
     "typeName": "GitHub::Organizations::Membership",
     "language": "typescript",
-    "runtime": "nodejs12.x",
+    "runtime": "nodejs14.x",
     "entrypoint": "dist/GitHub-Organizations-Membership/src/handlers.entrypoint",
     "testEntrypoint": "dist/GitHub-Organizations-Membership/src/handlers.testEntrypoint",
     "settings": {
