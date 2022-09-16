@@ -4,7 +4,7 @@
     "language": "typescript",
     "runtime": "nodejs14.x",
     "entrypoint": "dist/GitHub-Git-Tag/src/handlers.entrypoint",
-    "testEntrypoint": "dist/GitHub-Git-Tag/src/handlers.testEntrypoint,
+    "testEntrypoint": "dist/GitHub-Git-Tag/src/handlers.testEntrypoint",
     "settings": {
         "version": false,
         "subparser_name": null,

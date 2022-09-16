@@ -15,15 +15,6 @@ export class ResourceModel extends BaseModel {
     @Exclude()
     protected readonly IDENTIFIER_KEY_TAG: string = '/properties/Tag';
 
-    @Expose({ name: 'GitHubAccess' })
-    @Transform(
-        (value: any, obj: any) =>
-            transformValue(String, 'gitHubAccess', value, obj, []),
-        {
-            toClassOnly: true,
-        }
-    )
-    gitHubAccess?: Optional<string>;
     @Expose({ name: 'Owner' })
     @Transform(
         (value: any, obj: any) =>
@@ -95,5 +86,31 @@ export class ResourceModel extends BaseModel {
         // only return the identifiers if any can be used
         return identifiers.length === 0 ? null : identifiers;
     }
+}
+
+export class TypeConfigurationModel extends BaseModel {
+    ['constructor']: typeof TypeConfigurationModel;
+
+
+    @Expose({ name: 'GitHubAccess' })
+    @Type(() => GitHubAccess)
+    gitHubAccess?: Optional<GitHubAccess>;
+
+}
+
+export class GitHubAccess extends BaseModel {
+    ['constructor']: typeof GitHubAccess;
+
+
+    @Expose({ name: 'AccessToken' })
+    @Transform(
+        (value: any, obj: any) =>
+            transformValue(String, 'accessToken', value, obj, []),
+        {
+            toClassOnly: true,
+        }
+    )
+    accessToken?: Optional<string>;
+
 }
 
