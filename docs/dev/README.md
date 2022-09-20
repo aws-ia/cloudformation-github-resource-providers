@@ -10,14 +10,12 @@ Executing this in the console from the project root will add it. Replace the val
 
 ```properties
 cat << EOF >> .git/config
-[filter "github-token"]
+[filter "github"]
 	clean = sed \\
-		-e 's:[githubAccessToken]:<GITHUB_TOKEN>:g' \\
 		-e 's:[organizacionForTesting]:<GITHUB_ORG>:g' \\
 		-e 's:[existingTeamForTesting]:<GITHUB_TEAM>:g' \\
 		-e 's:[existingGithubUserForTesting]:<GITHUB_USERNAME>:g' 
 	smudge = sed \\
-		-e 's:<GITHUB_TOKEN>:[githubAccessToken]:g' \\
 		-e 's:<GITHUB_ORG>:[organizacionForTesting]:g' \\
 		-e 's:<GITHUB_TEAM>:[existingTeamForTesting]:g' \\
 		-e 's:<GITHUB_USERNAME>:[existingGithubUserForTesting]:g'

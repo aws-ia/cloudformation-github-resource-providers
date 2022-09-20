@@ -1,2 +1,2 @@
-*/overrides.json filter=github-token
-**/example.yaml filter=github-token
+*/overrides.json filter=github
+**/example.yaml filter=github
