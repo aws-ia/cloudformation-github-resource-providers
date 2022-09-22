@@ -58,15 +58,6 @@ export class ResourceModel extends BaseModel {
         }
     )
     slug?: Optional<string>;
-    @Expose({ name: 'GitHubAccess' })
-    @Transform(
-        (value: any, obj: any) =>
-            transformValue(String, 'gitHubAccess', value, obj, []),
-        {
-            toClassOnly: true,
-        }
-    )
-    gitHubAccess?: Optional<string>;
 
     @Exclude()
     public getPrimaryIdentifier(): Dict {
