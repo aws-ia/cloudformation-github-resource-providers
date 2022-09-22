@@ -1,250 +1,128 @@
-import {
-    Action,
-    BaseResource,
-    exceptions,
-    handlerEvent,
-    LoggerProxy,
-    OperationStatus,
-    Optional,
-    ProgressEvent,
-    ResourceHandlerRequest,
-    SessionProxy,
-} from '@amazon-web-services-cloudformation/cloudformation-cli-typescript-lib';
-import {ResourceModel} from './models';
+import {ResourceModel, TypeConfigurationModel} from './models';
 import {Octokit} from "@octokit/core";
-import {isOctokitRequestError} from "../../GitHub-Common/src/util";
-import {Endpoints, OctokitResponse, RequestError} from "@octokit/types";
-
+import {AbstractGitHubResource} from "../../GitHub-Common/src/abstract-github-resource";
+import {Endpoints, RequestError} from "@octokit/types";
 import {version} from '../package.json';
-
-interface CallbackContext extends Record<string, any> {}
+import {
+    exceptions,
+    ResourceHandlerRequest
+} from "@amazon-web-services-cloudformation/cloudformation-cli-typescript-lib";
+import {AlreadyExists} from "@amazon-web-services-cloudformation/cloudformation-cli-typescript-lib/dist/exceptions";
 
 type GetTeamRepoAccessEndpoint = 'GET /orgs/{org}/teams/{team_slug}/repos/{owner}/{repo}';
 type PutTeamRepoAccessEndpoint = 'PUT /orgs/{org}/teams/{team_slug}/repos/{owner}/{repo}';
 type DeleteTeamRepoAccessEndpoint = 'DELETE /orgs/{org}/teams/{team_slug}/repos/{owner}/{repo}';
 
-type GetTeamRepoAccessResponseData = Endpoints[GetTeamRepoAccessEndpoint]['response']['data'];
-type PutTeamRepoAccessResponseData = Endpoints[PutTeamRepoAccessEndpoint]['response']['data'];
-type DeleteTeamRepoAccessResponseData = Endpoints[DeleteTeamRepoAccessEndpoint]['response']['data'];
+type GetTeamRepoAccessPayload = Endpoints[GetTeamRepoAccessEndpoint]['response']['data'];
 
-class Resource extends BaseResource<ResourceModel> {
+class Resource extends AbstractGitHubResource<ResourceModel, GetTeamRepoAccessPayload, void, void, TypeConfigurationModel> {
 
     private userAgent = `AWS CloudFormation (+https://aws.amazon.com/cloudformation/) CloudFormation resource ${this.typeName}/${version}`;
 
-    private async getTeamRepoAccess(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>, logger: LoggerProxy): Promise<OctokitResponse<GetTeamRepoAccessResponseData>> {
+    processRequestException(e: Error | RequestError, request: ResourceHandlerRequest<ResourceModel>) {
+        try {
+            super.processRequestException(e, request);
+        } catch (ex) {
+            // The base class always return an AlreadyExists exception when a 422 occurred. This is fine in most case
+            // but here, a 422 doesn't necessarily mean that the resource exists. So we are checking if the message
+            // contains "already exists" and if it doesn't then we throw a InvalidRequest. Otherwise, we rethrow.
+            if (ex instanceof AlreadyExists && !e.toString().includes('already exists')) {
+                throw new exceptions.InvalidRequest((e as Error).message);
+            }
+            throw ex;
+        }
+    }
+
+    async get(model: ResourceModel, typeConfiguration?: TypeConfigurationModel): Promise<GetTeamRepoAccessPayload> {
         const octokit = new Octokit({
-            auth: model.gitHubAccess,
+            auth: typeConfiguration?.gitHubAccess.accessToken,
             userAgent: this.userAgent
         });
 
-        try {
-            return await octokit.request<GetTeamRepoAccessEndpoint>('GET /orgs/{org}/teams/{team_slug}/repos/{owner}/{repo}', {
+        const response = await octokit.request<GetTeamRepoAccessEndpoint>(
+            'GET /orgs/{org}/teams/{team_slug}/repos/{owner}/{repo}',
+            {
                 org: model.org,
                 team_slug: model.team,
                 owner: model.owner,
                 repo: model.repository,
                 headers: {Accept: 'application/vnd.github.v3+json'}
             });
-        } catch (e) {
-            this.processRequestException(e, request, logger);
-        }
+
+        return response.data;
     }
 
-    private async putTeamRepoAccess(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>, logger: LoggerProxy): Promise<OctokitResponse<PutTeamRepoAccessResponseData>> {
+    async list(model: ResourceModel, typeConfiguration?: TypeConfigurationModel): Promise<ResourceModel[]> {
+        const resourceModel = await this.get(model, typeConfiguration);
+
+        return [this.setModelFrom(model, resourceModel)];
+    }
+
+    async create(model: ResourceModel, typeConfiguration?: TypeConfigurationModel): Promise<void> {
         const octokit = new Octokit({
-            auth: model.gitHubAccess,
+            auth: typeConfiguration?.gitHubAccess.accessToken,
             userAgent: this.userAgent
         });
 
-        try {
-            return await octokit.request<PutTeamRepoAccessEndpoint>('PUT /orgs/{org}/teams/{team_slug}/repos/{owner}/{repo}', {
+        await octokit.request<PutTeamRepoAccessEndpoint>(
+            'PUT /orgs/{org}/teams/{team_slug}/repos/{owner}/{repo}',
+            {
                 org: model.org,
                 team_slug: model.team,
                 owner: model.owner,
                 repo: model.repository,
                 permission: model.permission as "pull" | "push" | "admin" | "maintain" | "triage" | undefined
             });
-        } catch (e) {
-            this.processRequestException(e, request, logger);
-        }
     }
 
-    private async deleteTeamRepoAccess(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>): Promise<OctokitResponse<DeleteTeamRepoAccessResponseData>> {
+    async update(model: ResourceModel, typeConfiguration?: TypeConfigurationModel): Promise<void> {
+        await this.create(model, typeConfiguration);
+    }
+
+    async delete(model: ResourceModel, typeConfiguration?: TypeConfigurationModel): Promise<void> {
         const octokit = new Octokit({
-            auth: model.gitHubAccess,
+            auth: typeConfiguration?.gitHubAccess.accessToken,
             userAgent: this.userAgent
         });
 
-        try {
-            return await octokit.request<DeleteTeamRepoAccessEndpoint>('DELETE /orgs/{org}/teams/{team_slug}/repos/{owner}/{repo}', {
+        await octokit.request<DeleteTeamRepoAccessEndpoint>(
+            'DELETE /orgs/{org}/teams/{team_slug}/repos/{owner}/{repo}',
+            {
                 org: model.org,
                 team_slug: model.team,
                 owner: model.owner,
                 repo: model.repository
             });
-        } catch (e) {
-            this.processRequestException(e, request);
-        }
     }
 
-    private processRequestException(e: Error, request: ResourceHandlerRequest<ResourceModel>, logger?: LoggerProxy) {
-        if (!!logger) {
-            logger.log(`Error response ${JSON.stringify(e)}`)
-        }
-        if (isOctokitRequestError(e) && (e as unknown as RequestError).status === 404) {
-            throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
-        }
-        if (isOctokitRequestError(e) && (e as unknown as RequestError).status === 403) {
-            throw new exceptions.AccessDenied((e as unknown as RequestError).errors?.map(e => e.message).join('\n') || e.message);
-        }
-        throw new exceptions.InternalFailure(e);
+    newModel(partial?: any): ResourceModel {
+        return new ResourceModel(partial);
     }
 
-    private async assertTeamRepoAccess(model: ResourceModel, request: ResourceHandlerRequest<ResourceModel>, logger: LoggerProxy) {
-        try {
-            await this.getTeamRepoAccess(model, request, logger);
-        } catch (e) {
-            return false;
+    setModelFrom(model: ResourceModel, from?: GetTeamRepoAccessPayload): ResourceModel {
+        let permission = model.permission || 'push';
+        if (from?.permissions?.admin === true) {
+            permission = 'admin';
         }
-        return true;
+        if (from?.permissions?.maintain === true) {
+            permission = 'maintain';
+        }
+        if (from?.permissions?.triage === true) {
+            permission = 'triage';
+        }
+        if (from?.permissions?.pull) {
+            permission = 'pull';
+        }
+
+        return new ResourceModel({
+            ...model,
+            permission: permission
+        });
     }
 
-    private parsePermission(data: GetTeamRepoAccessResponseData) {
-        if (data.permissions.admin === true) {
-            return 'admin';
-        }
-        if (data.permissions.maintain === true) {
-            return 'maintain';
-        }
-        if (data.permissions.triage === true) {
-            return 'triage';
-        }
-        if (data.permissions.pull) {
-            return 'pull';
-        }
-        return 'push';
-    }
-
-    /**
-     * CloudFormation invokes this handler when the resource is initially created
-     * during stack create operations.
-     *
-     * @param session Current AWS session passed through from caller
-     * @param request The request object for the provisioning request passed to the implementor
-     * @param callbackContext Custom context object to allow the passing through of additional
-     * state or metadata between subsequent retries
-     * @param logger Logger to proxy requests to default publishers
-     */
-    @handlerEvent(Action.Create)
-    public async create(
-        session: Optional<SessionProxy>,
-        request: ResourceHandlerRequest<ResourceModel>,
-        callbackContext: CallbackContext,
-        logger: LoggerProxy
-    ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
-        const model = new ResourceModel(request.desiredResourceState);
-
-        if (await this.assertTeamRepoAccess(model, request, logger)) {
-            throw new exceptions.AlreadyExists(this.typeName, request.logicalResourceIdentifier);
-        }
-
-        await this.putTeamRepoAccess(model, request, logger);
-
-        return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(model);
-    }
-
-    /**
-     * CloudFormation invokes this handler when the resource is updated
-     * as part of a stack update operation.
-     *
-     * @param session Current AWS session passed through from caller
-     * @param request The request object for the provisioning request passed to the implementor
-     * @param callbackContext Custom context object to allow the passing through of additional
-     * state or metadata between subsequent retries
-     * @param logger Logger to proxy requests to default publishers
-     */
-    @handlerEvent(Action.Update)
-    public async update(
-        session: Optional<SessionProxy>,
-        request: ResourceHandlerRequest<ResourceModel>,
-        callbackContext: CallbackContext,
-        logger: LoggerProxy
-    ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
-        const model = new ResourceModel(request.desiredResourceState);
-
-        if (!(await this.assertTeamRepoAccess(model, request, logger))) {
-            throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
-        }
-
-        await this.putTeamRepoAccess(model, request, logger);
-
-        return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(model);
-    }
-
-    /**
-     * CloudFormation invokes this handler when the resource is deleted, either when
-     * the resource is deleted from the stack as part of a stack update operation,
-     * or the stack itself is deleted.
-     *
-     * @param session Current AWS session passed through from caller
-     * @param request The request object for the provisioning request passed to the implementor
-     * @param callbackContext Custom context object to allow the passing through of additional
-     * state or metadata between subsequent retries
-     * @param logger Logger to proxy requests to default publishers
-     */
-    @handlerEvent(Action.Delete)
-    public async delete(
-        session: Optional<SessionProxy>,
-        request: ResourceHandlerRequest<ResourceModel>,
-        callbackContext: CallbackContext,
-        logger: LoggerProxy
-    ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
-        const model = new ResourceModel(request.desiredResourceState);
-
-        if (!(await this.assertTeamRepoAccess(model, request, logger))) {
-            throw new exceptions.NotFound(this.typeName, request.logicalResourceIdentifier);
-        }
-
-        await this.deleteTeamRepoAccess(model, request);
-
-        return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>();
-    }
-
-    /**
-     * CloudFormation invokes this handler as part of a stack update operation when
-     * detailed information about the resource's current state is required.
-     *
-     * @param session Current AWS session passed through from caller
-     * @param request The request object for the provisioning request passed to the implementor
-     * @param callbackContext Custom context object to allow the passing through of additional
-     * state or metadata between subsequent retries
-     * @param logger Logger to proxy requests to default publishers
-     */
-    @handlerEvent(Action.Read)
-    public async read(
-        session: Optional<SessionProxy>,
-        request: ResourceHandlerRequest<ResourceModel>,
-        callbackContext: CallbackContext,
-        logger: LoggerProxy
-    ): Promise<ProgressEvent<ResourceModel, CallbackContext>> {
-        const model = new ResourceModel(request.desiredResourceState);
-
-        const response = await this.getTeamRepoAccess(model, request, logger);
-        /*
-          GitHub documentation and behaviour are not matching: it should return a 200 response with data, including
-          the permission, but it has changed in the latest days. If the team has access it return 204, if not 400.
-          Seem it's ignoring  the fact the header has been sent
-          See: https://docs.github.com/en/rest/teams/teams#check-team-permissions-for-a-repository
-         */
-        if (response.status !== 204) {
-            model.permission = this.parsePermission(response.data);
-        }
-
-        return ProgressEvent.success<ProgressEvent<ResourceModel, CallbackContext>>(model);
-    }
 }
 
-export const resource = new Resource(ResourceModel.TYPE_NAME, ResourceModel);
+export const resource = new Resource(ResourceModel.TYPE_NAME, ResourceModel, null, null, TypeConfigurationModel);
 
 // Entrypoint for production usage after registered in CloudFormation
 export const entrypoint = resource.entrypoint;
