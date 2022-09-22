@@ -1,19 +1,14 @@
 {
   "CREATE": {
-    "/GitHubAccess": "<GITHUB_TOKEN>",
-    "/Owner": "<GITHUB_ORG>",
+    "/Owner": "dgenius",
     "/Repository": "<GITHUB_REPOSITORY>",
     "/Events": ["push"],
-    "/Config": {
-      "Url": "http://some.url.com",
-      "Secret": "123444"
-    }
+    "/Url": "http://some.url.com",
+    "/Secret": "123444"
   },
   "UPDATE": {
     "/Events": ["pull_request"],
-    "/Config": {
-      "Url": "http://some.url.com",
-      "Secret": "123444"
-    }
+    "/Url": "http://some.url.com",
+    "/Secret": "123444"
   }
 }
