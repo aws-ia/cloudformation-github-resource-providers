@@ -13,7 +13,8 @@ export abstract class AbstractGitHubResource<ResourceModelType extends BaseModel
             throw new exceptions.ServiceInternalError((e as Error).message);
         }
 
-        const errorMessage = (e as unknown as RequestError).errors?.map(error => error.message).join('\n');
+        const errorMessage = `[${(e as RequestError).name}] ${(e as Error).message}`;
+
         switch ((e as unknown as RequestError).status) {
             case 401:
                 throw new exceptions.InvalidCredentials(errorMessage)
@@ -30,7 +31,7 @@ export abstract class AbstractGitHubResource<ResourceModelType extends BaseModel
     }
 
     private isOctokitRequestError(ex: object) {
-        return ex instanceof Object && ex.hasOwnProperty('status') && ex.hasOwnProperty('name');
+        return ex instanceof Object && ex.hasOwnProperty('status') && ex.hasOwnProperty('name') && ex.hasOwnProperty('message');
     }
 
 }

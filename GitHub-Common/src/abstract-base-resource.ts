@@ -128,7 +128,7 @@ export abstract class AbstractBaseResource<ResourceModelType extends BaseModel, 
                     retry: 1
                 });
             } catch (e) {
-                logger.log(`Error ${e}`);
+                this.loggerProxy.log(`[X] ${e}`);
                 this.processRequestException(e, request);
             }
         }
@@ -141,17 +141,18 @@ export abstract class AbstractBaseResource<ResourceModelType extends BaseModel, 
         } catch (e) {
             try {
                 this.processRequestException(e, request);
-            } catch (e) {
-                if (e instanceof NotFound) {
+            } catch (ex) {
+                if (ex instanceof NotFound) {
                     if (callbackContext.retry <= this.maxRetries) {
                         return ProgressEvent.progress<ProgressEvent<ResourceModelType, RetryableCallbackContext>>(model, {
                             retry: callbackContext.retry + 1
                         });
                     } else {
+                        this.loggerProxy.log(`[X] ${ex}`);
                         throw new exceptions.NotStabilized(`Resource failed to stabilized after ${this.maxRetries} retries`);
                     }
                 }
-                throw e;
+                throw ex;
             }
         }
     }
@@ -186,7 +187,7 @@ export abstract class AbstractBaseResource<ResourceModelType extends BaseModel, 
             const data = await this.get(model, typeConfiguration);
             model = this.setModelFrom(model, data);
         } catch (e) {
-            logger.log(`Error ${e}`);
+            this.loggerProxy.log(`[X] ${e}`);
             this.processRequestException(e, request);
         }
 
@@ -226,7 +227,7 @@ export abstract class AbstractBaseResource<ResourceModelType extends BaseModel, 
                     retry: 1
                 });
             } catch (e) {
-                logger.log(`Error ${e}`);
+                this.loggerProxy.log(`[X] ${e}`);
                 this.processRequestException(e, request);
             }
         }
@@ -236,11 +237,12 @@ export abstract class AbstractBaseResource<ResourceModelType extends BaseModel, 
         } catch (e) {
             try {
                 this.processRequestException(e, request);
-            } catch (e) {
-                if (e instanceof NotFound) {
+            } catch (ex) {
+                if (ex instanceof NotFound) {
                     return ProgressEvent.success<ProgressEvent<ResourceModelType, RetryableCallbackContext>>();
                 }
-                throw e;
+                this.loggerProxy.log(`[X] ${ex}`);
+                throw ex;
             }
         }
 
@@ -278,7 +280,7 @@ export abstract class AbstractBaseResource<ResourceModelType extends BaseModel, 
             const location = await this.get(model, typeConfiguration);
             model = this.setModelFrom(model, location);
         } catch (e) {
-            logger.log(`Error ${e}`);
+            this.loggerProxy.log(`[X] ${e}`);
             this.processRequestException(e, request);
         }
 
@@ -314,7 +316,7 @@ export abstract class AbstractBaseResource<ResourceModelType extends BaseModel, 
                 .resourceModels(data)
                 .build();
         } catch (e) {
-            logger.log(`Error ${e}`);
+            this.loggerProxy.log(`[X] ${e}`);
             this.processRequestException(e, request);
         }
     }

@@ -1,15 +1,13 @@
 {
   "CREATE": {
-    "/GitHubAccess": "<GITHUB_TOKEN>",
-    "/Org": "Cloudsoft-CloudFormation",
+    "/Org": "dgenius",
     "/Name": "foo",
-    "/Description": "GitHub repo created from the CloudFormation contract tests",
-    "/Homepage": "https://GitHub.com",
+    "/Description": "GitHub repo created from the CloudFormation contract <GITHUB_REPOSITORY>s",
     "/LicenseTemplate": "mit",
     "/GitIgnoreTemplate": "Node",
     "/TeamId": null,
     "/AllowMergeCommit": true,
-    "/AllowForking": false,
+    "/AllowForking": null,
     "/Visibility": "public",
     "/Private": false,
     "/Homepage": "https://github.com"
@@ -18,6 +16,8 @@
     "/SecurityAndAnalysis": null,
     "/Archived": false,
     "/AllowMergeCommit": true,
-    "/AllowForking": false
+    "/AllowForking": null,
+    "/Visibility": "public",
+    "/Private": false
   }
 }

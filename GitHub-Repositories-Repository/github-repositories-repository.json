@@ -1,7 +1,7 @@
 {
   "typeName": "GitHub::Repositories::Repository",
   "description": "Manage a repository in GitHub.",
-  "sourceUrl": "https://github.com/aws-cloudformation/aws-cloudformation-rpdk.git",
+  "sourceUrl": "https://docs.github.com/en/rest/repos/repos#create-an-organization-repository",
   "definitions": {
     "GitHubAccess": {
       "type": "object",
@@ -99,10 +99,6 @@
     ]
   },
   "properties": {
-    "GitHubAccess": {
-      "description": "Personal access token",
-      "type": "string"
-    },
     "Org": {
       "description": "The organization name. The name is not case sensitive. If not specified, then the managed repository will be within the currently logged-in user account.",
       "type": "string"
@@ -241,8 +237,10 @@
     }
   },
   "additionalProperties": false,
+  "tagging": {
+    "taggable": false
+  },
   "required": [
-    "GitHubAccess",
     "Name"
   ],
   "readOnlyProperties": [
@@ -257,7 +255,6 @@
     "/properties/IssuesCount"
   ],
   "createOnlyProperties": [
-    "/properties/GitHubAccess",
     "/properties/Org",
     "/properties/Name",
     "/properties/TeamId",
