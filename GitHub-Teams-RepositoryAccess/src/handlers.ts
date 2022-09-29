@@ -1,5 +1,5 @@
 import {ResourceModel, TypeConfigurationModel} from './models';
-import {Octokit} from "@octokit/core";
+import {Octokit} from "@octokit/rest";
 import {AbstractGitHubResource} from "../../GitHub-Common/src/abstract-github-resource";
 import {Endpoints, RequestError} from "@octokit/types";
 import {version} from '../package.json';
@@ -10,10 +10,14 @@ import {
 import {AlreadyExists} from "@amazon-web-services-cloudformation/cloudformation-cli-typescript-lib/dist/exceptions";
 
 type GetTeamRepoAccessEndpoint = 'GET /orgs/{org}/teams/{team_slug}/repos/{owner}/{repo}';
+type ListTeamRepoAccessEndpoint = 'GET /orgs/{org}/teams/{team_slug}/repos';
 type PutTeamRepoAccessEndpoint = 'PUT /orgs/{org}/teams/{team_slug}/repos/{owner}/{repo}';
 type DeleteTeamRepoAccessEndpoint = 'DELETE /orgs/{org}/teams/{team_slug}/repos/{owner}/{repo}';
 
 type GetTeamRepoAccessPayload = Endpoints[GetTeamRepoAccessEndpoint]['response']['data'];
+type ListTeamRepoAccessPayload = Endpoints[ListTeamRepoAccessEndpoint]['response']['data'];
+type RepoAccess = GetTeamRepoAccessPayload & ListTeamRepoAccessPayload;
+
 
 class Resource extends AbstractGitHubResource<ResourceModel, GetTeamRepoAccessPayload, void, void, TypeConfigurationModel> {
 
@@ -53,9 +57,20 @@ class Resource extends AbstractGitHubResource<ResourceModel, GetTeamRepoAccessPa
     }
 
     async list(model: ResourceModel, typeConfiguration?: TypeConfigurationModel): Promise<ResourceModel[]> {
-        const resourceModel = await this.get(model, typeConfiguration);
+        const octokit = new Octokit({
+            auth: typeConfiguration?.gitHubAccess.accessToken,
+            userAgent: this.userAgent
+        });
 
-        return [this.setModelFrom(model, resourceModel)];
+        const response = await octokit.paginate<RepoAccess>(
+                'GET /orgs/{org}/teams/{team_slug}/repos',
+                {
+                    org: model.org,
+                    team_slug: model.team,
+                    headers: {Accept: 'application/vnd.github.v3+json'}
+                });
+
+        return response.map(access => this.setModelFrom(model, access));
     }
 
     async create(model: ResourceModel, typeConfiguration?: TypeConfigurationModel): Promise<void> {
