@@ -53,10 +53,6 @@
         "maintain",
         "triage"
       ]
-    },
-    "InvitationId": {
-      "description": "Invitation identifier",
-      "type": "number"
     }
   },
   "additionalProperties": false,
@@ -77,9 +73,6 @@
     "/properties/Owner",
     "/properties/Repository",
     "/properties/Username"
-  ],
-  "readOnlyProperties": [
-    "/properties/InvitationId"
   ],
   "handlers": {
     "create": {

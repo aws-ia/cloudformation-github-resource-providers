@@ -51,15 +51,6 @@ export class ResourceModel extends BaseModel {
         }
     )
     permission?: Optional<string>;
-    @Expose({ name: 'InvitationId' })
-    @Transform(
-        (value: any, obj: any) =>
-            transformValue(Number, 'invitationId', value, obj, []),
-        {
-            toClassOnly: true,
-        }
-    )
-    invitationId?: Optional<number>;
 
     @Exclude()
     public getPrimaryIdentifier(): Dict {

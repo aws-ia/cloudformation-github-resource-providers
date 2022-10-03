@@ -10,10 +10,11 @@ export abstract class AbstractGitHubResource<ResourceModelType extends BaseModel
 
     processRequestException(e: Error | RequestError, request: ResourceHandlerRequest<ResourceModelType>) {
         if (!this.isOctokitRequestError(e)) {
+            this.loggerProxy.log('Not an ocktokit error');
             throw new exceptions.ServiceInternalError((e as Error).message);
         }
 
-        const errorMessage = `[${(e as RequestError).name}] ${(e as Error).message}`;
+        const errorMessage = `${(e as RequestError).name}`;
 
         switch ((e as unknown as RequestError).status) {
             case 401:
@@ -31,7 +32,7 @@ export abstract class AbstractGitHubResource<ResourceModelType extends BaseModel
     }
 
     private isOctokitRequestError(ex: object) {
-        return ex instanceof Object && ex.hasOwnProperty('status') && ex.hasOwnProperty('name') && ex.hasOwnProperty('message');
+        return ex instanceof Object && ex.hasOwnProperty('status') && ex.hasOwnProperty('name');
     }
 
 }
