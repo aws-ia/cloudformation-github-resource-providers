@@ -99,7 +99,7 @@ class Resource extends AbstractGitHubResource<ResourceModel, GetMemberPayload, P
     }
 
     setModelFrom(model: ResourceModel, from?: GetMemberPayload | PutMemberPayload): ResourceModel {
-        return new ResourceModel(model);
+        return new ResourceModel({...model, role: from.role});
     }
 
 }
