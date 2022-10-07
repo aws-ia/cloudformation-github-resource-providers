@@ -113,14 +113,24 @@ class Resource extends AbstractGitHubResource<ResourceModel, GetWebhookPayload, 
     }
 
     setModelFrom(model: ResourceModel, from?: WebhookPayload): ResourceModel {
+        let insecureSsl:number;
+
+        if (typeof from.config.insecure_ssl === 'string') {
+           insecureSsl = parseInt(from.config.insecure_ssl);
+        } else {
+            insecureSsl = from.config.insecure_ssl;
+        }
+
         const resourceModel = new ResourceModel({
-            ...model,
+            owner: model.owner,
+            repository: model.repository,
             id: from.id,
+            name: from.name,
             active: from.active,
             events: from.events,
             url: from.config.url,
             contentType: from.config.content_type,
-            insecure_ssl: from.config.insecure_ssl,
+            insecureSsl: insecureSsl
         });
 
         delete resourceModel.secret;

@@ -100,6 +100,8 @@
     "/properties/Id"
   ],
   "primaryIdentifier": [
+    "/properties/Owner",
+    "/properties/Repository",
     "/properties/Id"
   ],
   "createOnlyProperties": [

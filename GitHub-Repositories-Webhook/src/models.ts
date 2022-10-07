@@ -9,6 +9,10 @@ export class ResourceModel extends BaseModel {
     public static readonly TYPE_NAME: string = 'GitHub::Repositories::Webhook';
 
     @Exclude()
+    protected readonly IDENTIFIER_KEY_OWNER: string = '/properties/Owner';
+    @Exclude()
+    protected readonly IDENTIFIER_KEY_REPOSITORY: string = '/properties/Repository';
+    @Exclude()
     protected readonly IDENTIFIER_KEY_ID: string = '/properties/Id';
 
     @Expose({ name: 'Owner' })
@@ -105,12 +109,20 @@ export class ResourceModel extends BaseModel {
     @Exclude()
     public getPrimaryIdentifier(): Dict {
         const identifier: Dict = {};
+        if (this.owner != null) {
+            identifier[this.IDENTIFIER_KEY_OWNER] = this.owner;
+        }
+
+        if (this.repository != null) {
+            identifier[this.IDENTIFIER_KEY_REPOSITORY] = this.repository;
+        }
+
         if (this.id != null) {
             identifier[this.IDENTIFIER_KEY_ID] = this.id;
         }
 
         // only return the identifier if it can be used, i.e. if all components are present
-        return Object.keys(identifier).length === 1 ? identifier : null;
+        return Object.keys(identifier).length === 3 ? identifier : null;
     }
 
     @Exclude()
