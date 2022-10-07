@@ -85,7 +85,7 @@ class Resource extends AbstractGitHubResource<ResourceModel, ResourceModel, Reso
     async create(model: ResourceModel, typeConfiguration?: TypeConfigurationModel): Promise<ResourceModel> {
         const response = await this.putCollaborator(model, typeConfiguration);
 
-        return new ResourceModel();
+        return new ResourceModel({permission: this.permissionsToPermission(response.data.permissions)});
     }
 
     async update(model: ResourceModel, typeConfiguration?: TypeConfigurationModel): Promise<ResourceModel> {
@@ -140,7 +140,7 @@ class Resource extends AbstractGitHubResource<ResourceModel, ResourceModel, Reso
     }
 
     setModelFrom(model: ResourceModel, from?: ResourceModel): ResourceModel {
-        return new ResourceModel({...model, ...from});
+        return new ResourceModel({owner: model.owner, repository: model.repository, username: model.username, ...from});
     }
 
     private async putCollaborator(model: ResourceModel, typeConfiguration?: TypeConfigurationModel) {

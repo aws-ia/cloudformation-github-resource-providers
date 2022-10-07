@@ -112,13 +112,9 @@ class Resource extends AbstractGitHubResource<ResourceModel, GetUserRepoResponse
             license_template: model.licenseTemplate
         };
 
-        this.loggerProxy.log(`!!!!! DJG CREATE check allow forking ${model.allowForking}`);
         if (model.allowForking != null) {
-            this.loggerProxy.log(`!!!!! DJG CREATE adding allow forking ${model.allowForking}`);
             payload.allow_forking = model.allowForking;
         }
-
-        this.loggerProxy.log(`!!!!! DJG CREATE request object ${JSON.stringify(payload)}`);
 
         const response = await octokit.request<CreateOrgRepoEndpoint | CreateUserRepoEndpoint>(model.org ? 'POST /orgs/{org}/repos' : 'POST /user/repos', payload);
 

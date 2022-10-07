@@ -128,7 +128,7 @@ export abstract class AbstractBaseResource<ResourceModelType extends BaseModel, 
                     retry: 1
                 });
             } catch (e) {
-                this.loggerProxy.log(`[X] ${e}`);
+                this.loggerProxy.log(`[X] Failed to create resource ${e}`);
                 this.processRequestException(e, request);
             }
         }
@@ -187,7 +187,7 @@ export abstract class AbstractBaseResource<ResourceModelType extends BaseModel, 
             const data = await this.get(model, typeConfiguration);
             model = this.setModelFrom(model, data);
         } catch (e) {
-            this.loggerProxy.log(`[X] ${e}`);
+            this.loggerProxy.log(`[X] Failed to update resource ${e}`);
             this.processRequestException(e, request);
         }
 
@@ -227,7 +227,7 @@ export abstract class AbstractBaseResource<ResourceModelType extends BaseModel, 
                     retry: 1
                 });
             } catch (e) {
-                this.loggerProxy.log(`[X] ${e}`);
+                this.loggerProxy.log(`[X] Failed to delete resource ${e}`);
                 this.processRequestException(e, request);
             }
         }
@@ -241,7 +241,7 @@ export abstract class AbstractBaseResource<ResourceModelType extends BaseModel, 
                 if (ex instanceof NotFound) {
                     return ProgressEvent.success<ProgressEvent<ResourceModelType, RetryableCallbackContext>>();
                 }
-                this.loggerProxy.log(`[X] ${ex}`);
+                this.loggerProxy.log(`[X] Failed to get resource after delete not 404 : ${ex}`);
                 throw ex;
             }
         }
@@ -280,7 +280,7 @@ export abstract class AbstractBaseResource<ResourceModelType extends BaseModel, 
             const location = await this.get(model, typeConfiguration);
             model = this.setModelFrom(model, location);
         } catch (e) {
-            this.loggerProxy.log(`[X] ${e}`);
+            this.loggerProxy.log(`[X] Failed to read resource ${e}`);
             this.processRequestException(e, request);
         }
 
@@ -316,7 +316,7 @@ export abstract class AbstractBaseResource<ResourceModelType extends BaseModel, 
                 .resourceModels(data)
                 .build();
         } catch (e) {
-            this.loggerProxy.log(`[X] ${e}`);
+            this.loggerProxy.log(`[X] Failed to list resources ${e}`);
             this.processRequestException(e, request);
         }
     }

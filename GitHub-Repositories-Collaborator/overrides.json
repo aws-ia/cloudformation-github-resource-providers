@@ -2,7 +2,7 @@
   "CREATE": {
     "/Owner": "<GITHUB_ORG>",
     "/Repository": "<GITHUB_REPOSITORY>",
-    "/Username": "<GITHUB_USERNAME>",
+    "/Username": "alasdairhodge",
     "/Permission": "pull"
   },
   "UPDATE": {

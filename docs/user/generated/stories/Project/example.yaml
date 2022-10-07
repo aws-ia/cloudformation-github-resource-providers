@@ -20,7 +20,7 @@ Resources:
     Properties:
       GitHubAccess: !Ref GitHubAccess
       Org: ACME-CloudFormation
-      Name: MyRepo
+      Name: myrepo
       Description: Repo created by cloudformation example
       Homepage: https://GitHub.com
       Private: true
