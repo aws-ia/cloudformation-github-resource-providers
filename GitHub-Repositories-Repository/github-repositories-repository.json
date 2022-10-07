@@ -262,6 +262,14 @@
     "/properties/GitIgnoreTemplate",
     "/properties/LicenseTemplate"
   ],
+  "writeOnlyProperties": [
+    "/properties/Org",
+    "/properties/TeamId",
+    "/properties/AllowForking",
+    "/properties/AllowAutoMerge",
+    "/properties/AutoInit",
+    "/properties/GitIgnoreTemplate"
+  ],
   "primaryIdentifier": [
     "/properties/Owner",
     "/properties/Name"

@@ -1,7 +1,7 @@
 {
   "CREATE": {
-    "/Org": "dgenius",
-    "/Name": "foo",
+    "/Org": "<GITHUB_ORG>",
+    "/Name": "foo2",
     "/Description": "GitHub repo created from the CloudFormation contract <GITHUB_REPOSITORY>s",
     "/LicenseTemplate": "mit",
     "/GitIgnoreTemplate": "Node",
@@ -9,12 +9,13 @@
     "/AllowMergeCommit": true,
     "/AllowForking": null,
     "/Visibility": "public",
+    "/Archived": false,
     "/Private": false,
     "/Homepage": "https://github.com"
   },
   "UPDATE": {
-    "/SecurityAndAnalysis": null,
     "/Archived": false,
+    "/Description": "New description",
     "/AllowMergeCommit": true,
     "/AllowForking": null,
     "/Visibility": "public",

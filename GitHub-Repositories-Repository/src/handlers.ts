@@ -1,4 +1,5 @@
 import {ResourceModel, TypeConfigurationModel} from './models';
+import {CaseTransformer, Transformer} from '../../GitHub-Common/src/util';
 import {Octokit} from "@octokit/rest";
 import {Endpoints, RequestError} from "@octokit/types";
 import {AbstractGitHubResource} from "../../GitHub-Common/src/abstract-github-resource";
@@ -89,7 +90,7 @@ class Resource extends AbstractGitHubResource<ResourceModel, GetUserRepoResponse
             userAgent: this.userAgent
         });
 
-        const response = await octokit.request<CreateOrgRepoEndpoint | CreateUserRepoEndpoint>(model.org ? 'POST /orgs/{org}/repos' : 'POST /user/repos', {
+        let payload:any = {
             ...{org: model.org ? model.org : undefined},
             name: model.name,
             private: model.private_,
@@ -109,7 +110,17 @@ class Resource extends AbstractGitHubResource<ResourceModel, GetUserRepoResponse
             is_template: model.isTemplate,
             gitignore_template: model.gitIgnoreTemplate,
             license_template: model.licenseTemplate
-        });
+        };
+
+        this.loggerProxy.log(`!!!!! DJG CREATE check allow forking ${model.allowForking}`);
+        if (model.allowForking != null) {
+            this.loggerProxy.log(`!!!!! DJG CREATE adding allow forking ${model.allowForking}`);
+            payload.allow_forking = model.allowForking;
+        }
+
+        this.loggerProxy.log(`!!!!! DJG CREATE request object ${JSON.stringify(payload)}`);
+
+        const response = await octokit.request<CreateOrgRepoEndpoint | CreateUserRepoEndpoint>(model.org ? 'POST /orgs/{org}/repos' : 'POST /user/repos', payload);
 
         return response.data;
     }
@@ -175,19 +186,31 @@ class Resource extends AbstractGitHubResource<ResourceModel, GetUserRepoResponse
     }
 
     setModelFrom(model: ResourceModel, from?: RepoData): ResourceModel {
-        return new ResourceModel({
+        if (!from) {
+            return model;
+        }
+
+        delete from.updated_at;
+
+        let resourceModel = new ResourceModel({
             ...model,
-            owner: from.owner.login,
-            name: from.name,
-            gitUrl: from.git_url,
-            htmlUrl: from.html_url,
-            defaultBranch: from.default_branch,
-            language: from.language,
-            forksCount: from.forks_count,
-            starsCount: from.forks_count,
-            watchersCount: from.forks_count,
-            issuesCount: from.forks_count
+            ...Transformer.for(from)
+                .transformKeys(CaseTransformer.SNAKE_TO_CAMEL)
+                .forModelIngestion()
+                .transform(),
+            owner: from.owner?.login,
+            licenseTemplate: from.license?.key,
+
         });
+
+        // Delete write-only properties - probably only necessary for tests
+        delete resourceModel.org;
+        delete resourceModel.teamId;
+        delete resourceModel.allowForking;
+        delete resourceModel.allowAutoMerge;
+        delete resourceModel.autoInit;
+        delete resourceModel.gitIgnoreTemplate;
+        return resourceModel;
     }
 
 }
