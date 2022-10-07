@@ -4,7 +4,7 @@ import {AbstractGitHubResource} from "../../GitHub-Common/src/abstract-github-re
 import {Endpoints, RequestError} from "@octokit/types";
 import {version} from '../package.json';
 import {
-    exceptions,
+    exceptions, LoggerProxy,
     ResourceHandlerRequest
 } from "@amazon-web-services-cloudformation/cloudformation-cli-typescript-lib";
 import {AlreadyExists} from "@amazon-web-services-cloudformation/cloudformation-cli-typescript-lib/dist/exceptions";
@@ -42,7 +42,6 @@ class Resource extends AbstractGitHubResource<ResourceModel, GetTeamRepoAccessPa
             auth: typeConfiguration?.gitHubAccess.accessToken,
             userAgent: this.userAgent
         });
-
         const response = await octokit.request<GetTeamRepoAccessEndpoint>(
             'GET /orgs/{org}/teams/{team_slug}/repos/{owner}/{repo}',
             {
@@ -50,7 +49,7 @@ class Resource extends AbstractGitHubResource<ResourceModel, GetTeamRepoAccessPa
                 team_slug: model.team,
                 owner: model.owner,
                 repo: model.repository,
-                headers: {Accept: 'application/vnd.github.v3+json'}
+                headers: {Accept: 'application/vnd.github.v3.repository+json'}
             });
 
         return response.data;
@@ -115,18 +114,21 @@ class Resource extends AbstractGitHubResource<ResourceModel, GetTeamRepoAccessPa
     }
 
     setModelFrom(model: ResourceModel, from?: GetTeamRepoAccessPayload): ResourceModel {
-        let permission = model.permission || 'push';
-        if (from?.permissions?.admin === true) {
-            permission = 'admin';
-        }
-        if (from?.permissions?.maintain === true) {
-            permission = 'maintain';
+        let permission = '';
+        if (from?.permissions?.pull) {
+            permission = 'pull';
         }
         if (from?.permissions?.triage === true) {
             permission = 'triage';
         }
-        if (from?.permissions?.pull) {
-            permission = 'pull';
+        if (from?.permissions?.push) {
+            permission = 'push';
+        }
+        if (from?.permissions?.maintain === true) {
+            permission = 'maintain';
+        }
+        if (from?.permissions?.admin === true) {
+            permission = 'admin';
         }
 
         return new ResourceModel({
