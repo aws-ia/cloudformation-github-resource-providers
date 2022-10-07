@@ -15,15 +15,6 @@ export class ResourceModel extends BaseModel {
     @Exclude()
     protected readonly IDENTIFIER_KEY_USERNAME: string = '/properties/Username';
 
-    @Expose({ name: 'GitHubAccess' })
-    @Transform(
-        (value: any, obj: any) =>
-            transformValue(String, 'gitHubAccess', value, obj, []),
-        {
-            toClassOnly: true,
-        }
-    )
-    gitHubAccess?: Optional<string>;
     @Expose({ name: 'Org' })
     @Transform(
         (value: any, obj: any) =>

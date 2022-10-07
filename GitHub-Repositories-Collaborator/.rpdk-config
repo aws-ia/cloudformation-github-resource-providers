@@ -2,7 +2,7 @@
     "artifact_type": "RESOURCE",
     "typeName": "GitHub::Repositories::Collaborator",
     "language": "typescript",
-    "runtime": "nodejs12.x",
+    "runtime": "nodejs14.x",
     "entrypoint": "dist/GitHub-Repositories-Collaborator/src/handlers.entrypoint",
     "testEntrypoint": "dist/GitHub-Repositories-Collaborator/src/handlers.testEntrypoint",
     "settings": {
@@ -15,7 +15,7 @@
         "endpoint_url": null,
         "region": null,
         "target_schemas": [],
-        "useDocker": true,
+        "useDocker": false,
         "protocolVersion": "2.0.0"
     }
 }

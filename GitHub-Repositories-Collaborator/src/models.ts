@@ -15,15 +15,6 @@ export class ResourceModel extends BaseModel {
     @Exclude()
     protected readonly IDENTIFIER_KEY_USERNAME: string = '/properties/Username';
 
-    @Expose({ name: 'GitHubAccess' })
-    @Transform(
-        (value: any, obj: any) =>
-            transformValue(String, 'gitHubAccess', value, obj, []),
-        {
-            toClassOnly: true,
-        }
-    )
-    gitHubAccess?: Optional<string>;
     @Expose({ name: 'Owner' })
     @Transform(
         (value: any, obj: any) =>
@@ -60,18 +51,6 @@ export class ResourceModel extends BaseModel {
         }
     )
     permission?: Optional<string>;
-    @Expose({ name: 'Permissions' })
-    @Type(() => Permissions)
-    permissions?: Optional<Permissions>;
-    @Expose({ name: 'InvitationId' })
-    @Transform(
-        (value: any, obj: any) =>
-            transformValue(Number, 'invitationId', value, obj, []),
-        {
-            toClassOnly: true,
-        }
-    )
-    invitationId?: Optional<number>;
 
     @Exclude()
     public getPrimaryIdentifier(): Dict {
@@ -98,58 +77,6 @@ export class ResourceModel extends BaseModel {
         // only return the identifiers if any can be used
         return identifiers.length === 0 ? null : identifiers;
     }
-}
-
-export class Permissions extends BaseModel {
-    ['constructor']: typeof Permissions;
-
-
-    @Expose({ name: 'Pull' })
-    @Transform(
-        (value: any, obj: any) =>
-            transformValue(Boolean, 'pull', value, obj, []),
-        {
-            toClassOnly: true,
-        }
-    )
-    pull?: Optional<boolean>;
-    @Expose({ name: 'Triage' })
-    @Transform(
-        (value: any, obj: any) =>
-            transformValue(Boolean, 'triage', value, obj, []),
-        {
-            toClassOnly: true,
-        }
-    )
-    triage?: Optional<boolean>;
-    @Expose({ name: 'Push' })
-    @Transform(
-        (value: any, obj: any) =>
-            transformValue(Boolean, 'push', value, obj, []),
-        {
-            toClassOnly: true,
-        }
-    )
-    push?: Optional<boolean>;
-    @Expose({ name: 'Maintain' })
-    @Transform(
-        (value: any, obj: any) =>
-            transformValue(Boolean, 'maintain', value, obj, []),
-        {
-            toClassOnly: true,
-        }
-    )
-    maintain?: Optional<boolean>;
-    @Expose({ name: 'Admin' })
-    @Transform(
-        (value: any, obj: any) =>
-            transformValue(Boolean, 'admin', value, obj, []),
-        {
-            toClassOnly: true,
-        }
-    )
-    admin?: Optional<boolean>;
-
 }
 
 export class TypeConfigurationModel extends BaseModel {

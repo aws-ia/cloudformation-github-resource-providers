@@ -11,17 +11,22 @@
     "build": "npx tsc",
     "watch": "npx tsc -w",
     "prepack": "npm run build",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "dependencies": {
     "@amazon-web-services-cloudformation/cloudformation-cli-typescript-lib": "^1.0.3",
     "@octokit/core": "^3.6.0",
-    "@octokit/plugin-paginate-rest": "^2.17.0",
-    "axios": "^0.27.2"
+    "@octokit/plugin-paginate-rest": "^2.17.0"
   },
   "devDependencies": {
     "@octokit/types": "^6.34.0",
-    "@types/node": "^12.0.0",
+    "@types/jest": "^28.1.1",
+    "@types/node": "^14.0.0",
+    "jest": "^28.1.1",
+    "ts-jest": "^28.0.5",
     "typescript": "^4.1.2"
+  },
+  "optionalDependencies": {
+    "aws-sdk": "^2.656.0"
   }
 }

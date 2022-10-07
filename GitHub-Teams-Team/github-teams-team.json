@@ -1,7 +1,7 @@
 {
   "typeName": "GitHub::Teams::Team",
   "description": "Manage a team in Github",
-  "sourceUrl": "https://github.com/aws-cloudformation/aws-cloudformation-rpdk.git",
+  "sourceUrl": "https://docs.github.com/en/rest/teams/teams#create-a-team",
   "definitions": {
     "GitHubAccess": {
       "type": "object",
@@ -52,17 +52,15 @@
     "Slug": {
       "description": "The Organization unique identifier for the team",
       "type": "string"
-    },
-    "GitHubAccess": {
-      "description": "Personal access token",
-      "type": "string"
     }
   },
   "additionalProperties": false,
+  "tagging": {
+    "taggable": false
+  },
   "required": [
     "Name",
-    "Organization",
-    "GitHubAccess"
+    "Organization"
   ],
   "createOnlyProperties": [
     "/properties/Name",
@@ -74,9 +72,6 @@
   "primaryIdentifier": [
     "/properties/Organization",
     "/properties/Slug"
-  ],
-  "writeOnlyProperties": [
-    "/properties/GitHubAccess"
   ],
   "handlers": {
     "create": {

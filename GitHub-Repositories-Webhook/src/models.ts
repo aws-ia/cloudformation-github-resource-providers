@@ -9,17 +9,12 @@ export class ResourceModel extends BaseModel {
     public static readonly TYPE_NAME: string = 'GitHub::Repositories::Webhook';
 
     @Exclude()
+    protected readonly IDENTIFIER_KEY_OWNER: string = '/properties/Owner';
+    @Exclude()
+    protected readonly IDENTIFIER_KEY_REPOSITORY: string = '/properties/Repository';
+    @Exclude()
     protected readonly IDENTIFIER_KEY_ID: string = '/properties/Id';
 
-    @Expose({ name: 'GitHubAccess' })
-    @Transform(
-        (value: any, obj: any) =>
-            transformValue(String, 'gitHubAccess', value, obj, []),
-        {
-            toClassOnly: true,
-        }
-    )
-    gitHubAccess?: Optional<string>;
     @Expose({ name: 'Owner' })
     @Transform(
         (value: any, obj: any) =>
@@ -74,33 +69,6 @@ export class ResourceModel extends BaseModel {
         }
     )
     repository?: Optional<string>;
-    @Expose({ name: 'Config' })
-    @Type(() => WebhookConfig)
-    config?: Optional<WebhookConfig>;
-
-    @Exclude()
-    public getPrimaryIdentifier(): Dict {
-        const identifier: Dict = {};
-        if (this.id != null) {
-            identifier[this.IDENTIFIER_KEY_ID] = this.id;
-        }
-
-        // only return the identifier if it can be used, i.e. if all components are present
-        return Object.keys(identifier).length === 1 ? identifier : null;
-    }
-
-    @Exclude()
-    public getAdditionalIdentifiers(): Array<Dict> {
-        const identifiers: Array<Dict> = new Array<Dict>();
-        // only return the identifiers if any can be used
-        return identifiers.length === 0 ? null : identifiers;
-    }
-}
-
-export class WebhookConfig extends BaseModel {
-    ['constructor']: typeof WebhookConfig;
-
-
     @Expose({ name: 'ContentType' })
     @Transform(
         (value: any, obj: any) =>
@@ -138,6 +106,31 @@ export class WebhookConfig extends BaseModel {
     )
     insecureSsl?: Optional<number>;
 
+    @Exclude()
+    public getPrimaryIdentifier(): Dict {
+        const identifier: Dict = {};
+        if (this.owner != null) {
+            identifier[this.IDENTIFIER_KEY_OWNER] = this.owner;
+        }
+
+        if (this.repository != null) {
+            identifier[this.IDENTIFIER_KEY_REPOSITORY] = this.repository;
+        }
+
+        if (this.id != null) {
+            identifier[this.IDENTIFIER_KEY_ID] = this.id;
+        }
+
+        // only return the identifier if it can be used, i.e. if all components are present
+        return Object.keys(identifier).length === 3 ? identifier : null;
+    }
+
+    @Exclude()
+    public getAdditionalIdentifiers(): Array<Dict> {
+        const identifiers: Array<Dict> = new Array<Dict>();
+        // only return the identifiers if any can be used
+        return identifiers.length === 0 ? null : identifiers;
+    }
 }
 
 export class TypeConfigurationModel extends BaseModel {

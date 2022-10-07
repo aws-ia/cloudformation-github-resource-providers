@@ -1,86 +1,82 @@
 {
-    "typeName": "GitHub::Organizations::Membership",
-    "description": "Add people to an organization. Will create an invite and user will only become a member once they accept this invite.",
-    "sourceUrl": "https://github.com/aws-cloudformation/aws-cloudformation-rpdk.git",
-    "definitions": {
-        "GitHubAccess": {
-            "type": "object",
-            "properties": {
-                "AccessToken": {
-                    "description": "Personal Access Token",
-                    "type": "string"
-                }
-            },
-            "required": [
-                "AccessToken"
-            ],
-            "additionalProperties": false
+  "typeName": "GitHub::Organizations::Membership",
+  "description": "Add people to an organization. Will create an invite and user will only become a member once they accept this invite.",
+  "sourceUrl": "https://docs.github.com/en/rest/orgs/members",
+  "definitions": {
+    "GitHubAccess": {
+      "type": "object",
+      "properties": {
+        "AccessToken": {
+          "description": "Personal Access Token",
+          "type": "string"
         }
-    },
-    "typeConfiguration": {
-        "properties": {
-            "GitHubAccess": {
-                "$ref": "#/definitions/GitHubAccess"
-            }
-        },
-        "additionalProperties": false,
-        "required": [
-            "GitHubAccess"
-        ]
-    },
+      },
+      "required": [
+        "AccessToken"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "typeConfiguration": {
     "properties": {
-        "GitHubAccess": {
-            "description": "Personal Access Token",
-            "type": "string"
-        },
-        "Organization": {
-            "description": "The Organization the user is being added to",
-            "type": "string"
-        },
-        "Username": {
-            "description": "The handle for the GitHub user account",
-            "type": "string"
-        },
-        "Role": {
-            "description": "The role for the new member.",
-            "type": "string",
-            "enum": ["admin", "member"]
-        }
+      "GitHubAccess": {
+        "$ref": "#/definitions/GitHubAccess"
+      }
     },
     "additionalProperties": false,
     "required": [
-        "GitHubAccess",
-        "Organization"
-    ],
-    "primaryIdentifier": [
-        "/properties/Username",
-        "/properties/Organization"
-    ],
-    "createOnlyProperties": [
-        "/properties/GitHubAccess",
-        "/properties/Organization",
-        "/properties/Username"
-    ],
-    "handlers": {
-        "create": {
-            "permissions": [
-            ]
-        },
-        "read": {
-            "permissions": [
-            ]
-        },
-        "update": {
-            "permissions": [
-            ]
-        },
-        "delete": {
-            "permissions": [
-            ]
-        },
-        "list": {
-            "permissions": [
-            ]
-        }
+      "GitHubAccess"
+    ]
+  },
+  "properties": {
+    "Organization": {
+      "description": "The Organization the user is being added to",
+      "type": "string"
+    },
+    "Username": {
+      "description": "The handle for the GitHub user account",
+      "type": "string"
+    },
+    "Role": {
+      "description": "The role for the new member.",
+      "type": "string",
+      "enum": [
+        "admin",
+        "member"
+      ]
     }
+  },
+  "additionalProperties": false,
+  "tagging": {
+    "taggable": false
+  },
+  "required": [
+    "Organization",
+    "Username"
+  ],
+  "primaryIdentifier": [
+    "/properties/Username",
+    "/properties/Organization"
+  ],
+  "createOnlyProperties": [
+    "/properties/Organization",
+    "/properties/Username"
+  ],
+  "handlers": {
+    "create": {
+      "permissions": []
+    },
+    "read": {
+      "permissions": []
+    },
+    "update": {
+      "permissions": []
+    },
+    "delete": {
+      "permissions": []
+    },
+    "list": {
+      "permissions": []
+    }
+  }
 }

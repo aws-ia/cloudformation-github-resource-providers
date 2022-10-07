@@ -1,8 +1,7 @@
 {
   "CREATE": {
-    "/GitHubAccess": "<GITHUB_TOKEN>",
-    "/Owner": "Cloudsoft-CloudFormation",
-    "/Repository": "CloudFormation-GitHub-Test",
+    "/Owner": "<GITHUB_ORG>",
+    "/Repository": "<GITHUB_REPOSITORY>",
     "/Tag": "v0.0.0",
     "/Sha": "660163e2b2872e3ecd831d971b95af6df45ea0b3"
   },

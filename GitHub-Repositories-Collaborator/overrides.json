@@ -1,9 +1,8 @@
 {
   "CREATE": {
-    "/GitHubAccess": "<GITHUB_TOKEN>",
     "/Owner": "<GITHUB_ORG>",
     "/Repository": "<GITHUB_REPOSITORY>",
-    "/Username": "<EXTERNAL_GITHUB_USERNAME>",
+    "/Username": "alasdairhodge",
     "/Permission": "pull"
   },
   "UPDATE": {

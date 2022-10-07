@@ -1,6 +1,5 @@
 {
   "CREATE": {
-    "/GitHubAccess": "<GITHUB_TOKEN>",
     "/Org": "<GITHUB_ORG>",
     "/TeamSlug": "<GITHUB_TEAM>",
     "/Username": "<GITHUB_USERNAME>",
