@@ -102,7 +102,8 @@ class Resource extends AbstractGitHubResource<ResourceModel, GetTeamPayload, Cre
             ...model,
             description: from?.description,
             privacy: from?.privacy,
-            slug: from?.slug
+            slug: from?.slug,
+            name: from?.name
         });
     }
 
