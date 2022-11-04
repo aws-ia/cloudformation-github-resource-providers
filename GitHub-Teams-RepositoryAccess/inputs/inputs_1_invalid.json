@@ -1,0 +1,7 @@
+{
+  "Org": "orgDoesNotExist",
+  "Team": "teamDoesNotExist",
+  "Owner": "ownerDoesNotExist",
+  "Repository": "repoDoesNotExist",
+  "Permission": "pull"
+}
