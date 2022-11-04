@@ -1,2 +1,3 @@
 */overrides.json filter=github
 **/example.yaml filter=github
+**/inputs/*.json filter=github
