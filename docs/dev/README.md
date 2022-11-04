@@ -14,11 +14,16 @@ cat << EOF >> .git/config
 	clean = sed \\
 		-e 's:[organizacionForTesting]:<GITHUB_ORG>:g' \\
 		-e 's:[existingRepositoryForTesting]:<GITHUB_REPOSITORY>:g' \\
+		-e 's:[existingShaCommitOfAboveRepositoryForTesting]:<GITHUB_SHA_1>:g' \\
+		-e 's:[existingShaCommitOfAboveRepositoryForTesting]:<GITHUB_SHA_2>:g' \\
+		-e 's:[existingRepositoryForTesting]:<GITHUB_REPOSITORY>:g' \\
 		-e 's:[existingTeamForTesting]:<GITHUB_TEAM>:g' \\
-		-e 's:[existingGithubUserForTesting]:<GITHUB_USERNAME>:g' 
+		-e 's:[existingGithubUserForTesting]:<GITHUB_USERNAME>:g'
 	smudge = sed \\
 		-e 's:<GITHUB_ORG>:[organizacionForTesting]:g' \\
         -e 's:<GITHUB_REPOSITORY>:[existingRepositoryForTesting]:g' \\
+        -e 's:<GITHUB_SHA_1>:[existingShaCommitOfAboveRepositoryForTesting]:g' \\
+        -e 's:<GITHUB_SHA_2>:[existingShaCommitOfAboveRepositoryForTesting]:g' \\
 		-e 's:<GITHUB_TEAM>:[existingTeamForTesting]:g' \\
 		-e 's:<GITHUB_USERNAME>:[existingGithubUserForTesting]:g'
 EOF

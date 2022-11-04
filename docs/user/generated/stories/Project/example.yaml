@@ -2,25 +2,24 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: Shows how to set up a new github based project
 
 Parameters:
-  GitHubAccess:
+  RepoName:
     Type: String
     Description: |
-      Access token for GitHub.  It is recommended you store this in secrets manager.
+      The name of the repo that is being created and configured
+    Default: MyRepo
     
 Resources:
   Membership:
     Type: GitHub::Organizations::Membership
     Properties:
-      GitHubAccess: !Ref GitHubAccess
       Organization: ACME-CloudFormation
       Username: ACME-cloudformation-test-user
       Role: member
   MyRepo:
     Type: GitHub::Repositories::Repository
     Properties:
-      GitHubAccess: !Ref GitHubAccess
       Org: ACME-CloudFormation
-      Name: myrepo
+      Name: !Ref RepoName
       Description: Repo created by cloudformation example
       Homepage: https://GitHub.com
       Private: true
@@ -37,29 +36,24 @@ Resources:
       AllowRebaseMerge: true
       AllowAutoMerge: true
       DeleteBranchOnMerge: false
-      AllowForking: true
       Archived: false
   MyWebHook:
     Type: GitHub::Repositories::Webhook
     DependsOn: MyRepo
     Properties:
-      GitHubAccess: !Ref GitHubAccess
+      Url: http://some.url.com
       Owner: ACME-CloudFormation
       Name: web
       Active: false
       Events:
         - push
-      Repository: MyRepo
-      Config:
-        Url: http://some.url.com
-        Secret: 123444
+      Repository: !Ref RepoName
   ExternalCollaborator:
     Type: GitHub::Repositories::Collaborator
     DependsOn: MyRepo
     Properties:
-      GitHubAccess: !Ref GitHubAccess
       Owner: ACME-CloudFormation
-      Repository: MyRepo
+      Repository: !Ref RepoName
       Username: alasdairhodge
       Permission: pull
   DemoTeam:
@@ -69,27 +63,21 @@ Resources:
       Organization: ACME-CloudFormation
       Description: My new Team
       Privacy: secret
-      GitHubAccess: !Ref GitHubAccess
   DemoTeamMemberMe:
     Type: GitHub::Teams::Membership
-    DependsOn: DemoTeam
     Properties:
-      GitHubAccess: !Ref GitHubAccess
       Org: ACME-CloudFormation
-      TeamSlug: my-demo-team
+      TeamSlug: !GetAtt DemoTeam.Slug
       Username: organisation-member
       Role: member
   DemoTeamAccessRepo:
     Type: GitHub::Teams::RepositoryAccess
-    DependsOn:
-    - MyRepo
-    - DemoTeam
+    DependsOn: MyRepo
     Properties:
-      GitHubAccess: !Ref GitHubAccess
       Org: ACME-CloudFormation
-      Team: my-demo-team
+      Team: !GetAtt DemoTeam.Slug
       Owner: ACME-CloudFormation
-      Repository: MyRepo
+      Repository: !Ref RepoName
       Permission: pull
 
 
