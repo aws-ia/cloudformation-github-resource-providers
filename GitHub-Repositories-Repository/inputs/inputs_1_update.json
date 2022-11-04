@@ -1,0 +1,9 @@
+{
+  "Org": "<GITHUB_ORG>",
+  "Name": "CTv2",
+  "Archived": false,
+  "Description": "New description",
+  "AllowMergeCommit": true,
+  "Visibility": "public",
+  "Private": false
+}
