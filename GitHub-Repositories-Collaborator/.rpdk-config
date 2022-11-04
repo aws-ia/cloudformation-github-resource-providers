@@ -17,5 +17,15 @@
         "target_schemas": [],
         "useDocker": false,
         "protocolVersion": "2.0.0"
+    },
+    "contractSettings":{
+        "typeConfiguration": {
+            "configuration": {
+                "GitHubAccess": {
+                    "AccessToken": "{{resolve:ssm-secure:/cfn/github/token:1}}"
+                }
+            },
+            "configurationAlias": "default"
+        }
     }
 }
