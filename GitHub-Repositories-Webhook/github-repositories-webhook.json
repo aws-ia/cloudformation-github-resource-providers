@@ -36,6 +36,7 @@
     "Name": {
       "description": "Use web to create a webhook. Default: web. This parameter only accepts the value web.",
       "type": "string",
+      "default": "web",
       "enum": [
         "web"
       ]
@@ -93,8 +94,7 @@
     "taggable": false
   },
   "required": [
-    "Owner",
-    "Name"
+    "Owner"
   ],
   "readOnlyProperties": [
     "/properties/Id"
