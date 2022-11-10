@@ -7,26 +7,26 @@
     "doc": "docs"
   },
   "scripts": {
-    "clean:all": "find . -depth 1 -type d -name \"*\" -exec bash -c \"test -e {}/.rpdk-config && cd '{}' && rm -rf build && rm -rf dist && rm -rf node_modules\" \\;",
+    "clean:all": "find . -maxdepth 1 -type d -name \"*\" -exec bash -c \"test -e {}/.rpdk-config && cd '{}' && rm -rf build && rm -rf dist && rm -rf node_modules\" \\;",
     "prebuild:all": "cd GitHub-Common && npm install && npm run build",
-    "build:all": "find . -depth 1 -type d -name \"*\" -exec bash -c \"test -e {}/.rpdk-config && cd '{}' && cfn generate && npm install && npm run build\" \\;",
+    "build:all": "find . -maxdepth 1 -type d -name \"*\" -exec bash -c \"test -e {}/.rpdk-config && cd '{}' && cfn generate && npm install && npm run build\" \\;",
     "build:docs-clean": "rm -rf docs/user/generated/resources/*",
-    "build:docs-cp-docs": "find . -depth 1 -type d -name \"*\" -exec bash -c \"! test -e {}/.rpdk-config || mkdir -p docs/user/generated/resources/{} && cp {}/docs/* docs/user/generated/resources/{}/\" \\;",
-    "build:docs-cp-extras": "find . -depth 1 -type d -name \"*\" -exec bash -c \"! test -e {}/.rpdk-config || mkdir -p docs/user/generated/resources/{} && cp {}/docs-extra/* docs/user/generated/resources/{}/\" \\;",
+    "build:docs-cp-docs": "find . -maxdepth 1 -type d -name \"*\" -exec bash -c \"! test -e {}/.rpdk-config || mkdir -p docs/user/generated/resources/{} && cp {}/docs/* docs/user/generated/resources/{}/\" \\;",
+    "build:docs-cp-extras": "find . -maxdepth 1 -type d -name \"*\" -exec bash -c \"! test -e {}/.rpdk-config || mkdir -p docs/user/generated/resources/{} && cp {}/docs-extra/* docs/user/generated/resources/{}/\" \\;",
     "build:docs-cp": "cp -r docs/user/src/main/docs/* docs/user/generated",
     "build:docs": "npm run build:docs-clean ; npm run build:docs-cp && npm run build:docs-cp-docs && npm run build:docs-cp-extras",
     "build": "npm run build:all && npm run build:docs",
-    "submit:all": "find . -depth 1 -type d -name \"*\" -exec bash -c \"test -e {}/.rpdk-config && cd '{}' && cfn submit --set-default -v --region eu-west-2\" \\;",
-    "test": "find . -depth 1 -type d -name \"*\" -exec bash -c \"test -e {}/jest.config.js && cd '{}' && npm test\" \\;"
+    "submit:all": "find . -maxdepth 1 -type d -name \"*\" -exec bash -c \"test -e {}/.rpdk-config && cd '{}' && cfn submit --set-default -v --region eu-west-2\" \\;",
+    "test": "find . -maxdepth 1 -type d -name \"*\" -exec bash -c \"test -e {}/jest.config.js && cd '{}' && npm test\" \\;"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cloudsoft/cloudformation-github.git"
+    "url": "git+https://github.com/cloudsoft/cloudformation-github-resource-providers.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/cloudsoft/cloudformation-github/issues"
+    "url": "https://github.com/cloudsoft/cloudformation-github-resource-providers/issues"
   },
-  "homepage": "https://github.com/cloudsoft/cloudformation-github#readme"
+  "homepage": "https://github.com/cloudsoft/cloudformation-githu-resource-providers#readme"
 }
