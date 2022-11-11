@@ -12,7 +12,6 @@ To declare this entity in your AWS CloudFormation template, use the following sy
 {
     "Type" : "GitHub::Repositories::Repository",
     "Properties" : {
-        "<a href="#githubaccess" title="GitHubAccess">GitHubAccess</a>" : <i>String</i>,
         "<a href="#org" title="Org">Org</a>" : <i>String</i>,
         "<a href="#name" title="Name">Name</a>" : <i>String</i>,
         "<a href="#description" title="Description">Description</a>" : <i>String</i>,
@@ -44,7 +43,6 @@ To declare this entity in your AWS CloudFormation template, use the following sy
 <pre>
 Type: GitHub::Repositories::Repository
 Properties:
-    <a href="#githubaccess" title="GitHubAccess">GitHubAccess</a>: <i>String</i>
     <a href="#org" title="Org">Org</a>: <i>String</i>
     <a href="#name" title="Name">Name</a>: <i>String</i>
     <a href="#description" title="Description">Description</a>: <i>String</i>
@@ -70,16 +68,6 @@ Properties:
 </pre>
 
 ## Properties
-
-#### GitHubAccess
-
-Personal access token
-
-_Required_: Yes
-
-_Type_: String
-
-_Update requires_: [Replacement](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-replacement)
 
 #### Org
 

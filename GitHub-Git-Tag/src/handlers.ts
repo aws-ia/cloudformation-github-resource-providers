@@ -106,6 +106,8 @@ class Resource extends AbstractGitHubResource<ResourceModel, GetTagPayload, Crea
             resourceModel.sha = from.object.sha;
         }
 
+        delete resourceModel.force;
+
         return resourceModel;
     }
 

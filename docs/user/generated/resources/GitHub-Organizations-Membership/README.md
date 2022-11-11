@@ -12,7 +12,6 @@ To declare this entity in your AWS CloudFormation template, use the following sy
 {
     "Type" : "GitHub::Organizations::Membership",
     "Properties" : {
-        "<a href="#githubaccess" title="GitHubAccess">GitHubAccess</a>" : <i>String</i>,
         "<a href="#organization" title="Organization">Organization</a>" : <i>String</i>,
         "<a href="#username" title="Username">Username</a>" : <i>String</i>,
         "<a href="#role" title="Role">Role</a>" : <i>String</i>
@@ -25,23 +24,12 @@ To declare this entity in your AWS CloudFormation template, use the following sy
 <pre>
 Type: GitHub::Organizations::Membership
 Properties:
-    <a href="#githubaccess" title="GitHubAccess">GitHubAccess</a>: <i>String</i>
     <a href="#organization" title="Organization">Organization</a>: <i>String</i>
     <a href="#username" title="Username">Username</a>: <i>String</i>
     <a href="#role" title="Role">Role</a>: <i>String</i>
 </pre>
 
 ## Properties
-
-#### GitHubAccess
-
-Personal Access Token
-
-_Required_: Yes
-
-_Type_: String
-
-_Update requires_: [Replacement](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-replacement)
 
 #### Organization
 
@@ -57,7 +45,7 @@ _Update requires_: [Replacement](https://docs.aws.amazon.com/AWSCloudFormation/l
 
 The handle for the GitHub user account
 
-_Required_: No
+_Required_: Yes
 
 _Type_: String
 
