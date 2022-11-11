@@ -1,0 +1,7 @@
+{
+  "Owner": "<GITHUB_ORG>",
+  "Repository": "<GITHUB_REPOSITORY>",
+  "Events": ["push"],
+  "Url": "https://some.url.com",
+  "Secret": "123444"
+}

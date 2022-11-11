@@ -1,0 +1,7 @@
+{
+  "Owner": "ownerDoesNotExist",
+  "Repository": "repoDoesNotExist",
+  "Events": ["push"],
+  "Url": "https://some.url.com",
+  "Secret": "123444"
+}

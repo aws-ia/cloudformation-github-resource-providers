@@ -58,7 +58,7 @@ _Update requires_: [Replacement](https://docs.aws.amazon.com/AWSCloudFormation/l
 
 Use web to create a webhook. Default: web. This parameter only accepts the value web.
 
-_Required_: Yes
+_Required_: No
 
 _Type_: String
 

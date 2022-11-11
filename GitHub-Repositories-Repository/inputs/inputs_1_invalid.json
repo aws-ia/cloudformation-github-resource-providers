@@ -1,0 +1,12 @@
+{
+  "Org": "orDoesNotExist",
+  "Name": "CTv2",
+  "Description": "GitHub repo created from the CloudFormation contract <GITHUB_REPOSITORY>s",
+  "LicenseTemplate": "mit",
+  "GitIgnoreTemplate": "Node",
+  "AllowMergeCommit": true,
+  "Visibility": "public",
+  "Archived": false,
+  "Private": false,
+  "Homepage": "https://github.com"
+}

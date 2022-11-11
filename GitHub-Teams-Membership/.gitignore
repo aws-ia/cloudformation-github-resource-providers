@@ -1,6 +1,7 @@
 # Distribution / packaging
 build/
 dist/
+*.zip
 
 # Unit test / coverage reports
 .cache
