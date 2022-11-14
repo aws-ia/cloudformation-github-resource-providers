@@ -22,7 +22,7 @@
         "typeConfiguration": {
             "configuration": {
                 "GitHubAccess": {
-                    "AccessToken": "{{resolve:ssm-secure:/ct/github/token:1}}"
+                    "AccessToken": "{{resolve:ssm-secure:/cfn/github/token:1}}"
                 }
             }
         }
