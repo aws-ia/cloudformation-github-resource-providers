@@ -99,7 +99,7 @@
     ]
   },
   "properties": {
-    "Org": {
+    "Organization": {
       "description": "The organization name. The name is not case sensitive. If not specified, then the managed repository will be within the currently logged-in user account.",
       "type": "string"
     },
@@ -255,7 +255,7 @@
     "/properties/IssuesCount"
   ],
   "createOnlyProperties": [
-    "/properties/Org",
+    "/properties/Organization",
     "/properties/Name",
     "/properties/TeamId",
     "/properties/AutoInit",
@@ -263,7 +263,7 @@
     "/properties/LicenseTemplate"
   ],
   "writeOnlyProperties": [
-    "/properties/Org",
+    "/properties/Organization",
     "/properties/TeamId",
     "/properties/AllowForking",
     "/properties/AllowAutoMerge",

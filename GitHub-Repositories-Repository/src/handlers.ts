@@ -1,4 +1,4 @@
-import {ResourceModel, TypeConfigurationModel} from './models';
+import {ResourceModel, SecurityAndAnalysis, TypeConfigurationModel} from './models';
 import {CaseTransformer, Transformer} from '../../GitHub-Common/src/util';
 import {Octokit} from "@octokit/rest";
 import {Endpoints, RequestError} from "@octokit/types";
@@ -71,15 +71,19 @@ class Resource extends AbstractGitHubResource<ResourceModel, GetUserRepoResponse
             userAgent: this.userAgent
         });
 
-        const requestRoute = model.org
+
+        const requestRoute = model.organization
             ? 'GET /orgs/{org}/repos'
             : 'GET /user/repos';
-        const requestParams = model.org
-            ? {org: model.org}
+        const requestParams = model.organization
+            ? {org: model.organization}
             : {}
+        this.loggerProxy.log(`!!!!! DJG Start paging ${requestRoute} ${JSON.stringify(requestParams)}`);
         const models = await octokit.paginate<RepoData>(
             requestRoute,
             requestParams);
+
+        this.loggerProxy.log("!!!!! DJG stop paging");
 
         return models.map(repoItem => this.setModelFrom(model, repoItem));
     }
@@ -91,7 +95,7 @@ class Resource extends AbstractGitHubResource<ResourceModel, GetUserRepoResponse
         });
 
         let payload:any = {
-            ...{org: model.org ? model.org : undefined},
+            ...{org: model.organization ? model.organization : undefined},
             name: model.name,
             private: model.private_,
             description: model.description,
@@ -116,7 +120,7 @@ class Resource extends AbstractGitHubResource<ResourceModel, GetUserRepoResponse
             payload.allow_forking = model.allowForking;
         }
 
-        const response = await octokit.request<CreateOrgRepoEndpoint | CreateUserRepoEndpoint>(model.org ? 'POST /orgs/{org}/repos' : 'POST /user/repos', payload);
+        const response = await octokit.request<CreateOrgRepoEndpoint | CreateUserRepoEndpoint>(model.organization ? 'POST /orgs/{org}/repos' : 'POST /user/repos', payload);
 
         return response.data;
     }
@@ -199,14 +203,54 @@ class Resource extends AbstractGitHubResource<ResourceModel, GetUserRepoResponse
 
         });
 
+        let payload: ResourceModel = new ResourceModel( {
+            owner: from.owner?.login ? from.owner.login : model.owner,
+            licenseTemplate: from.license?.key,
+            name: from.name,
+            private_: from.private,
+            description: from.description,
+            homepage: from.homepage,
+            visibility: (from.visibility || 'public') as "private" | "public" | "visibility" | "internal",
+            allowAutoMerge: from.allow_auto_merge,
+            allowMergeCommit: from.allow_merge_commit,
+            allowRebaseMerge: from.allow_rebase_merge,
+            allowSquashMerge: from.allow_squash_merge,
+            deleteBranchOnMerge: from.delete_branch_on_merge,
+            hasIssues: from.has_issues,
+            hasProjects: from.has_projects,
+            hasWiki: from.has_wiki,
+            isTemplate: from.is_template,
+            archived: from.archived,
+            defaultBranch: from.default_branch,
+            htmlUrl: from.html_url || '',
+            gitUrl:from.git_url || '',
+            language: from.language || '',
+            forksCount: from.forks_count || 0,
+            starsCount: from.stargazers_count || 0,
+            watchersCount: from.watchers_count || 0,
+            issuesCount: from.open_issues_count || 0,
+            SecurityAndAnalysis: new SecurityAndAnalysis(
+                 {
+                    advanceSecurity: from.security_and_analysis?.advanced_security,
+                    secretScanning: from.security_and_analysis?.secret_scanning
+                })
+        });
+
+        if (!!from.allow_forking) {
+            payload.allowForking = from.allow_forking;
+        }
+
+        this.loggerProxy.log(`!!!! DJG ${JSON.stringify(payload)}`);
+
+
         // Delete write-only properties - probably only necessary for tests
-        delete resourceModel.org;
-        delete resourceModel.teamId;
-        delete resourceModel.allowForking;
-        delete resourceModel.allowAutoMerge;
-        delete resourceModel.autoInit;
-        delete resourceModel.gitIgnoreTemplate;
-        return resourceModel;
+        delete payload.organization;
+        delete payload.teamId;
+        delete payload.allowForking;
+        delete payload.allowAutoMerge;
+        delete payload.autoInit;
+        delete payload.gitIgnoreTemplate;
+        return payload;
     }
 
 }
