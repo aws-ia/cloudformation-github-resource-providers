@@ -1,6 +1,6 @@
 # GitHub::Git::Tag
 
-An example resource schema demonstrating some basic constructs and validation rules.
+Manage a git tag on GitHub
 
 ## Syntax
 
@@ -12,7 +12,6 @@ To declare this entity in your AWS CloudFormation template, use the following sy
 {
     "Type" : "GitHub::Git::Tag",
     "Properties" : {
-        "<a href="#githubaccess" title="GitHubAccess">GitHubAccess</a>" : <i>String</i>,
         "<a href="#owner" title="Owner">Owner</a>" : <i>String</i>,
         "<a href="#repository" title="Repository">Repository</a>" : <i>String</i>,
         "<a href="#tag" title="Tag">Tag</a>" : <i>String</i>,
@@ -27,7 +26,6 @@ To declare this entity in your AWS CloudFormation template, use the following sy
 <pre>
 Type: GitHub::Git::Tag
 Properties:
-    <a href="#githubaccess" title="GitHubAccess">GitHubAccess</a>: <i>String</i>
     <a href="#owner" title="Owner">Owner</a>: <i>String</i>
     <a href="#repository" title="Repository">Repository</a>: <i>String</i>
     <a href="#tag" title="Tag">Tag</a>: <i>String</i>
@@ -36,16 +34,6 @@ Properties:
 </pre>
 
 ## Properties
-
-#### GitHubAccess
-
-Personal Access Token
-
-_Required_: Yes
-
-_Type_: String
-
-_Update requires_: [Replacement](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-replacement)
 
 #### Owner
 

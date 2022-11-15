@@ -1,9 +1,12 @@
 {
-  "Org": "<GITHUB_ORG>",
-  "Name": "CTv2",
-  "Archived": false,
-  "Description": "New description",
-  "AllowMergeCommit": true,
-  "Visibility": "public",
-  "Private": false
+    "Organization": "<GITHUB_ORG>",
+    "Name": "foo2",
+    "LicenseTemplate": "mit",
+    "GitIgnoreTemplate": "Node",
+    "Homepage": "https://github.com",
+    "Archived": false,
+    "Description": "New description",
+    "AllowMergeCommit": true,
+    "Visibility": "public",
+    "Private": false
 }

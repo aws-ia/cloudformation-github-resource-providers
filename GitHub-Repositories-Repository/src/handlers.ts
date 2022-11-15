@@ -1,12 +1,22 @@
-import {ResourceModel, TypeConfigurationModel} from './models';
+import {ResourceModel, SecurityAndAnalysis, TypeConfigurationModel} from './models';
 import {CaseTransformer, Transformer} from '../../GitHub-Common/src/util';
 import {Octokit} from "@octokit/rest";
 import {Endpoints, RequestError} from "@octokit/types";
 import {AbstractGitHubResource} from "../../GitHub-Common/src/abstract-github-resource";
+import {RetryableCallbackContext} from "../../GitHub-Common/src/abstract-base-resource";
 import {version} from '../package.json';
 import {
+    Action,
+    BaseModel,
+    BaseResource,
     exceptions,
-    ResourceHandlerRequest
+    handlerEvent,
+    LoggerProxy,
+    OperationStatus,
+    Optional,
+    ProgressEvent,
+    ResourceHandlerRequest,
+    SessionProxy
 } from "@amazon-web-services-cloudformation/cloudformation-cli-typescript-lib";
 import {AlreadyExists} from "@amazon-web-services-cloudformation/cloudformation-cli-typescript-lib/dist/exceptions";
 
@@ -71,11 +81,11 @@ class Resource extends AbstractGitHubResource<ResourceModel, GetUserRepoResponse
             userAgent: this.userAgent
         });
 
-        const requestRoute = model.org
+        const requestRoute = model.owner
             ? 'GET /orgs/{org}/repos'
             : 'GET /user/repos';
-        const requestParams = model.org
-            ? {org: model.org}
+        const requestParams = model.owner
+            ? {org: model.owner}
             : {}
         const models = await octokit.paginate<RepoData>(
             requestRoute,
@@ -91,7 +101,7 @@ class Resource extends AbstractGitHubResource<ResourceModel, GetUserRepoResponse
         });
 
         let payload:any = {
-            ...{org: model.org ? model.org : undefined},
+            ...{org: model.organization ? model.organization : undefined},
             name: model.name,
             private: model.private_,
             description: model.description,
@@ -116,7 +126,7 @@ class Resource extends AbstractGitHubResource<ResourceModel, GetUserRepoResponse
             payload.allow_forking = model.allowForking;
         }
 
-        const response = await octokit.request<CreateOrgRepoEndpoint | CreateUserRepoEndpoint>(model.org ? 'POST /orgs/{org}/repos' : 'POST /user/repos', payload);
+        const response = await octokit.request<CreateOrgRepoEndpoint | CreateUserRepoEndpoint>(model.organization ? 'POST /orgs/{org}/repos' : 'POST /user/repos', payload);
 
         return response.data;
     }
@@ -188,19 +198,40 @@ class Resource extends AbstractGitHubResource<ResourceModel, GetUserRepoResponse
 
         delete from.updated_at;
 
-        let resourceModel = new ResourceModel({
-            ...model,
-            ...Transformer.for(from)
-                .transformKeys(CaseTransformer.SNAKE_TO_CAMEL)
-                .forModelIngestion()
-                .transform(),
-            owner: from.owner?.login,
+        let resourceModel: ResourceModel = new ResourceModel( {
+            owner: from.owner?.login ? from.owner.login : model.owner,
             licenseTemplate: from.license?.key,
-
+            name: from.name,
+            private_: from.private,
+            description: from.description,
+            homepage: from.homepage,
+            visibility: (from.visibility || 'public') as "private" | "public" | "visibility" | "internal",
+            allowAutoMerge: from.allow_auto_merge,
+            allowMergeCommit: from.allow_merge_commit,
+            allowRebaseMerge: from.allow_rebase_merge,
+            allowSquashMerge: from.allow_squash_merge,
+            deleteBranchOnMerge: from.delete_branch_on_merge,
+            hasIssues: from.has_issues,
+            hasProjects: from.has_projects,
+            hasWiki: from.has_wiki,
+            isTemplate: from.is_template,
+            archived: from.archived,
+            defaultBranch: from.default_branch,
+            htmlUrl: from.html_url || '',
+            gitUrl:from.git_url || '',
+            language: from.language || '',
+            forksCount: from.forks_count || 0,
+            starsCount: from.stargazers_count || 0,
+            watchersCount: from.watchers_count || 0,
+            issuesCount: from.open_issues_count || 0
         });
 
+        if (!!from.allow_forking) {
+            resourceModel.allowForking = from.allow_forking;
+        }
+
         // Delete write-only properties - probably only necessary for tests
-        delete resourceModel.org;
+        delete resourceModel.organization;
         delete resourceModel.teamId;
         delete resourceModel.allowForking;
         delete resourceModel.allowAutoMerge;

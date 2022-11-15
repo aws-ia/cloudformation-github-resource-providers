@@ -24,8 +24,7 @@
                 "GitHubAccess": {
                     "AccessToken": "{{resolve:ssm-secure:/cfn/github/token:1}}"
                 }
-            },
-            "configurationAlias": "default"
+            }
         }
     }
 }

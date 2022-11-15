@@ -71,6 +71,9 @@
     "/properties/Repository",
     "/properties/Tag"
   ],
+  "writeOnlyProperties": [
+    "/properties/Force"
+  ],
   "handlers": {
     "create": {
       "permissions": []

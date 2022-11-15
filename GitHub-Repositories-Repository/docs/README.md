@@ -12,7 +12,7 @@ To declare this entity in your AWS CloudFormation template, use the following sy
 {
     "Type" : "GitHub::Repositories::Repository",
     "Properties" : {
-        "<a href="#org" title="Org">Org</a>" : <i>String</i>,
+        "<a href="#organization" title="Organization">Organization</a>" : <i>String</i>,
         "<a href="#name" title="Name">Name</a>" : <i>String</i>,
         "<a href="#description" title="Description">Description</a>" : <i>String</i>,
         "<a href="#homepage" title="Homepage">Homepage</a>" : <i>String</i>,
@@ -43,7 +43,7 @@ To declare this entity in your AWS CloudFormation template, use the following sy
 <pre>
 Type: GitHub::Repositories::Repository
 Properties:
-    <a href="#org" title="Org">Org</a>: <i>String</i>
+    <a href="#organization" title="Organization">Organization</a>: <i>String</i>
     <a href="#name" title="Name">Name</a>: <i>String</i>
     <a href="#description" title="Description">Description</a>: <i>String</i>
     <a href="#homepage" title="Homepage">Homepage</a>: <i>String</i>
@@ -69,7 +69,7 @@ Properties:
 
 ## Properties
 
-#### Org
+#### Organization
 
 The organization name. The name is not case sensitive. If not specified, then the managed repository will be within the currently logged-in user account.
 

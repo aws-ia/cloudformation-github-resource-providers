@@ -12,13 +12,15 @@ To declare this entity in your AWS CloudFormation template, use the following sy
 {
     "Type" : "GitHub::Repositories::Webhook",
     "Properties" : {
-        "<a href="#githubaccess" title="GitHubAccess">GitHubAccess</a>" : <i>String</i>,
         "<a href="#owner" title="Owner">Owner</a>" : <i>String</i>,
         "<a href="#name" title="Name">Name</a>" : <i>String</i>,
         "<a href="#active" title="Active">Active</a>" : <i>Boolean</i>,
         "<a href="#events" title="Events">Events</a>" : <i>[ String, ... ]</i>,
         "<a href="#repository" title="Repository">Repository</a>" : <i>String</i>,
-        "<a href="#config" title="Config">Config</a>" : <i><a href="webhookconfig.md">WebhookConfig</a></i>
+        "<a href="#contenttype" title="ContentType">ContentType</a>" : <i>String</i>,
+        "<a href="#url" title="Url">Url</a>" : <i>String</i>,
+        "<a href="#secret" title="Secret">Secret</a>" : <i>String</i>,
+        "<a href="#insecuressl" title="InsecureSsl">InsecureSsl</a>" : <i>Double</i>
     }
 }
 </pre>
@@ -28,27 +30,19 @@ To declare this entity in your AWS CloudFormation template, use the following sy
 <pre>
 Type: GitHub::Repositories::Webhook
 Properties:
-    <a href="#githubaccess" title="GitHubAccess">GitHubAccess</a>: <i>String</i>
     <a href="#owner" title="Owner">Owner</a>: <i>String</i>
     <a href="#name" title="Name">Name</a>: <i>String</i>
     <a href="#active" title="Active">Active</a>: <i>Boolean</i>
     <a href="#events" title="Events">Events</a>: <i>
       - String</i>
     <a href="#repository" title="Repository">Repository</a>: <i>String</i>
-    <a href="#config" title="Config">Config</a>: <i><a href="webhookconfig.md">WebhookConfig</a></i>
+    <a href="#contenttype" title="ContentType">ContentType</a>: <i>String</i>
+    <a href="#url" title="Url">Url</a>: <i>String</i>
+    <a href="#secret" title="Secret">Secret</a>: <i>String</i>
+    <a href="#insecuressl" title="InsecureSsl">InsecureSsl</a>: <i>Double</i>
 </pre>
 
 ## Properties
-
-#### GitHubAccess
-
-Personal access token
-
-_Required_: Yes
-
-_Type_: String
-
-_Update requires_: [Replacement](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-replacement)
 
 #### Owner
 
@@ -64,7 +58,7 @@ _Update requires_: [Replacement](https://docs.aws.amazon.com/AWSCloudFormation/l
 
 Use web to create a webhook. Default: web. This parameter only accepts the value web.
 
-_Required_: Yes
+_Required_: No
 
 _Type_: String
 
@@ -102,21 +96,51 @@ _Type_: String
 
 _Update requires_: [Replacement](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-replacement)
 
-#### Config
+#### ContentType
 
-Key/value pairs to provide settings for this webhook
+The media type used to serialize the payloads. Supported values include json and form. The default is form.
 
 _Required_: No
 
-_Type_: <a href="webhookconfig.md">WebhookConfig</a>
+_Type_: String
+
+_Allowed Values_: <code>form</code> | <code>json</code>
+
+_Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
+
+#### Url
+
+The URL to which the payloads will be delivered.
+
+_Required_: No
+
+_Type_: String
+
+_Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
+
+#### Secret
+
+If provided, the secret will be used as the key to generate the HMAC hex digest value for delivery signature headers.
+
+_Required_: No
+
+_Type_: String
+
+_Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
+
+#### InsecureSsl
+
+Determines whether the SSL certificate of the host for url will be verified when delivering payloads. Supported values include 0 (verification is performed) and 1 (verification is not performed). The default is 0. We strongly recommend not setting this to 1 as you are subject to man-in-the-middle and other attacks.
+
+_Required_: No
+
+_Type_: Double
+
+_Allowed Values_: <code>0</code> | <code>1</code>
 
 _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
 
 ## Return Values
-
-### Ref
-
-When you pass the logical ID of this resource to the intrinsic `Ref` function, Ref returns the Id.
 
 ### Fn::GetAtt
 

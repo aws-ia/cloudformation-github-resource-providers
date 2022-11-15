@@ -13,15 +13,15 @@ export class ResourceModel extends BaseModel {
     @Exclude()
     protected readonly IDENTIFIER_KEY_NAME: string = '/properties/Name';
 
-    @Expose({ name: 'Org' })
+    @Expose({ name: 'Organization' })
     @Transform(
         (value: any, obj: any) =>
-            transformValue(String, 'org', value, obj, []),
+            transformValue(String, 'organization', value, obj, []),
         {
             toClassOnly: true,
         }
     )
-    org?: Optional<string>;
+    organization?: Optional<string>;
     @Expose({ name: 'Name' })
     @Transform(
         (value: any, obj: any) =>

@@ -1,5 +1,5 @@
 {
-  "Org": "orDoesNotExist",
+  "Organization": "orDoesNotExist",
   "Name": "CTv2",
   "Description": "GitHub repo created from the CloudFormation contract <GITHUB_REPOSITORY>s",
   "LicenseTemplate": "mit",
