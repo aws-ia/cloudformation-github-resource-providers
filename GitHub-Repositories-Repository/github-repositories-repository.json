@@ -268,7 +268,8 @@
     "/properties/AllowForking",
     "/properties/AllowAutoMerge",
     "/properties/AutoInit",
-    "/properties/GitIgnoreTemplate"
+    "/properties/GitIgnoreTemplate",
+    "/properties/SecurityAndAnalysis"
   ],
   "primaryIdentifier": [
     "/properties/Owner",

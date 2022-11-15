@@ -3,7 +3,7 @@
     "Name": "foo2",
     "LicenseTemplate": "mit",
     "GitIgnoreTemplate": "Node",
-    "Homepage": "https//:github.com",
+    "Homepage": "https://github.com",
     "Archived": false,
     "Description": "New description",
     "AllowMergeCommit": true,

@@ -3,10 +3,20 @@ import {CaseTransformer, Transformer} from '../../GitHub-Common/src/util';
 import {Octokit} from "@octokit/rest";
 import {Endpoints, RequestError} from "@octokit/types";
 import {AbstractGitHubResource} from "../../GitHub-Common/src/abstract-github-resource";
+import {RetryableCallbackContext} from "../../GitHub-Common/src/abstract-base-resource";
 import {version} from '../package.json';
 import {
+    Action,
+    BaseModel,
+    BaseResource,
     exceptions,
-    ResourceHandlerRequest
+    handlerEvent,
+    LoggerProxy,
+    OperationStatus,
+    Optional,
+    ProgressEvent,
+    ResourceHandlerRequest,
+    SessionProxy
 } from "@amazon-web-services-cloudformation/cloudformation-cli-typescript-lib";
 import {AlreadyExists} from "@amazon-web-services-cloudformation/cloudformation-cli-typescript-lib/dist/exceptions";
 
@@ -65,25 +75,44 @@ class Resource extends AbstractGitHubResource<ResourceModel, GetUserRepoResponse
         return response.data;
     }
 
+    // @handlerEvent(Action.List)
+    // public async listHandler(
+    //     session: Optional<SessionProxy>,
+    //     request: ResourceHandlerRequest<ResourceModel>,
+    //     callbackContext: RetryableCallbackContext,
+    //     logger: LoggerProxy,
+    //     typeConfiguration: TypeConfigurationModel
+    // ): Promise<ProgressEvent<ResourceModel, RetryableCallbackContext>> {
+    //     const model = this.newModel(request.desiredResourceState);
+    //
+    //     try {
+    //         const data = await this.list(model, typeConfiguration);
+    //
+    //         return ProgressEvent.builder<ProgressEvent<ResourceModel, RetryableCallbackContext>>()
+    //             .status(OperationStatus.Success)
+    //             .resourceModels(data)
+    //             .build();
+    //     } catch (e) {
+    //         this.loggerProxy.log(`[X] Failed to list resources ${e}`);
+    //         this.processRequestException(e, request);
+    //     }
+    // }
+
     async list(model: ResourceModel, typeConfiguration?: TypeConfigurationModel): Promise<ResourceModel[]> {
         const octokit = new Octokit({
             auth: typeConfiguration?.gitHubAccess.accessToken,
             userAgent: this.userAgent
         });
 
-
-        const requestRoute = model.organization
+        const requestRoute = model.owner
             ? 'GET /orgs/{org}/repos'
             : 'GET /user/repos';
-        const requestParams = model.organization
-            ? {org: model.organization}
+        const requestParams = model.owner
+            ? {org: model.owner}
             : {}
-        this.loggerProxy.log(`!!!!! DJG Start paging ${requestRoute} ${JSON.stringify(requestParams)}`);
         const models = await octokit.paginate<RepoData>(
             requestRoute,
             requestParams);
-
-        this.loggerProxy.log("!!!!! DJG stop paging");
 
         return models.map(repoItem => this.setModelFrom(model, repoItem));
     }
@@ -192,16 +221,17 @@ class Resource extends AbstractGitHubResource<ResourceModel, GetUserRepoResponse
 
         delete from.updated_at;
 
-        let resourceModel = new ResourceModel({
-            ...model,
-            ...Transformer.for(from)
-                .transformKeys(CaseTransformer.SNAKE_TO_CAMEL)
-                .forModelIngestion()
-                .transform(),
-            owner: from.owner?.login,
-            licenseTemplate: from.license?.key,
+        // let resourceModel = new ResourceModel({
+        //     ...model,
+        //     ...Transformer.for(from)
+        //         .transformKeys(CaseTransformer.SNAKE_TO_CAMEL)
+        //         .forModelIngestion()
+        //         .transform(),
+        //     owner: from.owner?.login,
+        //     licenseTemplate: from.license?.key,
+        // });
 
-        });
+        this.loggerProxy.log(`!!!! DJG  sat from ${JSON.stringify(from)}`);
 
         let payload: ResourceModel = new ResourceModel( {
             owner: from.owner?.login ? from.owner.login : model.owner,
@@ -228,19 +258,14 @@ class Resource extends AbstractGitHubResource<ResourceModel, GetUserRepoResponse
             forksCount: from.forks_count || 0,
             starsCount: from.stargazers_count || 0,
             watchersCount: from.watchers_count || 0,
-            issuesCount: from.open_issues_count || 0,
-            SecurityAndAnalysis: new SecurityAndAnalysis(
-                 {
-                    advanceSecurity: from.security_and_analysis?.advanced_security,
-                    secretScanning: from.security_and_analysis?.secret_scanning
-                })
+            issuesCount: from.open_issues_count || 0
         });
 
         if (!!from.allow_forking) {
             payload.allowForking = from.allow_forking;
         }
 
-        this.loggerProxy.log(`!!!! DJG ${JSON.stringify(payload)}`);
+        this.loggerProxy.log(`!!!! DJG  sat as ${JSON.stringify(payload)}`);
 
 
         // Delete write-only properties - probably only necessary for tests
