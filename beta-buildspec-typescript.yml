@@ -31,7 +31,8 @@ phases:
       - cfn submit --set-default
       - aws cloudformation set-type-configuration --type RESOURCE --type-name $TYPE_NAME --configuration-alias default --configuration $(cat /root/.cfn-cli/typeConfiguration.json| jq -c "")
       - INTEG_STACK_NAME="integ-$(echo $RESOURCE_PATH | tr '[:upper:]' '[:lower:]')"
-      - aws cloudformation create-stack --stack-name $INTEG_STACK_NAME --template-body file://test/integ.yml
+      - cat test/integ.yml | sed "s/TEST_REPO_NAME/$(uuidgen)/" > test/integ-unique.yml
+      - aws cloudformation create-stack --stack-name $INTEG_STACK_NAME --template-body file://test/integ-unique.yml
       - aws cloudformation wait stack-create-complete --stack-name $INTEG_STACK_NAME
     finally:
       - cat rpdk.log
