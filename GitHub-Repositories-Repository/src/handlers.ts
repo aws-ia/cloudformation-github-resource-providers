@@ -231,8 +231,6 @@ class Resource extends AbstractGitHubResource<ResourceModel, GetUserRepoResponse
         //     licenseTemplate: from.license?.key,
         // });
 
-        this.loggerProxy.log(`!!!! DJG  sat from ${JSON.stringify(from)}`);
-
         let payload: ResourceModel = new ResourceModel( {
             owner: from.owner?.login ? from.owner.login : model.owner,
             licenseTemplate: from.license?.key,
@@ -264,9 +262,6 @@ class Resource extends AbstractGitHubResource<ResourceModel, GetUserRepoResponse
         if (!!from.allow_forking) {
             payload.allowForking = from.allow_forking;
         }
-
-        this.loggerProxy.log(`!!!! DJG  sat as ${JSON.stringify(payload)}`);
-
 
         // Delete write-only properties - probably only necessary for tests
         delete payload.organization;
