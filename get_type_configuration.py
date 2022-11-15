@@ -1,4 +1,4 @@
-"Get the Okta secret from secrets manager and write it to ~/.cfn-cli/typeConfiguration.json"
+"Get the GitHub secret from secrets manager and write it to ~/.cfn-cli/typeConfiguration.json"
 
 import boto3
 import base64
@@ -9,7 +9,7 @@ from botocore.exceptions import ClientError
 def get_secret():
     "Get the secret from secrets manager"
 
-    secret_name = "okta-type-configuration"
+    secret_name = "cep-github-type-configuration"
     region_name = "us-east-1"
     session = boto3.session.Session()
     client = session.client(
