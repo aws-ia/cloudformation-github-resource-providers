@@ -75,29 +75,6 @@ class Resource extends AbstractGitHubResource<ResourceModel, GetUserRepoResponse
         return response.data;
     }
 
-    // @handlerEvent(Action.List)
-    // public async listHandler(
-    //     session: Optional<SessionProxy>,
-    //     request: ResourceHandlerRequest<ResourceModel>,
-    //     callbackContext: RetryableCallbackContext,
-    //     logger: LoggerProxy,
-    //     typeConfiguration: TypeConfigurationModel
-    // ): Promise<ProgressEvent<ResourceModel, RetryableCallbackContext>> {
-    //     const model = this.newModel(request.desiredResourceState);
-    //
-    //     try {
-    //         const data = await this.list(model, typeConfiguration);
-    //
-    //         return ProgressEvent.builder<ProgressEvent<ResourceModel, RetryableCallbackContext>>()
-    //             .status(OperationStatus.Success)
-    //             .resourceModels(data)
-    //             .build();
-    //     } catch (e) {
-    //         this.loggerProxy.log(`[X] Failed to list resources ${e}`);
-    //         this.processRequestException(e, request);
-    //     }
-    // }
-
     async list(model: ResourceModel, typeConfiguration?: TypeConfigurationModel): Promise<ResourceModel[]> {
         const octokit = new Octokit({
             auth: typeConfiguration?.gitHubAccess.accessToken,
@@ -221,17 +198,7 @@ class Resource extends AbstractGitHubResource<ResourceModel, GetUserRepoResponse
 
         delete from.updated_at;
 
-        // let resourceModel = new ResourceModel({
-        //     ...model,
-        //     ...Transformer.for(from)
-        //         .transformKeys(CaseTransformer.SNAKE_TO_CAMEL)
-        //         .forModelIngestion()
-        //         .transform(),
-        //     owner: from.owner?.login,
-        //     licenseTemplate: from.license?.key,
-        // });
-
-        let payload: ResourceModel = new ResourceModel( {
+        let resourceModel: ResourceModel = new ResourceModel( {
             owner: from.owner?.login ? from.owner.login : model.owner,
             licenseTemplate: from.license?.key,
             name: from.name,
@@ -260,17 +227,17 @@ class Resource extends AbstractGitHubResource<ResourceModel, GetUserRepoResponse
         });
 
         if (!!from.allow_forking) {
-            payload.allowForking = from.allow_forking;
+            resourceModel.allowForking = from.allow_forking;
         }
 
         // Delete write-only properties - probably only necessary for tests
-        delete payload.organization;
-        delete payload.teamId;
-        delete payload.allowForking;
-        delete payload.allowAutoMerge;
-        delete payload.autoInit;
-        delete payload.gitIgnoreTemplate;
-        return payload;
+        delete resourceModel.organization;
+        delete resourceModel.teamId;
+        delete resourceModel.allowForking;
+        delete resourceModel.allowAutoMerge;
+        delete resourceModel.autoInit;
+        delete resourceModel.gitIgnoreTemplate;
+        return resourceModel;
     }
 
 }
