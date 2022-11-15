@@ -1,7 +1,7 @@
 {
   "Organization": "orgDoesNotExist",
   "Name": "CTv2",
-  "Description": "",
+  "Description": "Test",
   "LicenseTemplate": "mit",
   "GitIgnoreTemplate": "Node",
   "AllowMergeCommit": true,
