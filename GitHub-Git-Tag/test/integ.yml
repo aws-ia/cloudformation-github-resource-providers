@@ -4,7 +4,7 @@ Resources:
     Type: GitHub::Git::Tag
     Properties:
       Owner: ericzbeard-aws-cep-testing 
-      Repository: ericzbeard-aws-cep-testing
+      Repository: test-stable-1
       Tag: v0.0.0
       Sha: 6907b5086cfdc46381af05d94c2e41ac6812a962
 

@@ -1,6 +1,6 @@
 {
   "Owner": "GITHUB_ORG",
   "Repository": "GITHUB_REPO",
-  "Tag": "v0.0.0",
+  "Tag": "GITHUB_TAG",
   "Sha": "GITHUB_SHA"
 }
