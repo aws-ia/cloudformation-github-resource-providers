@@ -1,0 +1,10 @@
+Resources:
+
+  TestRepo:
+    Type: GitHub::Repositories::Repository
+    Properties:
+      Organization: ericzbeard-aws-cep-testing
+      Name: TEST_REPO_NAME 
+      Description: Test Repo for CEP Beta
+      Private: true
+

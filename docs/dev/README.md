@@ -2,6 +2,8 @@
 
 ## Set up git filter
 
+_Note: this is changing, to accomodate CICD. `example_inputs` is now transformed into `inputs` by `setup.sh` in each resource folder. Only GitHub-Repositories-Repository has been changed so far._
+
 This project uses a filter set up in the [.gitattributes](.gitattributes) file to replace private values for testing within the different `overides.json` on each resource.
 
 The filter has to be added manually inside the `.git/config` file once the repository has been cloned.

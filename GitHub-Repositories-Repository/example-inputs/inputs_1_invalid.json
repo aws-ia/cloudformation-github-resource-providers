@@ -1,7 +1,7 @@
 {
-  "Organization": "orDoesNotExist",
+  "Organization": "orgDoesNotExist",
   "Name": "CTv2",
-  "Description": "GitHub repo created from the CloudFormation contract <GITHUB_REPOSITORY>s",
+  "Description": "Test",
   "LicenseTemplate": "mit",
   "GitIgnoreTemplate": "Node",
   "AllowMergeCommit": true,

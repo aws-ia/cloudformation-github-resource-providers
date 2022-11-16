@@ -1,7 +1,7 @@
 {
-    "Organization": "<GITHUB_ORG>",
-    "Name": "foo2",
-    "Description": "GitHub repo created from the CloudFormation contract <GITHUB_REPOSITORY>s",
+    "Organization": "GITHUB_ORG",
+    "Name": "GITHUB_REPO",
+    "Description": "Test Description",
     "LicenseTemplate": "mit",
     "GitIgnoreTemplate": "Node",
     "AllowMergeCommit": true,
