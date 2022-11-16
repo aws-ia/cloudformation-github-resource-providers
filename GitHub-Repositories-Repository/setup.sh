@@ -13,6 +13,7 @@ mkdir -p inputs
 cat example-inputs/inputs_1_create.json | sed "s/GITHUB_ORG/${GITHUB_ORG}/g" | sed "s/GITHUB_REPO/${GITHUB_REPO}/g"  > inputs/inputs_1_create.json
 cat example-inputs/inputs_1_update.json | sed "s/GITHUB_ORG/${GITHUB_ORG}/g" | sed "s/GITHUB_REPO/${GITHUB_REPO}/g"  > inputs/inputs_1_update.json
 cp example-inputs/inputs_1_invalid.json inputs/
+cat test/integ.yml | sed "s/TEST_REPO_NAME/$(uuidgen)/" | sed "s/TEST_TAG/$(uuidgen)/" > test/integ-unique.yml
 
 python3 ../get_type_configuration.py
 
