@@ -1,6 +1,6 @@
 {
-  "Owner": "<GITHUB_ORG>",
-  "Repository": "<GITHUB_REPOSITORY>",
+  "Owner": "ericzbeard-aws-cep-testing",
+  "Repository": "test-cep-repo",
   "Tag": "v0.0.0",
-  "Sha": "<GITHUB_SHA_1>"
+  "Sha": "6907b5086cfdc46381af05d94c2e41ac6812a962"
 }

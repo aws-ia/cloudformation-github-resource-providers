@@ -17,3 +17,6 @@ coverage/
 
 # contains credentials
 sam-tests/
+*.zip
+inputs/
+local/
