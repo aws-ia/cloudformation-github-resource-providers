@@ -19,4 +19,4 @@ coverage/
 sam-tests/
 *.zip
 inputs
-
+integ-unique.yml
