@@ -1,0 +1,9 @@
+Resources:
+
+  TestOrgMember:
+    Type: GitHub::Organizations::Membership
+    Properties:
+      Organization: GITHUB_ORG
+      Username: GITHUB_USERNAME
+      Role: member
+
