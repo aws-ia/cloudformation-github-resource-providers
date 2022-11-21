@@ -15,7 +15,7 @@ cat example-inputs/inputs_1_update.json | sed "s/GITHUB_ORG/${GITHUB_ORG}/g" | s
 cp example-inputs/inputs_1_invalid.json inputs/
 
 # Not practical to make anything unique here.. we should delete the stack after
-cat test/integ.yml > test/integ-unique.yml
+cat test/integ.yml | sed "s/GITHUB_ORG/${GITHUB_ORG}/g" | sed "s/GITHUB_USERNAME/${GITHUB_USERNAME}/g" > test/integ-unique.yml
 
 python3 ../get_type_configuration.py
 
