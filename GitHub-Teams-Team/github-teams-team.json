@@ -1,7 +1,8 @@
 {
   "typeName": "GitHub::Teams::Team",
   "description": "Manage a team in Github",
-  "sourceUrl": "https://docs.github.com/en/rest/teams/teams#create-a-team",
+  "sourceUrl": "https://github.com/aws-ia/cloudformation-github-resource-providers.git",
+  "documentationUrl": "https://github.com/aws-ia/cloudformation-github-resource-providers",
   "definitions": {
     "GitHubAccess": {
       "type": "object",

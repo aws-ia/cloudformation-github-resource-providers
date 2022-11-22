@@ -1,7 +1,8 @@
 {
   "typeName": "GitHub::Organizations::Membership",
   "description": "Add people to an organization. Will create an invite and user will only become a member once they accept this invite.",
-  "sourceUrl": "https://docs.github.com/en/rest/orgs/members",
+  "sourceUrl": "https://github.com/aws-ia/cloudformation-github-resource-providers.git",
+  "documentationUrl": "https://github.com/aws-ia/cloudformation-github-resource-providers",
   "definitions": {
     "GitHubAccess": {
       "type": "object",

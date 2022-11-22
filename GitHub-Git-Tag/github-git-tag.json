@@ -1,7 +1,8 @@
 {
   "typeName": "GitHub::Git::Tag",
   "description": "Manage a git tag on GitHub",
-  "sourceUrl": "https://docs.github.com/en/rest/git/tags",
+  "sourceUrl": "https://github.com/aws-ia/cloudformation-github-resource-providers.git",
+  "documentationUrl": "https://github.com/aws-ia/cloudformation-github-resource-providers",
   "definitions": {
     "GitHubAccess": {
       "type": "object",

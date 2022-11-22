@@ -1,7 +1,8 @@
 {
   "typeName": "GitHub::Teams::RepositoryAccess",
   "description": "Manage a team access to a repository in GitHub.",
-  "sourceUrl": "https://github.com/aws-cloudformation/aws-cloudformation-rpdk.git",
+  "sourceUrl": "https://github.com/aws-ia/cloudformation-github-resource-providers.git",
+  "documentationUrl": "https://github.com/aws-ia/cloudformation-github-resource-providers",
   "definitions": {
     "GitHubAccess": {
       "type": "object",
