@@ -6,7 +6,11 @@
 # values in `example-inputs`.
 #
 #   GITHUB_ORG
-#   GITHUB_REPO
+#   GITHUB_USERNAME
+#
+#   Example
+#
+#   GITHUB_ORG=ericzbeard-aws-cep-testing GITHUB_USERNAME=ezbeard-github-test AWS_PROFILE=ezbeard-cep ./setup.sh
 
 mkdir -p inputs
 
