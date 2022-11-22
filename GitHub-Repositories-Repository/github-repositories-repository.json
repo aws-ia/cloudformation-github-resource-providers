@@ -1,7 +1,8 @@
 {
   "typeName": "GitHub::Repositories::Repository",
   "description": "Manage a repository in GitHub.",
-  "sourceUrl": "https://docs.github.com/en/rest/repos/repos#create-an-organization-repository",
+  "sourceUrl": "https://github.com/aws-ia/cloudformation-github-resource-providers.git",
+  "documentationUrl": "https://github.com/aws-ia/cloudformation-github-resource-providers",
   "definitions": {
     "GitHubAccess": {
       "type": "object",

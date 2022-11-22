@@ -1,7 +1,8 @@
 {
   "typeName": "GitHub::Repositories::Webhook",
   "description": "Repositories can have multiple webhooks installed. Each webhook should have a unique config. Multiple webhooks can share the same config as long as those webhooks do not have any events that overlap.",
-  "sourceUrl": "https://docs.github.com/en/rest/webhooks/repos#list-repository-webhooks",
+  "sourceUrl": "https://github.com/aws-ia/cloudformation-github-resource-providers.git",
+  "documentationUrl": "https://github.com/aws-ia/cloudformation-github-resource-providers",
   "typeConfiguration": {
     "properties": {
       "GitHubAccess": {

@@ -1,7 +1,8 @@
 {
   "typeName": "GitHub::Teams::Membership",
   "description": "Manages people's membership to GitHub teams",
-  "sourceUrl": "https://docs.github.com/en/organizations/organizing-members-into-teams/adding-organization-members-to-a-team",
+  "sourceUrl": "https://github.com/aws-ia/cloudformation-github-resource-providers.git",
+  "documentationUrl": "https://github.com/aws-ia/cloudformation-github-resource-providers",
   "definitions": {
     "GitHubAccess": {
       "type": "object",
