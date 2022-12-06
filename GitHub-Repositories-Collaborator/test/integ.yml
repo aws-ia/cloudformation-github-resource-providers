@@ -1,0 +1,10 @@
+Resources:
+
+  Collab:
+    Type: GitHub::Repositories::Collaborator
+    Properties:
+      Owner: GITHUB_ORG
+      Repository: GITHUB_REPO
+      Username: GITHUB_USERNAME
+      Permission: pull
+
