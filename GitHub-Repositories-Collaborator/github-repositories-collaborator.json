@@ -39,7 +39,7 @@
       "type": "string"
     },
     "Username": {
-      "description": "The handle for the GitHub user account.",
+      "description": "The login name for the GitHub user account.",
       "type": "string"
     },
     "Permission": {
