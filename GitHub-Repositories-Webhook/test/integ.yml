@@ -1,0 +1,12 @@
+Resources:
+
+  Hook:
+    Type: GitHub::Repositories::Webhook
+    Properties:
+      Owner: GITHUB_ORG
+      Repository: GITHUB_REPO
+      Events:
+        - push
+      Url: "https://something.example.com"
+      Secret: 11112222
+

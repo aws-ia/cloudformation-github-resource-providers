@@ -151,14 +151,14 @@ aws cloudformation --region $AWS_REGION set-type-default-version --type RESOURCE
 echo ""
 
 # Set the type configuration
-if [ -f "get_type_configuration.py" ]
+if [ -f "../get_type_configuration.py" ]
 then
     echo "About to set type configuration"
-    TYPE_CONFIG_PATH=$(python get_type_configuration.py)
+    TYPE_CONFIG_PATH=$(python ../get_type_configuration.py)
     echo "TYPE_CONFIG_PATH is $TYPE_CONFIG_PATH"
     aws cloudformation set-type-configuration --type RESOURCE --type-name $TYPE_NAME --configuration-alias default --configuration $(cat ${TYPE_CONFIG_PATH} | jq -c "")
 else
-    echo "Did not find get_type_configuration.py, skipping type configuration"
+    echo "Did not find ../get_type_configuration.py, skipping type configuration"
 fi
 
 # Test the resource type
