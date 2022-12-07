@@ -17,14 +17,16 @@ type Permissions = {
     admin: boolean
 }
 
-type GetCollaboratorEndpoint = 'GET /repos/{owner}/{repo}/collaborators/{username}/permission';
+type GetCollaboratorPermissionEndpoint = 'GET /repos/{owner}/{repo}/collaborators/{username}/permission';
+type GetCollaboratorEndpoint = 'GET /repos/{owner}/{repo}/collaborators/{username}';
 type CreateOrUpdateCollaboratorEndpoint = 'PUT /repos/{owner}/{repo}/collaborators/{username}';
 type ListCollaboratorEndpoint = 'GET /repos/{owner}/{repo}/collaborators';
 type ListInvitationsEndpoint = 'GET /repos/{owner}/{repo}/invitations';
 type GetInvitationEndpoint = 'GET /repos/{owner}/{repo}/invitations/{invitation_id}';
 type UpdateInvitationsEndpoint = 'PATCH /repos/{owner}/{repo}/invitations/{invitation_id}';
 
-type GetCollaboratorPayload = Endpoints[GetCollaboratorEndpoint]['response']['data'];
+type GetCollaboratorPayload = Endpoints[GetCollaboratorEndpoint]['response']['data']
+type GetCollaboratorPermissionPayload = Endpoints[GetCollaboratorPermissionEndpoint]['response']['data'];
 type PutCollaboratorPayload = Endpoints[CreateOrUpdateCollaboratorEndpoint]['response']['data'];
 type ListCollaboratorResponseData = Endpoints[ListCollaboratorEndpoint]['response']['data'];
 type ListInvitationsResponseData = Endpoints[ListInvitationsEndpoint]['response']['data'];
@@ -34,6 +36,7 @@ type UpdateInvitationsResponseData = Endpoints[UpdateInvitationsEndpoint]['respo
 
 type CollaboratorData =
     GetCollaboratorPayload &
+    GetCollaboratorPermissionPayload &
     PutCollaboratorPayload &
     ListCollaboratorResponseData &
     ListInvitationsResponseData &
@@ -54,20 +57,13 @@ class Resource extends AbstractGitHubResource<ResourceModel, ResourceModel, Reso
             return new ResourceModel({permission: this.permissionsToPermission(invite.permissions)});
         }
 
-        const response = await octokit.request<GetCollaboratorEndpoint>('GET /repos/{owner}/{repo}/collaborators/{username}/permission', {
+        const response = await octokit.request<GetCollaboratorEndpoint>('GET /repos/{owner}/{repo}/collaborators/{username}', {
             owner: model.owner,
             repo: model.repository,
             username: model.username
         });
 
-        if(response.data.permission == 'none') {
-            throw {
-                name: 'Not found',
-                status: 404
-            } as RequestError;
-        }
-
-        return new ResourceModel({permission: this.permissionsToPermission(response.data.permission)});
+        return response.data
     }
 
     async list(model: ResourceModel, typeConfiguration?: TypeConfigurationModel): Promise<ResourceModel[]> {
@@ -212,7 +208,7 @@ class Resource extends AbstractGitHubResource<ResourceModel, ResourceModel, Reso
                 auth: typeConfiguration?.gitHubAccess.accessToken,
                 userAgent: this.userAgent
             });
-            const response = await octokit.request<GetCollaboratorEndpoint>('GET /repos/{owner}/{repo}/collaborators/{username}/permission', {
+            const response = await octokit.request<GetCollaboratorPermissionEndpoint>('GET /repos/{owner}/{repo}/collaborators/{username}/permission', {
                 owner: model.owner,
                 repo: model.repository,
                 username: model.username
