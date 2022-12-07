@@ -1,0 +1,9 @@
+Resources:
+
+  TestTeam:
+    Type: GitHub::Teams::Team
+    Properties:
+      Organization: GITHUB_ORG
+      Name: Test
+      Description: Created by test automation
+
