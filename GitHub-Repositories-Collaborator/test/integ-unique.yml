@@ -1,0 +1,10 @@
+Resources:
+
+  Collab:
+    Type: GitHub::Repositories::Collaborator
+    Properties:
+      Owner: ericzbeard-aws-cep-testing
+      Repository: test-stable-1
+      Username: ezbeard-collab
+      Permission: pull
+

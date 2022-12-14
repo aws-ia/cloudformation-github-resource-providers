@@ -1,6 +1,6 @@
 {
-  "Owner": "<GITHUB_ORG>",
-  "Repository": "<GITHUB_REPOSITORY>",
+  "Owner": "GITHUB_ORG",
+  "Repository": "GITHUB_REPO",
   "Events": ["pull_request"],
   "Url": "https://some.other.url.com",
   "Secret": "123984"
