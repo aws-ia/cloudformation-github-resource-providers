@@ -1,0 +1,10 @@
+Resources:
+
+  TestTeam:
+    Type: GitHub::Teams::RepositoryAccess
+    Properties:
+      Org: GITHUB_ORG
+      Team: GITHUB_TEAM
+      Owner: GITHUB_ORG
+      Repository: GITHUB_REPO
+      Permission: push
