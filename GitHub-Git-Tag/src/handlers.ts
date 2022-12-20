@@ -5,7 +5,6 @@ import {AbstractGitHubResource} from "../../GitHub-Common/src/abstract-github-re
 import {version} from '../package.json';
 
 type GetTagEndpoint = 'GET /repos/{owner}/{repo}/git/ref/{ref}';
-type ListTagsEndpoint = 'GET /repos/{owner}/{repo}/git/matching-refs/{ref}';
 type DeleteTagEndpoint = 'DELETE /repos/{owner}/{repo}/git/ref/{ref}';
 type UpdateTagEndpoint = 'PATCH /repos/{owner}/{repo}/git/refs/{ref}';
 type CreateTagEndpoint = 'POST /repos/{owner}/{repo}/git/refs';
@@ -39,7 +38,7 @@ class Resource extends AbstractGitHubResource<ResourceModel, GetTagPayload, Crea
             userAgent: this.userAgent
         });
 
-        const response = await octokit.paginate<ListTagsEndpoint>('GET /repos/{owner}/{repo}/git/matching-refs/{ref}', {
+        const response = await octokit.paginate<GetTagPayload>('GET /repos/{owner}/{repo}/git/ref/{ref}', {
             owner: model.owner,
             repo: model.repository,
             ref: `tags/${model.tag}`
