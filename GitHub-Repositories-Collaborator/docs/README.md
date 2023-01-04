@@ -55,7 +55,7 @@ _Update requires_: [Replacement](https://docs.aws.amazon.com/AWSCloudFormation/l
 
 #### Username
 
-The handle for the GitHub user account.
+The login name for the GitHub user account.
 
 _Required_: Yes
 
