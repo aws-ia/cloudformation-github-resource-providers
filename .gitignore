@@ -121,4 +121,5 @@ coverage/
 
 local/
 integ-unique.yml
-
+**/src/handlers.test.ts
+*.zip
