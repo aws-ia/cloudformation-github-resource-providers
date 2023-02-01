@@ -17,7 +17,6 @@ phases:
       - node --version
       - pwd
       - ls
-
   build:
     commands:
       - echo Entered the build phase...
@@ -27,11 +26,7 @@ phases:
       - ls
       - npm install && npm run build
       - ./setup.sh
-      - ../deregister-all.sh us-east-1
-      - ../publish.sh us-east-1
-      - ../deregister-all.sh us-west-2
-      - ../publish.sh us-west-2
+      - ../publish-resource-regions.sh
     finally:
       - cat rpdk.log
       - ./cleanup.sh    
-
