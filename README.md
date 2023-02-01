@@ -13,6 +13,8 @@ This collection of [AWS CloudFormation resource types][1] allow GitHub to be con
 | GitHub::Teams::Membership          | This resource type manages a [GitHub Team Membership][13]        | [/GitHub-Teams-Membership][14]         |
 | GitHub::Teams::RepositoryAccess    | This resource type manages a [GitHub Team Repository Access][15] | [/GitHub-Teams-Repository-Access][16]  |
 | GitHub::Teams::Team                | This resource type manages a [GitHub Team][17]                   | [/GitHub-Teams-Team][18]               |
+| Github::Repositories::Secret         | This resource type manages a [Github Repositories Secret][27]      | [/Github-Repositories-Secret][29]
+| Github::Organizations::Secret         | This resource type manages a [Github Organizations Secret][28]      | [/Github-Organizations-Secret][30]
 
 
 ## Prerequisites
@@ -172,6 +174,42 @@ Resources:
 
 ```
 
+### Set up a repository secret
+
+```yaml
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Sets up a repository secret
+Resources:
+  MySecret:
+    Type: GitHub::Repositories::Secret
+    Properties:
+      Repository: example-repo
+      Owner: ACME-CloudFormation
+      SecretName: secret example
+      SecretValue: example_secret123
+
+```
+
+### Set up a organization secret
+
+```yaml
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Sets up a Organization secret
+Resources:
+  MySecret:
+    Type: GitHub::Organization::Secret
+    Properties:
+      Org: example-org
+      SecretName: secret example
+      SecretValue: example_secret123
+      Visibility: selected
+      SelectedRepositoryIds: 
+        - 595653363
+
+```
+
 [1]: https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/resource-types.html
 [2]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html
 [3]: https://docs.github.com/en/rest/git/tags
@@ -197,3 +235,7 @@ Resources:
 [23]: https://aws.amazon.com/console/
 [24]: https://console.aws.amazon.com/cloudformation/home
 [25]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/registry.html
+[27]: https://docs.github.com/en/rest/actions/secrets?apiVersion=2022-11-28#create-or-update-a-repository-secret
+[28]: https://docs.github.com/en/rest/actions/secrets?apiVersion=2022-11-28#create-or-update-an-organization-secret
+[29]: GitHub-Repositories-Secret
+[30]: GitHub-Organizations-Secret
