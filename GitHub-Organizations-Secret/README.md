@@ -1,21 +1,8 @@
-# GitHub CloudFormation Resources
+# GitHub::Repositories::Webhook
 
-This collection of [AWS CloudFormation resource types][1] allow GitHub to be controlled using [AWS CloudFormation][2].
+This resource type manages a [GitHub Organization Secret][28]
 
-
-| Resource                           | Description                                                      | Documentation                          |
-|------------------------------------|------------------------------------------------------------------|----------------------------------------|
-| GitHub::Git::Tag                   | This resource type manages a [GitHub Git Tag][3]                 | [/GitHub-Git-Tag][4]                   |
-| GitHub::Organizations::Membership  | This resource type manages a [GitHub Organization Membership][5] | [/GitHub-Origanizations-Membership][6] |
-| GitHub::Repositories::Collaborator | This resource type manages a [GitHub Repository Collaborator][7] | [/GitHub-Repositories-Collaborator][8] |
-| GitHub::Repositories::Repository   | This resource type manages a [GitHub Repository][9]              | [/GitHub-Repositories-Repository][10]  |
-| GitHub::Repositories::Webhook      | This resource type manages a [GitHub Repository Webhoo][11]      | [/GitHub-Repositories-Webhook][12]     |
-| GitHub::Teams::Membership          | This resource type manages a [GitHub Team Membership][13]        | [/GitHub-Teams-Membership][14]         |
-| GitHub::Teams::RepositoryAccess    | This resource type manages a [GitHub Team Repository Access][15] | [/GitHub-Teams-Repository-Access][16]  |
-| GitHub::Teams::Team                | This resource type manages a [GitHub Team][17]                   | [/GitHub-Teams-Team][18]               |
-| Github::Repositories::Secret         | This resource type manages a [Github Repositories Secret][27]      | [/Github-Repositories-Secret][29]
-| Github::Organizations::Secret         | This resource type manages a [Github Organizations Secret][28]      | [/Github-Organizations-Secret][30]
-
+[Documentation][26]
 
 ## Prerequisites
 * [AWS Account][19]
@@ -50,7 +37,7 @@ For example:
   ```Bash
   $ aws cloudformation set-type-configuration \
   --region us-west-2 --type RESOURCE \
-  --type-name GitHub::Git::Tag \
+  --type-name GitHub::Organization::Secret \
   --configuration-alias default \
   --configuration '{"GitHubAccess": {"AccessToken": "{{resolve:ssm-secure:/cfn/github/accesstoken:1}}"}}'
   ```
@@ -85,111 +72,6 @@ The GitHub CloudFormation resources are available on the CloudFormation Public R
 **Note**: To privately register a resource in any other region, use the provided packages.
 
 ## Examples
-
-### Setting up a new project in github with a repository, team, and external member with CloudFormation
-
-```yaml
----
-AWSTemplateFormatVersion: '2010-09-09'
-Description: Shows how to set up a new github based project
-
-Parameters:
-  RepoName:
-    Type: String
-    Description: |
-      The name of the repo that is being created and configured
-    Default: MyRepo
-
-Resources:
-  Membership:
-    Type: GitHub::Organizations::Membership
-    Properties:
-      Organization: ACME-CloudFormation
-      Username: ACME-cloudformation-test-user
-      Role: member
-  MyRepo:
-    Type: GitHub::Repositories::Repository
-    Properties:
-      Org: ACME-CloudFormation
-      Name: !Ref RepoName
-      Description: Repo created by cloudformation example
-      Homepage: https://GitHub.com
-      Private: true
-      Visibility: private
-      HasIssues: true
-      HasProjects: false
-      HasWiki: true
-      IsTemplate: false
-      AutoInit: true
-      GitIgnoreTemplate: Node
-      LicenseTemplate: mit
-      AllowSquashMerge: true
-      AllowMergeCommit: true
-      AllowRebaseMerge: true
-      AllowAutoMerge: true
-      DeleteBranchOnMerge: false
-      Archived: false
-  MyWebHook:
-    Type: GitHub::Repositories::Webhook
-    DependsOn: MyRepo
-    Properties:
-      Url: http://some.url.com
-      Owner: ACME-CloudFormation
-      Name: web
-      Active: false
-      Events:
-        - push
-      Repository: !Ref RepoName
-  ExternalCollaborator:
-    Type: GitHub::Repositories::Collaborator
-    DependsOn: MyRepo
-    Properties:
-      Owner: ACME-CloudFormation
-      Repository: !Ref RepoName
-      Username: externaluser
-      Permission: pull
-  DemoTeam:
-    Type: GitHub::Teams::Team
-    Properties:
-      Name: My Demo Team
-      Organization: ACME-CloudFormation
-      Description: My new Team
-      Privacy: secret
-  DemoTeamMemberMe:
-    Type: GitHub::Teams::Membership
-    Properties:
-      Org: ACME-CloudFormation
-      TeamSlug: !GetAtt DemoTeam.Slug
-      Username: organisation-member
-      Role: member
-  DemoTeamAccessRepo:
-    Type: GitHub::Teams::RepositoryAccess
-    DependsOn: MyRepo
-    Properties:
-      Org: ACME-CloudFormation
-      Team: !GetAtt DemoTeam.Slug
-      Owner: ACME-CloudFormation
-      Repository: !Ref RepoName
-      Permission: pull
-
-```
-
-### Set up a repository secret
-
-```yaml
----
-AWSTemplateFormatVersion: '2010-09-09'
-Description: Sets up a repository secret
-Resources:
-  MySecret:
-    Type: GitHub::Repositories::Secret
-    Properties:
-      Repository: example-repo
-      Owner: ACME-CloudFormation
-      SecretName: secret example
-      SecretValue: example_secret123
-
-```
 
 ### Set up a organization secret
 
@@ -235,7 +117,6 @@ Resources:
 [23]: https://aws.amazon.com/console/
 [24]: https://console.aws.amazon.com/cloudformation/home
 [25]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/registry.html
+[26]: ./docs/README.md
 [27]: https://docs.github.com/en/rest/actions/secrets?apiVersion=2022-11-28#create-or-update-a-repository-secret
 [28]: https://docs.github.com/en/rest/actions/secrets?apiVersion=2022-11-28#create-or-update-an-organization-secret
-[29]: GitHub-Repositories-Secret
-[30]: GitHub-Organizations-Secret

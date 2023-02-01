@@ -1,0 +1,6 @@
+{
+    "Owner": "<GITHUB_OWNER>",
+    "Repository": "<GITHUB_REPO>",
+    "SecretName": "new_secret123",
+    "SecretValue": "examplesecret"
+}

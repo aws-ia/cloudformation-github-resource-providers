@@ -1,0 +1,9 @@
+{
+    "Org": "<GITHUB_ORG>",
+    "SecretName": "new_secret",
+    "SecretValue": "example-secret",
+    "Visibility": "selected",
+    "SelectedRepositoryIds": [
+        595653363
+    ]
+}
