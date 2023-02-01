@@ -29,6 +29,7 @@ phases:
       - cfn validate
       - cfn generate
       - npm install && npm run build
+      - python ../get_type_configuration.py
       - cfn submit --dry-run
       - nohup sam local start-lambda &
       - sleep 10
