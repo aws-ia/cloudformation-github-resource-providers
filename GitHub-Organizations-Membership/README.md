@@ -31,7 +31,6 @@ Note: All official GitHub resources begin with `GitHub::` and specify that they 
 
 6. In your terminal, specify the configuration data for the registered GitHub CloudFormation resource type, in the given account and region by using the **SetTypeConfiguration** operation:
 
-
 For example:
 
   ```Bash
