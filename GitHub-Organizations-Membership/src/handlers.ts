@@ -26,6 +26,8 @@ class Resource extends AbstractGitHubResource<ResourceModel, GetMemberPayload, P
             username: model.username
         });
 
+        console.log("get response.data:", response.data)
+
         return response.data;
     }
 
@@ -46,6 +48,8 @@ class Resource extends AbstractGitHubResource<ResourceModel, GetMemberPayload, P
                 return resourceModel;
             }));
 
+        console.log("list members:", members)
+
         const invitations = await octokit.paginate(
             octokit.orgs.listPendingInvitations,
             {
@@ -56,6 +60,8 @@ class Resource extends AbstractGitHubResource<ResourceModel, GetMemberPayload, P
                 resourceModel.username = membershipItem.login
                 return resourceModel;
             }));
+
+        console.log("list invitations:", invitations)
 
         return [
             ...members,
