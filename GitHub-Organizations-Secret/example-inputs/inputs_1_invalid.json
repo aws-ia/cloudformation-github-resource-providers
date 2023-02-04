@@ -1,4 +1,4 @@
 {
-    "Org": "<GITHUB_ORG>",
+    "Org": "GITHUB_ORG",
     "SecretName": "new_secret"
 }
