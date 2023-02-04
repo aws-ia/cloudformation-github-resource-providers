@@ -4,6 +4,6 @@
     "SecretValue": "example-secret",
     "Visibility": "selected",
     "SelectedRepositoryIds": [
-        GITHUB_REPO_ID
+        "GITHUB_REPO_ID"
     ]
 }
