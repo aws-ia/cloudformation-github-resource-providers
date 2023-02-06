@@ -31,7 +31,7 @@ export abstract class AbstractGitHubResource<ResourceModelType extends BaseModel
         }
     }
 
-    private isOctokitRequestError(ex: object) {
+    isOctokitRequestError(ex: object) {
         return ex instanceof Object && ex.hasOwnProperty('status') && ex.hasOwnProperty('name');
     }
 

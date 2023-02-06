@@ -3,11 +3,11 @@ Resources:
   TestOrgSecret:
     Type: GitHub::Organization::Secret
     Properties:
-      Org: ericzbeard-aws-cep-testing 
+      Org: GITHUB_ORG
       SecretName: secret_name 
       SecretValue: secret-value
       Visibility: selected
       SelectedRepositoryIds:
-        - 595653363
+        - GITHUB_REPO_ID
 
 # TODO - Make these configurable, replace with AWS owned org

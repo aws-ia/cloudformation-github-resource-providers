@@ -1,8 +1,11 @@
 import {ResourceModel, TypeConfigurationModel} from './models';
 import {Octokit} from "@octokit/rest";
-import {Endpoints} from "@octokit/types";
+import {Endpoints, RequestError} from "@octokit/types";
 import {AbstractGitHubResource} from "../../GitHub-Common/src/abstract-github-resource";
 import {version} from '../package.json';
+import { exceptions } from '@amazon-web-services-cloudformation/cloudformation-cli-typescript-lib';
+import { create } from 'domain';
+import { request } from 'http';
 
 type GetTagEndpoint = 'GET /repos/{owner}/{repo}/git/ref/{ref}';
 type DeleteTagEndpoint = 'DELETE /repos/{owner}/{repo}/git/ref/{ref}';
@@ -29,6 +32,8 @@ class Resource extends AbstractGitHubResource<ResourceModel, GetTagPayload, Crea
             ref: `tags/${model.tag}`
         });
 
+        console.log("get response.data: ", response.data)
+
         return response.data;
     }
 
@@ -38,13 +43,40 @@ class Resource extends AbstractGitHubResource<ResourceModel, GetTagPayload, Crea
             userAgent: this.userAgent
         });
 
-        const response = await octokit.paginate<GetTagPayload>('GET /repos/{owner}/{repo}/git/ref/{ref}', {
-            owner: model.owner,
-            repo: model.repository,
-            ref: `tags/${model.tag}`
-        });
+        let response;
+        try {
+            response = await octokit.paginate<GetTagPayload>('GET /repos/{owner}/{repo}/git/ref/{ref}', {
+                owner: model.owner,
+                repo: model.repository,
+                ref: `tags/${model.tag}`
+            });
+        } catch (ex) {
+            // We need to catch this to return an empty array on 404
+            
+            console.log("list error trying to GetTagPayload: ", ex)
 
-        return response.map(tagPayload => this.setModelFrom(model, tagPayload));
+            if (!this.isOctokitRequestError(ex)) {
+                throw(ex)
+            }
+    
+            const errorMessage = `${(ex as RequestError).name}`;
+    
+            if ((ex as unknown as RequestError).status === 404) {
+                return []
+            } else {
+                throw(ex)
+            }
+        }
+
+        // TODO - Catch the 404 and return an empty list
+
+        console.log("list response: ", response);
+
+        const models = response.map(tagPayload => this.setModelFrom(model, tagPayload));
+
+        console.log("list models: ", models);
+
+        return models;
     }
 
     async create(model: ResourceModel, typeConfiguration?: TypeConfigurationModel): Promise<CreateTagPayload> {
