@@ -5,6 +5,6 @@ Resources:
     Properties:
       Owner: ericzbeard-aws-cep-testing
       Repository: test-stable-1
-      Username: ezbeard-collab
+      Username: ezbeard-github-test
       Permission: pull
 
