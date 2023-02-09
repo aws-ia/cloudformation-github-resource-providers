@@ -8,4 +8,3 @@ Resources:
       SecretName: secret_name 
       SecretValue: secret-value
 
-# TODO - Make these configurable, replace with AWS owned org

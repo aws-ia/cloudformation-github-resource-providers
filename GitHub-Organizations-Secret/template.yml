@@ -11,14 +11,14 @@ Resources:
   TestEntrypoint:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: dist/GitHub-Organization-Secret/src/handlers.testEntrypoint
+      Handler: dist/GitHub-Organizations-Secret/src/handlers.testEntrypoint
       Runtime: nodejs14.x
       CodeUri: ./
 
   TypeFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: dist/GitHub-Organization-Secret/src/handlers.entrypoint
+      Handler: dist/GitHub-Organizations-Secret/src/handlers.entrypoint
       Runtime: nodejs14.x
       CodeUri: ./
 
