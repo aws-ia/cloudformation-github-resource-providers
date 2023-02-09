@@ -1,5 +1,5 @@
 {
-    "Owner": "GITHUB_OWNER",
+    "Owner": "GITHUB_ORG",
     "Repository": "GITHUB_REPO",
     "SecretName": "new_secret123",
     "SecretValue": "examplesecret"

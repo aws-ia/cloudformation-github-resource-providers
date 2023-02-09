@@ -3,7 +3,6 @@
     "version": "0.1.0",
     "description": "AWS custom resource provider named GitHub::Repositories::Secret.",
     "private": true,
-    "main": "dist/handlers.js",
     "files": [
         "dist"
     ],

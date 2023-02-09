@@ -16,3 +16,6 @@ coverage/
 
 # contains credentials
 sam-tests/
+local/
+inputs/
+

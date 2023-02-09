@@ -2,5 +2,5 @@
   "Owner": "GITHUB_ORG",
   "Repository": "GITHUB_REPO",
   "Username": "GITHUB_USERNAME",
-  "Permission": "push"
+  "Permission": "pull"
 }

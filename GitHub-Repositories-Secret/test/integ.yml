@@ -3,9 +3,8 @@ Resources:
   TestRepoSecret:
     Type: GitHub::Repositories::Secret
     Properties:
-      Owner: ericzbeard-aws-cep-testing 
-      Repository: test-stable-1
+      Owner: GITHUB_ORG 
+      Repository: GITHUB_REPO
       SecretName: secret_name 
       SecretValue: secret-value
 
-# TODO - Make these configurable, replace with AWS owned org
