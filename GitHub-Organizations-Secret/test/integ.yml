@@ -1,7 +1,7 @@
 Resources:
 
   TestOrgSecret:
-    Type: GitHub::Organization::Secret
+    Type: GitHub::Organizations::Secret
     Properties:
       Org: GITHUB_ORG
       SecretName: secret_name 
