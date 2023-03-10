@@ -1,6 +1,6 @@
 Resources:
 
-  TestOrgMember:
+  TestMembership:
     Type: GitHub::Organizations::Membership
     Properties:
       Organization: GITHUB_ORG
