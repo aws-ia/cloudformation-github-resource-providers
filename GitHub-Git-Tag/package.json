@@ -29,6 +29,6 @@
     "ts-node": "^10.8.1"
   },
   "optionalDependencies": {
-    "aws-sdk": "^2.656.0"
+    "aws-sdk": "^2.1370.0"
   }
 }
