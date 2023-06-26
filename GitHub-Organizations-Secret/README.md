@@ -1,4 +1,4 @@
-# GitHub::Repositories::Webhook
+# GitHub::Organizations::Secret
 
 This resource type manages a [GitHub Organization Secret][28]
 
