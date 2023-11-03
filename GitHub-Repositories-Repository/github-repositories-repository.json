@@ -262,7 +262,6 @@
   ],
   "createOnlyProperties": [
     "/properties/Organization",
-    "/properties/Name",
     "/properties/TeamId",
     "/properties/AutoInit",
     "/properties/GitIgnoreTemplate",
