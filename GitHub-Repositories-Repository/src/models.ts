@@ -9,10 +9,19 @@ export class ResourceModel extends BaseModel {
     public static readonly TYPE_NAME: string = 'GitHub::Repositories::Repository';
 
     @Exclude()
-    protected readonly IDENTIFIER_KEY_OWNER: string = '/properties/Owner';
+    protected readonly IDENTIFIER_KEY_ID: string = '/properties/Id';
     @Exclude()
-    protected readonly IDENTIFIER_KEY_NAME: string = '/properties/Name';
+    protected readonly IDENTIFIER_KEY_OWNER: string = '/properties/Owner';
 
+    @Expose({ name: 'Id' })
+    @Transform(
+        (value: any, obj: any) =>
+            transformValue(Number, 'id', value, obj, []),
+        {
+            toClassOnly: true,
+        }
+    )
+    id?: Optional<number>;
     @Expose({ name: 'Organization' })
     @Transform(
         (value: any, obj: any) =>
@@ -290,12 +299,12 @@ export class ResourceModel extends BaseModel {
     @Exclude()
     public getPrimaryIdentifier(): Dict {
         const identifier: Dict = {};
-        if (this.owner != null) {
-            identifier[this.IDENTIFIER_KEY_OWNER] = this.owner;
+        if (this.id != null) {
+            identifier[this.IDENTIFIER_KEY_ID] = this.id;
         }
 
-        if (this.name != null) {
-            identifier[this.IDENTIFIER_KEY_NAME] = this.name;
+        if (this.owner != null) {
+            identifier[this.IDENTIFIER_KEY_OWNER] = this.owner;
         }
 
         // only return the identifier if it can be used, i.e. if all components are present

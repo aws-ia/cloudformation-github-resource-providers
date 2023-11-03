@@ -100,6 +100,10 @@
     ]
   },
   "properties": {
+    "Id": {
+      "description": "The ID of the repository.",
+      "type": "number"
+    },
     "Organization": {
       "description": "The organization name. The name is not case sensitive. If not specified, then the managed repository will be within the currently logged-in user account.",
       "type": "string"
@@ -245,6 +249,7 @@
     "Name"
   ],
   "readOnlyProperties": [
+    "/properties/Id",
     "/properties/Owner",
     "/properties/HtmlUrl",
     "/properties/GitUrl",
@@ -273,8 +278,8 @@
     "/properties/SecurityAndAnalysis"
   ],
   "primaryIdentifier": [
-    "/properties/Owner",
-    "/properties/Name"
+    "/properties/Id",
+    "/properties/Owner"
   ],
   "handlers": {
     "create": {

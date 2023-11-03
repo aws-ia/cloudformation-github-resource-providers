@@ -67,9 +67,13 @@ class Resource extends AbstractGitHubResource<ResourceModel, GetUserRepoResponse
             userAgent: this.userAgent
         });
 
-        const response = await octokit.request<GetUserRepoEndpoint>('GET /repos/{owner}/{repo}', {
-            owner: model.owner,
-            repo: model.name
+        // Note - in order to allow renaming the github repo, we need to use the id instead of owner and name for the path.
+        // See here for more information about this api (since it's undocumented): https://github.com/piotrmurach/github/issues/282
+        // ts ignore below necessary as this path is not part of octokit endpoints
+
+        // @ts-ignore
+        const response = await octokit.request<GetRepoByIdEndpoint>('GET /repositories/{id}', {
+            id: model.id
         });
 
         return response.data;
@@ -168,9 +172,14 @@ class Resource extends AbstractGitHubResource<ResourceModel, GetUserRepoResponse
             payload.allow_forking = model.allowForking;
         }
 
-        const response = await octokit.request<UpdateRepoEndpoint>(
-            'PATCH /repos/{owner}/{repo}',
-            payload);
+        const pathWithId = `PATCH /repositories/${model.id}`;
+
+        // Note - in order to allow renaming the github repo, we need to use the id instead of owner and name for the path.
+        // See here for more information about this api (since it's undocumented): https://github.com/piotrmurach/github/issues/282
+        // ts ignore below necessary as this path is not part of octokit endpoints
+
+        // @ts-ignore
+        const response = await octokit.request<UpdateRepoEndpoint>(pathWithId, payload);
 
         return response.data;
     }
@@ -199,6 +208,7 @@ class Resource extends AbstractGitHubResource<ResourceModel, GetUserRepoResponse
         delete from.updated_at;
 
         let resourceModel: ResourceModel = new ResourceModel( {
+            id: from.id,
             owner: from.owner?.login ? from.owner.login : model.owner,
             licenseTemplate: from.license?.key,
             name: from.name,
