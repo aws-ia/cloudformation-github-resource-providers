@@ -190,9 +190,8 @@ class Resource extends AbstractGitHubResource<ResourceModel, GetUserRepoResponse
             userAgent: this.userAgent
         });
 
-        await octokit.request('DELETE /repos/{owner}/{repo}', {
-            owner: model.owner,
-            repo: model.name
+        await octokit.request('DELETE /repositories/{repositoryId}', {
+            repositoryId: model.id,
         });
     }
 

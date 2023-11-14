@@ -282,19 +282,29 @@
   ],
   "handlers": {
     "create": {
-      "permissions": []
+      "permissions": [
+        "appsync:CreateApiKey"
+      ]
     },
     "read": {
-      "permissions": []
+      "permissions": [
+        "appsync:CreateApiKey"
+      ]
     },
     "update": {
-      "permissions": []
+      "permissions": [
+        "appsync:CreateApiKey"
+      ]
     },
     "delete": {
-      "permissions": []
+      "permissions": [
+        "appsync:CreateApiKey"
+      ]
     },
     "list": {
-      "permissions": []
+      "permissions": [
+        "appsync:CreateApiKey"
+      ]
     }
   }
 }
