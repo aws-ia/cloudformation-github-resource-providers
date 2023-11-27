@@ -14,7 +14,7 @@
         "watch": "npx tsc -w"
     },
     "dependencies": {
-        "@amazon-web-services-cloudformation/cloudformation-cli-typescript-lib": "^1.0.3",
+        "@amazon-web-services-cloudformation/cloudformation-cli-typescript-lib": "^1.0.5",
         "@octokit/rest": "^19.0.5",
         "class-transformer": "0.3.1"
     },
