@@ -3,7 +3,7 @@ version: 0.2
 phases:
   install:
     runtime-versions:
-      python: 3.7
+      python: 3.x
     commands:
       - echo Entered the install phase...
       - echo About to build $RESOURCE_PATH
@@ -12,7 +12,7 @@ phases:
       - cat /var/log/docker.log
       - curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.2/install.sh | bash
       - export NVM_DIR="$HOME/.nvm"
-      - echo "Loading nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" && nvm install 14 && nvm install-latest-npm
+      - echo "Loading nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" && nvm install 16 && nvm install-latest-npm
       - npm --version
       - node --version
       - pwd
