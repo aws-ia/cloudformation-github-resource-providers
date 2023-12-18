@@ -100,6 +100,10 @@
     ]
   },
   "properties": {
+    "Id": {
+      "description": "The ID of the repository.",
+      "type": "number"
+    },
     "Organization": {
       "description": "The organization name. The name is not case sensitive. If not specified, then the managed repository will be within the currently logged-in user account.",
       "type": "string"
@@ -245,6 +249,7 @@
     "Name"
   ],
   "readOnlyProperties": [
+    "/properties/Id",
     "/properties/Owner",
     "/properties/HtmlUrl",
     "/properties/GitUrl",
@@ -257,7 +262,6 @@
   ],
   "createOnlyProperties": [
     "/properties/Organization",
-    "/properties/Name",
     "/properties/TeamId",
     "/properties/AutoInit",
     "/properties/GitIgnoreTemplate",
@@ -273,24 +277,34 @@
     "/properties/SecurityAndAnalysis"
   ],
   "primaryIdentifier": [
-    "/properties/Owner",
-    "/properties/Name"
+    "/properties/Id",
+    "/properties/Owner"
   ],
   "handlers": {
     "create": {
-      "permissions": []
+      "permissions": [
+        "appsync:CreateApiKey"
+      ]
     },
     "read": {
-      "permissions": []
+      "permissions": [
+        "appsync:CreateApiKey"
+      ]
     },
     "update": {
-      "permissions": []
+      "permissions": [
+        "appsync:CreateApiKey"
+      ]
     },
     "delete": {
-      "permissions": []
+      "permissions": [
+        "appsync:CreateApiKey"
+      ]
     },
     "list": {
-      "permissions": []
+      "permissions": [
+        "appsync:CreateApiKey"
+      ]
     }
   }
 }
