@@ -16,7 +16,7 @@
   "dependencies": {
     "@amazon-web-services-cloudformation/cloudformation-cli-typescript-lib": "^1.0.5",
     "@octokit/core": "^4.1.0",
-    "@octokit/plugin-paginate-rest": "^5.0.1"
+    "@octokit/plugin-paginate-rest": "^11.4.1"
   },
   "devDependencies": {
     "@octokit/types": "^6.34.0",
